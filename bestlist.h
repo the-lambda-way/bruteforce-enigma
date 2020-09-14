@@ -4,14 +4,13 @@
 #include <functional>    // std::greater
 #include <string>
 #include <queue>
-using namespace std;
 
 
 template <class T, class F>
-class VectorQueue : public priority_queue<T, vector<T>, F>
+class VectorQueue : public std::priority_queue<T, std::vector<T>, F>
 {
 public:
-    const vector<T>& base ()    { return this->c; }
+    const std::vector<T>& base ()    { return this->c; }
 }; // class VectorQueue
 
 
@@ -26,7 +25,7 @@ struct ScoreEntry
         int rotor1, int rotor2, int rotor3,
         int rotor1pos, int rotor2pos, int rotor3pos,
         int ring1pos, int ring2pos, int ring3pos,
-        string text
+        std::string text
     )
     : score {score},
       rotor1 {rotor1}, rotor2 {rotor2}, rotor3 {rotor3},
@@ -39,18 +38,18 @@ struct ScoreEntry
     int rotor1, rotor2, rotor3;
     int rotor1pos, rotor2pos, rotor3pos;
     int ring1pos, ring2pos, ring3pos;
-    string text;
+    std::string text;
 
     friend inline bool operator> (const ScoreEntry& a, const ScoreEntry& b)    { return a.score > b.score; }
 
     void print (int i) const
     {
-        printf("%2i   % 8f   %s %s %s    %2d %2d %2d   %2d %2d %2d   %s\n",
-               i, score,
-               to_roman(rotor1), to_roman(rotor2), to_roman(rotor3),
-               rotor1pos, rotor2pos, rotor3pos,
-               ring1pos, ring2pos, ring3pos,
-               text.c_str());
+        std::printf("%2i   % 8f   %s %s %s    %2d %2d %2d   %2d %2d %2d   %s\n",
+                    i, score,
+                    to_roman(rotor1), to_roman(rotor2), to_roman(rotor3),
+                    rotor1pos, rotor2pos, rotor3pos,
+                    ring1pos, ring2pos, ring3pos,
+                    text.c_str());
     }
 
 
@@ -83,7 +82,7 @@ public:
         int rotor1, int rotor2, int rotor3,
         int rotor1pos, int rotor2pos, int rotor3pos,
         int ring1pos, int ring2pos, int ring3pos,
-        string text)
+        std::string text)
     {
         for (auto entry : entries.base())
         {
@@ -98,12 +97,12 @@ public:
         entries.pop();
 
         // Hack to print during computation
-        printf("% 8f   %s %s %s    %2d %2d %2d   %2d %2d %2d   %s\n",
-               score,
-               to_roman(rotor1), to_roman(rotor2), to_roman(rotor3),
-               rotor1pos, rotor2pos, rotor3pos,
-               ring1pos, ring2pos, ring3pos,
-               text.c_str());
+        std::printf("% 8f   %s %s %s    %2d %2d %2d   %2d %2d %2d   %s\n",
+                    score,
+                    to_roman(rotor1), to_roman(rotor2), to_roman(rotor3),
+                    rotor1pos, rotor2pos, rotor3pos,
+                    ring1pos, ring2pos, ring3pos,
+                    text.c_str());
     }
 
 
@@ -122,11 +121,11 @@ public:
     void print ()
     {
         auto copy = entries;
-        vector<ScoreEntry> ordered_entries;
+        std::vector<ScoreEntry> ordered_entries;
 
         int i = 0;
 
-        printf("#    Score         Rotor Ord   Rotor Pos  Ring Pos   Text  \n");
+        std::printf("#    Score         Rotor Ord   Rotor Pos  Ring Pos   Text  \n");
 
         while (!copy.empty())
         {
@@ -140,7 +139,7 @@ public:
 
 
 private:
-    VectorQueue<ScoreEntry, greater<>> entries;
+    VectorQueue<ScoreEntry, std::greater<>> entries;
     const char* roman_numerals[3] = {"I", "II", "III"};
 
     const char* to_roman (int num)

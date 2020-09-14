@@ -8,7 +8,7 @@
 using namespace std;
 
 
-NBestList<25> bf_4_threads (string_view ct, string_view plug, int ring_end = 26)
+NBestList<25> bf_4_threads (std::string_view ct, std::string_view plug, int ring_end = 26)
 {
      const array<array<int, 3>, 3> rotorsA {{{0, 1, 2}, {0, 2, 1}, {1, 0, 2}}};
      const array<array<int, 3>, 3> rotorsB {{{1, 2, 0}, {2, 0, 1}, {2, 1, 0}}};
@@ -26,7 +26,7 @@ NBestList<25> bf_4_threads (string_view ct, string_view plug, int ring_end = 26)
 }
 
 
-NBestList<25> bf_1_thread (string_view ct, string_view plug, int ring_end = 26)
+NBestList<25> bf_1_thread (std::string_view ct, std::string_view plug, int ring_end = 26)
 {
      const array<array<int, 3>, 3> rotorsA {{{0, 1, 2}, {0, 2, 1}, {1, 0, 2}}};
      const array<array<int, 3>, 3> rotorsB {{{1, 2, 0}, {2, 0, 1}, {2, 1, 0}}};

@@ -4,28 +4,26 @@
 #include <string>
 #include <string_view>
 
-using namespace std;
-
 
 // =====================================================================================================================
 // Parts
 // =====================================================================================================================
 struct Rotor
 {
-     string forward;
-     string reverse;
-     string turnover;
+     std::string forward;
+     std::string reverse;
+     std::string turnover;
 };
 
 
 struct EnigmaConfiguration
 {
-     string_view  plugboard;
-     string_view  stator;        // ETW
-     const Rotor& rotor1;
-     const Rotor& rotor2;
-     const Rotor& rotor3;
-     string_view  reflector;     // UKW
+     std::string_view  plugboard;
+     std::string_view  stator;        // ETW
+     const Rotor&      rotor1;
+     const Rotor&      rotor2;
+     const Rotor&      rotor3;
+     std::string_view  reflector;     // UKW
 };
 
 
@@ -42,11 +40,11 @@ Rotor m3_VI   = {"JPGVOUMFYQBENHZRDKASXLICTW", "SKXQLHCNWARVGMEBJPTYFDZUIO", "ZM
 Rotor m3_VII  = {"NZJHGRCXMYSWBOUFAIVLPEKQDT", "QMGYVPEDRCWTIANUXFKZOSLHJB", "ZM"};
 Rotor m3_VIII = {"FKQHTLXOCBJSPDZRAMEWNIUYGV", "QJINSAYDVKBFRUHMCPLEWZTGXO", "ZM"};
 
-string_view m3_ETW = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+std::string_view m3_ETW = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-string_view UKWA = "EJMZALYXVBWFCRQUONTSPIKHGD";
-string_view UKWB = "YRUHQSLDPXNGOKMIEBFZCWVJAT";
-string_view UKWC = "FVPJIAOYEDRZXWGCTKUQSBNMHL";
+std::string_view UKWA = "EJMZALYXVBWFCRQUONTSPIKHGD";
+std::string_view UKWB = "YRUHQSLDPXNGOKMIEBFZCWVJAT";
+std::string_view UKWC = "FVPJIAOYEDRZXWGCTKUQSBNMHL";
 
 Rotor m3_rotors[] = {m3_I, m3_II, m3_III, m3_IV, m3_V, m3_VI, m3_VII, m3_VIII};
 
@@ -56,8 +54,8 @@ Rotor railway_I   = {"JGDQOXUSCAMIFRVTPNEWKBLZYH", "JVICSMBZLAUWKREQDNHPGOTFYX",
 Rotor railway_II  = {"NTZPSFBOKMWRCJDIVLAEYUXHGQ", "SGMOTFYXPNIRJAHDZLEBVQKWUC", "E"};
 Rotor railway_III = {"JVIUBHTCDYAKEQZPOSGXNRMWFL", "KEHIMYSFCALZWUQPNVRGDBXTJO", "Y"};
 
-string_view railway_ETW = "QWERTZUIOASDFGHJKPYXCVBNML";
-string_view railway_UKM = "QYHOGNECVPUZTFDJAXWMKISRBL";
+std::string_view railway_ETW = "QWERTZUIOASDFGHJKPYXCVBNML";
+std::string_view railway_UKM = "QYHOGNECVPUZTFDJAXWMKISRBL";
 
 
 // CryptTool railway
@@ -111,7 +109,7 @@ public:
      EnigmaCore (
           int rotor1, int rotor2, int rotor3,
           int ring1pos, int ring2pos, int ring3pos,
-          string_view plugboard)
+          std::string_view plugboard)
 
      : rotor1 {rotor1}, rotor2 {rotor2}, rotor3 {rotor3},
        ring1pos {ring1pos}, ring2pos {ring2pos}, ring3pos {ring3pos},
@@ -154,9 +152,9 @@ public:
      }
 
 
-     string encrypt (
+     std::string encrypt (
           int rotor1pos, int rotor2pos, int rotor3pos,
-          string_view input)
+          std::string_view input)
      {
           this->rotor1pos = calculate_offset(rotor1pos, ring1pos);
           this->rotor2pos = calculate_offset(rotor2pos, ring2pos);
@@ -166,7 +164,7 @@ public:
           rotor2notch = calculate_offset(rotor2notch, ring2pos);
 
           // can maybe optimize this further
-          string s = "";
+          std::string s = "";
           s.reserve(input.length());
 
           for (auto c : input)     s += encrypt_letter(c);
@@ -189,8 +187,8 @@ public:
 
      // Note: CryptTool turns over on the notch position on the wheel, when it should turnover on the turnover (window)
      // position.
-     string_view notches = "VMG";     // pawl positions
-     // string_view notches = "NEY";     // actual window turnovers
+     std::string_view notches = "VMG";     // pawl positions
+     // std::string_view notches = "NEY";     // actual window turnovers
 
 
 private:
@@ -279,7 +277,6 @@ private:
 
 
      int char_to_ordinal (char c) const     { return c - 'A'; }
-     char ordinal_to_char (int i) const     { return i + 'A'; }
 
 
      void step_positions ()

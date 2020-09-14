@@ -8,12 +8,10 @@
 #include "EnigmaCore.h"
 #include "scoreText.h"
 
-using namespace std;
 
-
-string convert_to_ct (string_view in)
+std::string convert_to_ct (std::string_view in)
 {
-     string s;
+     std::string s;
 
      for (char c : in)
      {
@@ -28,13 +26,13 @@ string convert_to_ct (string_view in)
 // Is set up to make it easy to divide into 4 threads
 template <int N = 10>
 NBestList<N> bf_decipher (
-     string_view ct, string_view plugboard,
-     array<array<int, 3>, 3> rotor_combos, int ring1_start, int ring1_end, int ring_max = 26)
+     std::string_view ct, std::string_view plugboard,
+     std::array<std::array<int, 3>, 3> rotor_combos, int ring1_start, int ring1_end, int ring_max = 26)
 {
      const int length = ct.length();
 
      EnigmaCore core {0, 1, 2, 1, 1, 1, plugboard};
-     string pt;
+     std::string pt;
      double score;
      NBestList<N> best;
 
