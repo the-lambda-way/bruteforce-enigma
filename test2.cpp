@@ -12,6 +12,7 @@ int main (int argc, char** argv)
      // CrypTool test
      {
           // Expected:
+          // Model: railway
           // Rotors: II I III   Pos: 0 1 3   Ring: 3 1 2
           string expected_ct = "RCQIPVJHXVLDPLSONFHCEUHITPJUIGHQHZUDGSQXIEDHWUGBFLLFFLUZPCAGWRGKVZWDINYGZWQGEGNVMLFHX";
           string expected_pt = "IMCWNOVENGAYGHVRXVEBWLYGYHGTGAKTWQOILZSNGVNNTONILINKZTOMBYWUAXQPGAHMOSTXEISUTVAUSSIYV";
@@ -45,9 +46,46 @@ int main (int argc, char** argv)
      }
 
 
+     // CrypTool two notch test
+     {
+          // Expected:
+          // Model: m3
+          // Rotors: V I VII   Pos: 0 0 0   Ring: 0 0 0   Reflector: UKWA
+          string expected_pt = "SIDENOTEIGOTENIGMATOWORKWITHOTHERROTORSANDSUCHTESTEDITAGAINSTPRACTICALCRYPTOGRAPHY"
+                               "IMWORKINGONTESTINGTHEBRUTEFORCEPORTIONAGAINSTAKNOWNCIPHERTHEOPTIMIZATIONSIUSEFOR"
+                               "BRUTEFORCINGROTATETHEWHEELSDIFFERENTLYSOTHETESTINGISDIFFERENT";
+
+          string_view ct   = "EQJRHLEDDYDEIZLBDIYMCDJUXBXKBATSHXDOLOQDZQFZWRHYEUFNCXDEIXKPDNQHBESVHWIZTQEPWCKHJL"
+                             "GDKUWWBJIRGIINLPSDMOZIBJLCUCEJVQLPKUAQGMMKOWKPWIAJDJMXFFBNDBEXGLTVLQPZFRKTQKRGCQ"
+                             "RGXGFWLBHGUYKHDYESJUKZUUCRZMAKHTCJVMIUZJLBAXMCZLFOFXEGIIHMRLH";
+          string_view plug = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+          Enigma enigma {m3_ETW,
+                         m3_V, m3_I, m3_VII,
+                         m3_UKWA,
+                         plug,
+                         0, 0, 0,
+                         0, 0, 0};
+
+          string pt = enigma.encrypt(ct);
+          string rt = enigma.encrypt(pt);
+
+
+          cout << "CrypTool 2-notch test\n"
+               << "---------------------\n";
+
+          cout << "Plaintext:       " << pt << "\n";
+          cout << "     " << (pt == expected_pt ? "good\n" : "bad\n");
+
+          cout << "Reciphered text: " << rt << "\n";
+          cout << "     " << (rt == ct ? "good\n\n" : "bad\n\n");
+     }
+
+
      // Practical Cryptography test 1
      {
           // Expected:
+          // Model: m3
           // Rotors: IV V II   Pos: G W D   Ring: P A A
           // Note: rotors and rings are in reverse order compared to Practical Cryptography
           string expected_pt = "INTELLIGENCEPOINTSTOATTACKONTHEEASTWALLOFTHECASTLEATDAWN";
@@ -80,7 +118,8 @@ int main (int argc, char** argv)
      // Practical Cryptography test 2
      {
           // Expected:
-          // Rotors: I V II   Pos: S A O   Ring: B F A
+          // Model: m3
+          // Rotors: I V II   Pos: S A O   Ring: B F A   Reflector: UKWB
           // Note: rotors and rings are in reverse order compared to Practical Cryptography
           string expected_pt = "THEENIGMACIPHERWASAFIELDCIPHERUSEDBYTHEGERMANSDURINGWORLDWARIITHEENIGMAISONEOFT"
                                "HEBETTERKNOWNHISTORICALENCRYPTIONMACHINESANDITACTUALLYREFERSTOARANGEOFSIMILARCI"
