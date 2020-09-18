@@ -1,9 +1,13 @@
 #pragma once
 
+#include <functional>         // std::ref
 #include <string_view>
 #include <vector>
 
 
+// ---------------------------------------------------------------------------------------------------------------------
+// Structures
+// ---------------------------------------------------------------------------------------------------------------------
 struct Rotor
 {
      std::string_view pretty_name;
@@ -13,15 +17,33 @@ struct Rotor
 };
 
 
+// Assumes all uppercase and length 26
+std::string inverse_rotor_string (std::string_view forward)
+{
+     std::string inverse(26, '-');
+
+     for (int i = 0; i < 26; ++i)
+     {
+          inverse[forward[i] - 'A'] = 'A' + i;
+     }
+
+     return inverse;
+}
+
+
+// Useful for creating permutations of different settings.
 struct EnigmaModel
 {
-     Rotor              stator;         // ETW
-     std::vector<Rotor> rotors;
-     std::vector<Rotor> reflectors;     // UKW
+     using container = std::vector<std::reference_wrapper<const Rotor>>;
+
+     const Rotor& stator;         // ETW
+     container    rotors;
+     container    reflectors;     // UKW
 };
 
 
-struct EnigmaConfiguration
+// Useful when cracking rotor and ring positions or plugboards.
+struct EnigmaBase
 {
      const Rotor& stator;        // ETW
      const Rotor& rotor1;
@@ -29,22 +51,105 @@ struct EnigmaConfiguration
      const Rotor& rotor3;
      const Rotor& reflector;     // UKW
 
-     EnigmaConfiguration (const Rotor& stator,
-                          const Rotor& rotor1, const Rotor& rotor2, const Rotor& rotor3,
-                          const Rotor& reflector)
+
+     EnigmaBase (const Rotor& stator,
+                 const Rotor& rotor1, const Rotor& rotor2, const Rotor& rotor3,
+                 const Rotor& reflector)
      : stator {stator}, rotor1 {rotor1}, rotor2 {rotor2}, rotor3 {rotor3}, reflector {reflector}
      {}
 
-     EnigmaConfiguration (const EnigmaConfiguration& c)
+
+     EnigmaBase (const EnigmaBase& c)
      : stator {c.stator}, rotor1 {c.rotor1}, rotor2 {c.rotor2}, rotor3 {c.rotor3}, reflector {c.reflector}
      {}
 
-     EnigmaConfiguration (EnigmaConfiguration&& c)
+
+     EnigmaBase (EnigmaBase&& c)
      : stator {c.stator}, rotor1 {c.rotor1}, rotor2 {c.rotor2}, rotor3 {c.rotor3}, reflector {c.reflector}
      {}
 };
 
 
+// Useful for passing in settings, or retaining notable results.
+struct EnigmaConfiguration
+{
+     const Rotor& stator;        // ETW
+     const Rotor& rotor1;
+     const Rotor& rotor2;
+     const Rotor& rotor3;
+     const Rotor& reflector;     // UKW
+     std::string_view plugboard;
+     int ring1_pos;
+     int ring2_pos;
+     int ring3_pos;
+     int rotor1_pos;
+     int rotor2_pos;
+     int rotor3_pos;
+
+
+     EnigmaConfiguration (
+          const Rotor& stator,        // ETW
+          const Rotor& rotor1,
+          const Rotor& rotor2,
+          const Rotor& rotor3,
+          const Rotor& reflector,     // UKW
+          std::string_view plugboard,
+          int ring1_pos  = 0,
+          int ring2_pos  = 0,
+          int ring3_pos  = 0,
+          int rotor1_pos = 0,
+          int rotor2_pos = 0,
+          int rotor3_pos = 0
+     )
+     : stator {stator}, rotor1 {rotor1}, rotor2 {rotor2}, rotor3 {rotor3}, reflector {reflector},
+       plugboard {plugboard}, ring1_pos {ring1_pos}, ring2_pos {ring2_pos}, ring3_pos {ring3_pos},
+       rotor1_pos {rotor1_pos}, rotor2_pos {rotor2_pos}, rotor3_pos {rotor3_pos}
+     {}
+
+
+     EnigmaConfiguration (const EnigmaConfiguration& c)
+     : EnigmaConfiguration(c.stator, c.rotor1, c.rotor2, c.rotor3, c.reflector, c.plugboard,
+                           c.ring1_pos, c.ring2_pos, c.ring3_pos, c.rotor1_pos, c.rotor2_pos, c.rotor3_pos)
+     {}
+
+
+     EnigmaConfiguration (EnigmaConfiguration&& c)
+     : EnigmaConfiguration(c.stator, c.rotor1, c.rotor2, c.rotor3, c.reflector, c.plugboard,
+                           c.ring1_pos, c.ring2_pos, c.ring3_pos, c.rotor1_pos, c.rotor2_pos, c.rotor3_pos)
+     {}
+
+
+     EnigmaConfiguration (
+          const EnigmaBase& config,
+          std::string_view plugboard,
+          int ring1_pos  = 0,
+          int ring2_pos  = 0,
+          int ring3_pos  = 0,
+          int rotor1_pos = 0,
+          int rotor2_pos = 0,
+          int rotor3_pos = 0
+     )
+     : EnigmaConfiguration(config.stator, config.rotor1, config.rotor2, config.rotor3, config.reflector,
+                           plugboard, ring1_pos, ring2_pos, ring3_pos, rotor1_pos, rotor2_pos, rotor3_pos)
+     {}
+
+
+     EnigmaConfiguration (const EnigmaBase& config,
+                          std::string_view plugboard,
+                          std::string_view ring_positions,
+                          std::string_view rotor_positions
+     )
+     : EnigmaConfiguration(config.stator, config.rotor1, config.rotor2, config.rotor3, config.reflector,
+                           plugboard,
+                           ring_positions[0] - 'A', ring_positions[1] - 'A', ring_positions[2] - 'A',
+                           rotor_positions[0] - 'A', rotor_positions[1] - 'A', rotor_positions[2] - 'A')
+     {}
+};
+
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Models
+// ---------------------------------------------------------------------------------------------------------------------
 // https://www.cryptomuseum.com/crypto/enigma/m3/index.htm
 // https://en.wikipedia.org/wiki/Enigma_rotor_details
 
