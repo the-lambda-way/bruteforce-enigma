@@ -1,10 +1,12 @@
 #pragma once
 
 #include <array>
+#include <cstdio>
 #include <iostream>
 #include <future>
 #include <string>
 #include <string_view>
+#include <vector>
 #include "bestlist2.h"
 #include "enigma.h"
 #include "enigma_models.h"
@@ -56,28 +58,48 @@ std::vector<std::array<int, 3>> triples_from_n (int n)
 }
 
 
-std::vector<EnigmaBase> all_configurations (const EnigmaModel& model)
+std::vector<EnigmaBase> all_configurations_no_replace (const EnigmaModel& model)
 {
      std::vector<EnigmaBase> out;
-     // std::vector<std::array<int, 3>> rotor_permutations = three_permutations_of_n(model.rotors.size());
-     std::vector<std::array<int, 3>> rotor_permutations = triples_from_n(model.rotors.size());
+     std::vector<std::array<int, 3>> rotor_permutations = three_permutations_of_n(model.rotors.size());
 
-     for (const Rotor& reflector : model.reflectors)
+     for (const Rotor* reflector : model.reflectors)
      for (const std::array<int, 3> permutation : rotor_permutations)
-          out.emplace_back(model.stator,
-                           model.rotors[permutation[0]], model.rotors[permutation[1]], model.rotors[permutation[2]],
-                           reflector);
+          out.emplace_back(*model.stator,
+                           *model.rotors[permutation[0]], *model.rotors[permutation[1]], *model.rotors[permutation[2]],
+                           *reflector);
 
      return out;
 }
 
 
+std::vector<EnigmaBase> all_configurations (const EnigmaModel& model)
+{
+     std::vector<EnigmaBase> out;
+     std::vector<std::array<int, 3>> rotor_permutations = triples_from_n(model.rotors.size());
+
+     for (const Rotor* reflector : model.reflectors)
+     for (const std::array<int, 3> permutation : rotor_permutations)
+          out.emplace_back(*model.stator,
+                           *model.rotors[permutation[0]], *model.rotors[permutation[1]], *model.rotors[permutation[2]],
+                           *reflector);
+
+     return out;
+}
+
+
+void str_to_ordinals (int* out, std::string_view str)
+{
+     for (int i = 0; i < str.length(); ++i)     out[i] = str[i] - 'A';
+}
+
+
 template <int N = 10>
 NBestList<N> bf_decipher (
-     std::string_view ct,
-     std::string_view plugboard,
      const EnigmaModel& model,
-     int ring1_start, int ring1_end, int ring_max = 25
+     std::string_view plugboard,
+     std::string_view ct,
+     int ring1_start = 0, int ring1_end = 25, int ring_max = 25
 )
 {
      const int    length = ct.length();
@@ -85,31 +107,32 @@ NBestList<N> bf_decipher (
      double       score;
      NBestList<N> best;
 
+     int ct_ordinal[length];
+     str_to_ordinals(ct_ordinal, ct);
 
-     for (EnigmaBase base : all_configurations(model))
+     std::puts("Breaking enigma...");
+
+
+     for (const EnigmaBase& base : all_configurations(model))
      {
           Enigma enigma {base, plugboard, ring1_start};
 
           // TODO: Determine which settings are equivalent, and skip
 
-          // for (int ring1pos  = ring1_start; ring1pos  < ring1_end; ++ring1pos,  enigma.increment_ring(1))
-          // for (int ring2pos  = 0;           ring2pos  < ring_max;  ++ring2pos,  enigma.increment_ring(2))
-          // for (int ring3pos  = 0;           ring3pos  < ring_max;  ++ring3pos,  enigma.increment_ring(3))
-          for (int rotor1pos = 0;           rotor1pos < ring_max;      ++rotor1pos, enigma.increment_rotor(1))
-          for (int rotor2pos = 0;           rotor2pos < ring_max;      ++rotor2pos, enigma.increment_rotor(2))
-          for (int rotor3pos = 0;           rotor3pos < ring_max;      ++rotor3pos, enigma.increment_rotor(3))
+          for (int i = ring1_start;     i < ring1_end + 1;     ++i, enigma.increment_ring(1))
+          for (int i = 0;               i < ring_max + 1;      ++i, enigma.increment_ring(2))
+          for (int i = 0;               i < ring_max + 1;      ++i, enigma.increment_ring(3))
+          for (int i = 0;               i < ring_max + 1;      ++i, enigma.increment_rotor(1))
+          for (int i = 0;               i < ring_max + 1;      ++i, enigma.increment_rotor(2))
+          for (int i = 0;               i < ring_max + 1;      ++i, enigma.increment_rotor(3))
           {
-               enigma.encrypt(pt, ct);
+               enigma.encrypt(pt, ct_ordinal, length);
 
+               // TODO: score based on ordinals instead of characters
                score = scoreTextQgram(pt, length);
 
                if (best.is_good_score(score))
-                    best.add(score,
-                             base.rotor1.pretty_name, base.rotor2.pretty_name, base.rotor3.pretty_name,
-                             rotor1pos, rotor2pos, rotor3pos,
-                         //     ring1pos, ring2pos, ring3pos,
-                             0, 0, 0,
-                             pt);
+                    best.add(score, enigma.get_config(), pt);
           }
      }
 
@@ -119,64 +142,61 @@ NBestList<N> bf_decipher (
 
 
 
-// // Get best rotor positions, then use those to determine best ring positions
-// template <int N = 10>
-// NBestList<N> smart_decipher (
-//      std::string_view ct,
-//      std::string_view plugboard,
-//      const EnigmaModel& model,
-//      int ring1_start, int ring1_end, int ring_max = 25
-// )
-// {
-//      const int    length = ct.length();
-//      char         pt[length];
-//      double       score;
-//      NBestList<N> best_rotors;
-//      NBestList<N> best_rings;
+// Get best rotor positions, then use those to determine best ring positions
+NBestList<5> smart_decipher (
+     const EnigmaModel& model,
+     std::string_view plugboard,
+     std::string_view ct,
+     int rotor1_start = 0, int rotor1_end = 25
+)
+{
+     const int    length = ct.length();
+     char         pt[length];
+     double       score;
+     NBestList<5> best_rotors;
+     NBestList<5> best_rings;
+
+     int ct_ordinal[length];
+     str_to_ordinals(ct_ordinal, ct);
+
+     std::puts("Breaking enigma...");
 
 
-//      for (EnigmaBase base : all_configurations(model))
-//      {
-//           Enigma enigma {base, plugboard, ring1_start};
+     // Find the N best rotors
+     for (const EnigmaBase& base : all_configurations(model))
+     {
+          Enigma enigma {base, plugboard, 0, 0, 0, rotor1_start};
 
-//           for (int i = 0;     i < 25;     ++i, enigma.set_rotor(1, i))
-//           for (int j = 0;     j < 25;     ++j, enigma.set_rotor(2, j))
-//           for (int k = 0;     k < 25;     ++k, enigma.set_rotor(3, k))
-//           {
-//                enigma.encrypt(pt, ct);
+          for (int i = rotor1_start;     i < rotor1_end + 1;     ++i, enigma.increment_rotor(1))
+          for (int i = 0;                i < 26;                 ++i, enigma.increment_rotor(2))
+          for (int i = 0;                i < 26;                 ++i, enigma.increment_rotor(3))
+          {
+               enigma.encrypt(pt, ct_ordinal, length);
 
-//                score = scoreTextQgram(pt, length);
+               score = scoreTextQgram(pt, length);
 
-//                if (best_rotors.is_good_score(score))
-//                     best_rotors.add(score,
-//                                     base.rotor1.pretty_name, base.rotor2.pretty_name, base.rotor3.pretty_name,
-//                                     i, j, k,
-//                                     0, 0, 0,
-//                                     pt);
-//           }
-
-//           for (const EnigmaConfiguration& config : best_rotors)
-//           {
-//                Enigma enigma {config};
-
-//                for (int i = 0;     i < 25;     ++i, enigma.set_ring(1, i))
-//                for (int j = 0;     j < 25;     ++j, enigma.set_ring(2, j))
-//                for (int k = 0;     k < 25;     ++k, enigma.set_ring(3, k))
-//                {
-//                     enigma.encrypt(pt, ct);
-
-//                     score = scoreTextQgram(pt, length);
-
-//                     if (best_rotors.is_good_score(score))
-//                          best_rotors.add(score,
-//                                         config.rotor1.pretty_name, config.rotor2.pretty_name, config.rotor3.pretty_name,
-//                                         i, j, k,
-//                                         0, 0, 0,
-//                                         pt);
-//                }
-//           }
-//      }
+               if (best_rotors.is_good_score(score))
+                    best_rotors.add(score, enigma.get_config(), pt);
+          }
+     }
 
 
-//      return best;
-// }
+     // Now find the best rings from the top result
+     std::vector<ScoreEntry> top_rotors = best_rotors.get_entries();
+     Enigma enigma {top_rotors[0].config};
+
+     for (int i = 0;     i < 26;     ++i, enigma.increment_ring(1), enigma.increment_rotor(1))
+     for (int i = 0;     i < 26;     ++i, enigma.increment_ring(2), enigma.increment_rotor(2))
+     for (int i = 0;     i < 26;     ++i, enigma.increment_ring(3), enigma.increment_rotor(3))
+     {
+          enigma.encrypt(pt, ct_ordinal, length);
+
+          score = scoreTextQgram(pt, length);
+
+          if (best_rings.is_good_score(score))
+               best_rings.add(score, enigma.get_config(), pt);
+     }
+
+
+     return best_rings;
+}
