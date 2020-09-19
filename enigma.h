@@ -16,10 +16,7 @@ public:
              std::string_view ring_positions,
              std::string_view rotor_positions
      )
-     : Enigma(EnigmaConfiguration {base.stator, base.rotor1, base.rotor2, base.rotor3, base.reflector,
-                                   plugboard,
-                                   ring_positions[0] - 'A', ring_positions[1] - 'A', ring_positions[2] - 'A',
-                                   rotor_positions[0] - 'A', rotor_positions[1] - 'A', rotor_positions[2] - 'A'})
+     : Enigma(EnigmaConfiguration {base, plugboard, ring_positions, rotor_positions})
      {}
 
 
@@ -32,8 +29,8 @@ public:
              int rotor2_pos = 0,
              int rotor3_pos = 0
      )
-     : Enigma(EnigmaConfiguration {base.stator, base.rotor1, base.rotor2, base.rotor3, base.reflector,
-                                   plugboard, ring1_pos, ring2_pos, ring3_pos, rotor1_pos, rotor2_pos, rotor3_pos})
+     : Enigma(EnigmaConfiguration {base, plugboard,
+                                   ring1_pos, ring2_pos, ring3_pos, rotor1_pos, rotor2_pos, rotor3_pos})
      {}
 
 
@@ -74,17 +71,19 @@ public:
      Enigma (EnigmaConfiguration config)
      : config {std::move(config)}
      {
-          init_plug(this->config.plugboard,          plugboardA);
-          init_wheel(this->config.stator.forward,    stator_forward);
-          init_wheel(this->config.rotor1.forward,    rotor1_forward);
-          init_wheel(this->config.rotor2.forward,    rotor2_forward);
-          init_wheel(this->config.rotor3.forward,    rotor3_forward);
-          init_wheel(this->config.reflector.forward, reflector);
-          init_wheel(this->config.rotor3.reverse,    rotor3_reverse);
-          init_wheel(this->config.rotor2.reverse,    rotor2_reverse);
-          init_wheel(this->config.rotor1.reverse,    rotor1_reverse);
-          init_wheel(this->config.stator.reverse,    stator_reverse);
-          init_plug(this->config.plugboard,          plugboardB);
+          init_plug(this->config.plugboard, plugboardA);
+
+          init_rotor(this->config.stator->forward,    stator_forward);
+          init_rotor(this->config.rotor1->forward,    rotor1_forward);
+          init_rotor(this->config.rotor2->forward,    rotor2_forward);
+          init_rotor(this->config.rotor3->forward,    rotor3_forward);
+          init_rotor(this->config.reflector->forward, reflector);
+          init_rotor(this->config.rotor3->reverse,    rotor3_reverse);
+          init_rotor(this->config.rotor2->reverse,    rotor2_reverse);
+          init_rotor(this->config.rotor1->reverse,    rotor1_reverse);
+          init_rotor(this->config.stator->reverse,    stator_reverse);
+
+          init_plug(this->config.plugboard, plugboardB);
 
           // Note: alpha did not initialize correctly with default member initialization (compiler bug?)
           const char* str = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -124,6 +123,17 @@ public:
      }
 
 
+     void encrypt (char* out, int* ordinals, int length)
+     {
+          rotor1_offset = rotor1_pos;
+          rotor2_offset = rotor2_pos;
+          rotor3_offset = rotor3_pos;
+
+          for (int i = 0; i < length; ++i)
+               out[i] = alpha[encrypt_ordinal(ordinals[i])];
+     }
+
+
      void reset_ring_pos (int ring, int pos)
      {
           assert(1 <= ring && ring <= 3);
@@ -134,26 +144,16 @@ public:
                case 1 :
                     config.ring1_pos = pos;
 
-                    rotor1_turnoverA = config.rotor1.turnovers[0] - 'A';
-                    rotor1_turnoverB = config.rotor1.turnovers[1] == '\0'
-                                     ? config.rotor1.turnovers[0] - 'A'
-                                     : config.rotor1.turnovers[1] - 'A';
-
-                    rotor1_turnoverA = calculate_offset(rotor1_turnoverA, pos);
-                    rotor1_turnoverB = calculate_offset(rotor1_turnoverB, pos);
+                    rotor1_turnoverA = calculate_offset(config.rotor1->turnoverA, pos);
+                    rotor1_turnoverB = calculate_offset(config.rotor1->turnoverB, pos);
 
                     rotor1_pos = calculate_offset(config.rotor1_pos, pos);
                     break;
                case 2 :
                     config.ring2_pos = pos;
 
-                    rotor2_turnoverA = config.rotor2.turnovers[0] - 'A';
-                    rotor2_turnoverB = config.rotor2.turnovers[1] == '\0'
-                                     ? config.rotor2.turnovers[0] - 'A'
-                                     : config.rotor2.turnovers[1] - 'A';
-
-                    rotor2_turnoverA = calculate_offset(rotor2_turnoverA, pos);
-                    rotor2_turnoverB = calculate_offset(rotor2_turnoverB, pos);
+                    rotor2_turnoverA = calculate_offset(config.rotor2->turnoverA, pos);
+                    rotor2_turnoverB = calculate_offset(config.rotor2->turnoverB, pos);
 
                     rotor2_pos = calculate_offset(config.rotor2_pos, pos);
                     break;
@@ -186,7 +186,6 @@ public:
      }
 
 
-
      // While bruteforcing ring positions, save calculations by rotating the rotor instead of recalculating it
      void increment_ring (int ring)
      {
@@ -196,16 +195,19 @@ public:
           switch (ring)
           {
                case 1 :
+                    increment(config.ring1_pos);
                     decrement(rotor1_pos);
                     decrement(rotor1_turnoverA);
                     decrement(rotor1_turnoverB);
                     break;
                case 2 :
+                    increment(config.ring2_pos);
                     decrement(rotor2_pos);
                     decrement(rotor2_turnoverA);
                     decrement(rotor2_turnoverB);
                     break;
                case 3 :
+                    increment(config.ring3_pos);
                     decrement(rotor3_pos);
           }
      }
@@ -219,15 +221,21 @@ public:
           switch (rotor)
           {
                case 1 :
+                    increment(config.rotor1_pos);
                     increment(rotor1_pos);
                     break;
                case 2 :
+                    increment(config.rotor2_pos);
                     increment(rotor2_pos);
                     break;
                case 3 :
+                    increment(config.rotor3_pos);
                     increment(rotor3_pos);
           }
      }
+
+
+     EnigmaConfiguration get_config ()     { return config; }
 
 
 private:
@@ -261,27 +269,17 @@ private:
      int rotor3_offset;
 
 
-     // str must have 26 characters, out must have 78
-     void init_wheel (std::string_view str, int* out)
+     void init_rotor (const int* in, int* out)
      {
-          std::copy(str.begin(), str.end(), out);
-          std::copy(str.begin(), str.end(), out + 26);
-          std::copy(str.begin(), str.end(), out + 52);
-
-          chars_to_ordinals(out, 78);
+          std::copy(in, in + 78, out);
      }
 
 
      void init_plug (std::string_view str, int* out)
      {
           std::copy(str.begin(), str.end(), out);
-          chars_to_ordinals(out, 26);
-     }
 
-
-     void chars_to_ordinals (int* arr, int length)
-     {
-          for (int i = 0; i < length; ++i)     *arr++ -= 'A';
+          for (int i = 0; i < 26; ++i)     *out++ -= 'A';
      }
 
 

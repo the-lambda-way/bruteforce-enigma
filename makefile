@@ -8,21 +8,10 @@ crack_enigma:
 	@$(COMPILE) crack_enigma.cpp scoreText.c -o $@
 
 
-.PHONY: crack_enigma2
-crack_enigma2:
-	@$(COMPILE) crack_enigma2.cpp scoreText.c -o $@
-
-
 .PHONY: test
 test:
 	@$(COMPILE) test.cpp scoreText.c -o $@
 	@./test
-
-
-.PHONY: test2
-test2:
-	@$(COMPILE) test2.cpp scoreText.c -o $@
-	@./test2
 
 
 .PHONY: debug
@@ -30,14 +19,9 @@ debug:
 	@$(CXX) -std=c++17 -pthread -ggdb crack_enigma.cpp scoreText.c -o crack_enigma
 
 
-.PHONY: debug2
-debug2:
-	@$(CXX) -std=c++17 -pthread -ggdb crack_enigma2.cpp scoreText.c -o crack_enigma2
-
-
 .PHONY: debug-test
 debug-test:
-	@$(CXX) -std=c++17 -pthread -ggdb test2.cpp scoreText.c -o test2
+	@$(CXX) -std=c++17 -pthread -ggdb test.cpp scoreText.c -o test
 
 
 .PHONY: clean

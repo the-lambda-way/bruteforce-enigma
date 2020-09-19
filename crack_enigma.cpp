@@ -3,58 +3,73 @@
 #include <string>
 #include <string_view>
 #include "bf_enigma.h"
+#include "enigma.h"
+#include "enigma_models.h"
 #include "stopwatch.h"
 
 using namespace std;
 
 
-NBestList<25> bf_4_threads (std::string_view ct, std::string_view plug, int ring_end = 26)
+NBestList<25> bf_4_threads (EnigmaModel model, string_view plug, string_view ct, int ring_end = 25)
 {
-     const array<array<int, 3>, 3> rotorsA {{{0, 1, 2}, {0, 2, 1}, {1, 0, 2}}};
-     const array<array<int, 3>, 3> rotorsB {{{1, 2, 0}, {2, 0, 1}, {2, 1, 0}}};
+     int quarter = ring_end / 4 ;
 
-     const int mid = ring_end / 2;
-     const int end = ring_end;
-     const int max = ring_end;
+     int a = 0 * quarter;
+     int b = 1 * quarter;
+     int c = 2 * quarter;
+     int d = 3 * quarter;
+     int e = ring_end;
+     int max = ring_end;
 
-     auto future1 = async(launch::async, [&] () { return bf_decipher<15>(ct, plug, rotorsA, 1,       mid, max); });
-     auto future2 = async(launch::async, [&] () { return bf_decipher<15>(ct, plug, rotorsA, mid + 1, end, max); });
-     auto future3 = async(launch::async, [&] () { return bf_decipher<15>(ct, plug, rotorsB, 1,       mid, max); });
-     auto future4 = async(launch::async, [&] () { return bf_decipher<15>(ct, plug, rotorsB, mid + 1, end, max); });
+     auto future1 = async(launch::async, [&] () { return bf_decipher<15>(model, plug, ct, a,     b, max); });
+     auto future2 = async(launch::async, [&] () { return bf_decipher<15>(model, plug, ct, b + 1, c, max); });
+     auto future3 = async(launch::async, [&] () { return bf_decipher<15>(model, plug, ct, c + 1, d, max); });
+     auto future4 = async(launch::async, [&] () { return bf_decipher<15>(model, plug, ct, d + 1, e, max); });
 
      return combine_best<25>(future1.get(), future2.get(), future3.get(), future4.get());
 }
 
 
-NBestList<25> bf_1_thread (std::string_view ct, std::string_view plug, int ring_end = 26)
+NBestList<25> bf_1_thread (EnigmaModel model, string_view plug, string_view ct, int ring_end = 25)
 {
-     const array<array<int, 3>, 3> rotorsA {{{0, 1, 2}, {0, 2, 1}, {1, 0, 2}}};
-     const array<array<int, 3>, 3> rotorsB {{{1, 2, 0}, {2, 0, 1}, {2, 1, 0}}};
-
-     const int mid = ring_end / 2;
-     const int end = ring_end;
-     const int max = ring_end;
-
-     auto result1 = bf_decipher<15>(ct, plug, rotorsA, 1,       mid, max);
-     auto result2 = bf_decipher<15>(ct, plug, rotorsB, mid + 1, end, max);
-
-     return combine_best<25>(result1, result2);
+     return bf_decipher<25>(model, plug, ct, 0, ring_end, ring_end);
 }
+
+
+template <int N>
+NBestList<N> smart_4_threads (EnigmaModel model, string_view plug, string_view ct)
+{
+     auto future1 = async(launch::async, [&] () { return smart_decipher<N>(model, plug, ct, 0,  5); });
+     auto future2 = async(launch::async, [&] () { return smart_decipher<N>(model, plug, ct, 6,  11); });
+     auto future3 = async(launch::async, [&] () { return smart_decipher<N>(model, plug, ct, 12, 17); });
+     auto future4 = async(launch::async, [&] () { return smart_decipher<N>(model, plug, ct, 18, 25); });
+
+     return combine_best<N>(future1.get(), future2.get(), future3.get(), future4.get());
+}
+
 
 
 int main (int argc, char** argv)
 {
-     string_view text = "Rc qipv jhx vld plson fhceuh itp jui gh qhzu dg sq xie dhw. "
-                        "U gbfl lf fluz pcag wrgkv zw, dinyg zw, qge gnvm L fhx.";
-     string_view plug = "AYCDWZIHGJKLQNOPMVSTXREUBF";
-     string ct = convert_to_ct(text);
+     // string_view text = "Rc qipv jhx vld plson fhceuh itp jui gh qhzu dg sq xie dhw. "
+     //                    "U gbfl lf fluz pcag wrgkv zw, dinyg zw, qge gnvm L fhx.";
+     // string ct = convert_to_ct(text);
+     // string_view plug = "AYCDWZIHGJKLQNOPMVSTXREUBF";
+
+     // // string_view ct = "YXBMXADQBDBAAYIMKDODAYIXNBDQZFJKOLFVEEQBCLUUXDFVQYGKEYBVRHONJKPJMKUNLYLZUKBKJOA"
+     // //                  "JTWVWMOMDPGVXEPUKXBVSGHROFOSBCNKEHEHAKWKOGWTBZFXSYCGSUUPPIZTRTFVCXZVCXTFLMTPTAQ"
+     // //                  "VMREGWSBFZBM";
+     // // string_view plug = "ABCDEFGNUKJMLHPOQRSYIVWXTZ";
+
+     string_view ct = "NPNKANVHWKPXORCDDTRJRXSJFLCIUAIIBUNQIUQFTHLOZOIMENDNGPCB";
+     string_view plug = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
      Stopwatch sw;
      sw.click();
 
-     // NBestList<25> best = bf_1_thread(ct, plug, 10);
-     NBestList<25> best = bf_4_threads(ct, plug, 10);
-     // NBestList<25> best = bf_4_threads(ct, plug);
+     // NBestList<25> best = bf_1_thread(m3_model, plug, ct, 10);
+     // NBestList<25> best = bf_4_threads(m3_model, plug, ct);
+     NBestList best = smart_4_threads<15>(m3_model, plug, ct);
 
      sw.click();
 
