@@ -10,7 +10,7 @@
 using namespace std;
 
 
-NBestList<25> bf_4_threads (string_view ct, EnigmaModel model, string_view plug, int ring_end = 25)
+NBestList<25> bf_4_threads (EnigmaModel model, string_view plug, string_view ct, int ring_end = 25)
 {
      int quarter = ring_end / 4 ;
 
@@ -21,19 +21,31 @@ NBestList<25> bf_4_threads (string_view ct, EnigmaModel model, string_view plug,
      int e = ring_end;
      int max = ring_end;
 
-     auto future1 = async(launch::async, [&] () { return bf_decipher<15>(ct, plug, model, a,     b, max); });
-     auto future2 = async(launch::async, [&] () { return bf_decipher<15>(ct, plug, model, b + 1, c, max); });
-     auto future3 = async(launch::async, [&] () { return bf_decipher<15>(ct, plug, model, c + 1, d, max); });
-     auto future4 = async(launch::async, [&] () { return bf_decipher<15>(ct, plug, model, d + 1, e, max); });
+     auto future1 = async(launch::async, [&] () { return bf_decipher<15>(model, plug, ct, a,     b, max); });
+     auto future2 = async(launch::async, [&] () { return bf_decipher<15>(model, plug, ct, b + 1, c, max); });
+     auto future3 = async(launch::async, [&] () { return bf_decipher<15>(model, plug, ct, c + 1, d, max); });
+     auto future4 = async(launch::async, [&] () { return bf_decipher<15>(model, plug, ct, d + 1, e, max); });
 
      return combine_best<25>(future1.get(), future2.get(), future3.get(), future4.get());
 }
 
 
-NBestList<25> bf_1_thread (string_view ct, string_view plug, int ring_end = 25)
+NBestList<25> bf_1_thread (EnigmaModel model, string_view plug, string_view ct, int ring_end = 25)
 {
-     return bf_decipher<25>(ct, plug, CrypTool_railway_model, 0, ring_end, ring_end);
+     return bf_decipher<25>(model, plug, ct, 0, ring_end, ring_end);
 }
+
+
+NBestList<5> smart_4_threads (EnigmaModel model, string_view plug, string_view ct)
+{
+     auto future1 = async(launch::async, [&] () { return smart_decipher(model, plug, ct, 0,  5); });
+     auto future2 = async(launch::async, [&] () { return smart_decipher(model, plug, ct, 6,  11); });
+     auto future3 = async(launch::async, [&] () { return smart_decipher(model, plug, ct, 12, 17); });
+     auto future4 = async(launch::async, [&] () { return smart_decipher(model, plug, ct, 18, 25); });
+
+     return combine_best<5>(future1.get(), future2.get(), future3.get(), future4.get());
+}
+
 
 
 int main (int argc, char** argv)
@@ -51,9 +63,9 @@ int main (int argc, char** argv)
      Stopwatch sw;
      sw.click();
 
-     // NBestList<25> best = bf_1_thread(ct, plug, 10);
-     // NBestList<25> best = bf_4_threads(ct, plug, 12);
-     NBestList<25> best = bf_4_threads(ct, m3_model, plug);
+     // NBestList<25> best = bf_1_thread(m3_model, plug, ct, 10);
+     // NBestList<25> best = bf_4_threads(m3_model, plug, ct);
+     NBestList<5> best = smart_4_threads(m3_model, plug, ct);
 
      sw.click();
 
