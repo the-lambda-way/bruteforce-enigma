@@ -27,12 +27,17 @@ test2:
 
 .PHONY: debug
 debug:
-	@$(COMPILE) -ggdb crack_enigma.cpp scoreText.c -o crack_enigma
+	@$(CXX) -std=c++17 -pthread -ggdb crack_enigma.cpp scoreText.c -o crack_enigma
+
+
+.PHONY: debug2
+debug2:
+	@$(CXX) -std=c++17 -pthread -ggdb crack_enigma2.cpp scoreText.c -o crack_enigma2
 
 
 .PHONY: debug-test
 debug-test:
-	@$(COMPILE) -ggdb test2.cpp scoreText.c -o test2
+	@$(CXX) -std=c++17 -pthread -ggdb test2.cpp scoreText.c -o test2
 
 
 .PHONY: clean
