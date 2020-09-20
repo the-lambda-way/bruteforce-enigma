@@ -9,7 +9,7 @@
 #include <vector>
 #include "bestlist.h"
 #include "enigma.h"
-#include "enigma_models.h"
+#include "rotors.h"
 #include "scoreText.h"
 
 
@@ -150,10 +150,9 @@ NBestList<N> smart_decipher (
      int rotor1_start = 0, int rotor1_end = 25
 )
 {
-     const int    length = ct.length();
-     char         pt[length + 1];
-     double       score;
-     NBestList<N> best_rotors;
+     const int length = ct.length();
+     char      pt[length + 1];
+     double    score;
 
      int ct_ordinal[length];
      str_to_ordinals(ct_ordinal, ct);
@@ -162,6 +161,8 @@ NBestList<N> smart_decipher (
 
 
      // Find the N best rotors
+     NBestList<N> best_rotors;
+
      for (const EnigmaBase& base : all_configurations(model))
      {
           Enigma enigma {base, plugboard, 0, 0, 0, rotor1_start};

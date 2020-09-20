@@ -5,7 +5,7 @@
 #include <string>
 #include <string_view>
 #include <queue>
-#include "enigma_models.h"
+#include "models.h"
 
 
 // priority_queue does not give access to its member container, but we need it to iterate over the entries

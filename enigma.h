@@ -5,7 +5,7 @@
 #include <cstring>       // std::strncpy
 #include <string>
 #include <string_view>
-#include "enigma_models.h"
+#include "rotors.h"
 
 
 class Enigma

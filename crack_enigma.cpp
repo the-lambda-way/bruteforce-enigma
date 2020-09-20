@@ -3,8 +3,7 @@
 #include <string>
 #include <string_view>
 #include "bf_enigma.h"
-#include "enigma.h"
-#include "enigma_models.h"
+#include "models.h"
 #include "stopwatch.h"
 
 using namespace std;
@@ -56,10 +55,10 @@ int main (int argc, char** argv)
      // string ct = convert_to_ct(text);
      // string_view plug = "AYCDWZIHGJKLQNOPMVSTXREUBF";
 
-     // // string_view ct = "YXBMXADQBDBAAYIMKDODAYIXNBDQZFJKOLFVEEQBCLUUXDFVQYGKEYBVRHONJKPJMKUNLYLZUKBKJOA"
-     // //                  "JTWVWMOMDPGVXEPUKXBVSGHROFOSBCNKEHEHAKWKOGWTBZFXSYCGSUUPPIZTRTFVCXZVCXTFLMTPTAQ"
-     // //                  "VMREGWSBFZBM";
-     // // string_view plug = "ABCDEFGNUKJMLHPOQRSYIVWXTZ";
+     // string_view ct = "YXBMXADQBDBAAYIMKDODAYIXNBDQZFJKOLFVEEQBCLUUXDFVQYGKEYBVRHONJKPJMKUNLYLZUKBKJOA"
+     //                  "JTWVWMOMDPGVXEPUKXBVSGHROFOSBCNKEHEHAKWKOGWTBZFXSYCGSUUPPIZTRTFVCXZVCXTFLMTPTAQ"
+     //                  "VMREGWSBFZBM";
+     // string_view plug = "ABCDEFGNUKJMLHPOQRSYIVWXTZ";
 
      string_view ct = "NPNKANVHWKPXORCDDTRJRXSJFLCIUAIIBUNQIUQFTHLOZOIMENDNGPCB";
      string_view plug = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -70,8 +69,8 @@ int main (int argc, char** argv)
      // NBestList<25> best = bf_1_thread(m3_model, plug, ct, 10);     // quick test
 
      // NBestList<25> best = bf_4_threads(m3_model, plug, ct);
-     NBestList best = smart_4_threads<25>(m3_model, plug, ct);
-     // NBestList best = smart_decipher<10>(m3_model, plug, ct);
+     NBestList best = smart_4_threads<30>(m3_model, plug, ct);
+     // NBestList best = smart_decipher<25>(m3_model, plug, ct);
 
      sw.click();
 
