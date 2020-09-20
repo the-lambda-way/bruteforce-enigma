@@ -11,7 +11,7 @@ Open up **crack_enigma.cpp** and in the main function place your code. Using one
 
 Two enigma models are currently provided, m3 and railway. Look in *enigma_models.h* to examine the definitions. A [CrypTool2](https://www.cryptool.org/de/cryptool2) variant of railway is provided, since it uses different notches than the standard.
 
-Two algorithms are provided to bruteforce an enigma cipher. The first, called `smart_decipher`, should be sufficient for almost all ciphers. It uses a similar algorithm as [practical cryptography](http://www.practicalcryptography.com/cryptanalysis/breaking-machine-ciphers/cryptanalysis-enigma-part-2/), by first finding the best rotor combination and position, and then from the top result finding the best ring positions.
+Two algorithms are provided to bruteforce an enigma cipher. The first, called `smart_decipher`, should be sufficient for almost all ciphers. It uses a similar algorithm as [practical cryptography](http://www.practicalcryptography.com/cryptanalysis/breaking-machine-ciphers/cryptanalysis-enigma-part-2/), by first finding the best rotor combination and position, and then from the top results finding the best ring positions.
 
 The second, called `bf_decipher`, goes through every combination of rotor, rotor position, and ring position of a given enigma model. This algorithm is useful for very short messages, or complex ones that wouldn't score well using a quadgram scoring model. Since this requires over 300 million decryptions per rotor configuration, it can take a very long time to finish. See below for the performance characteristics on my machine.
 
@@ -27,7 +27,7 @@ Tested on my personal laptop, with a 56-character cipher.
 | ------------------------------ | ------------------------- | ------------------------- |
 | Cipher length                  | 56                        | 56                        |
 | Enigma model                   | railway (27 combinations) | railway (27 combinations) |
-| Total time                     | 0.25 sec                  | 59 min, 30 sec            |
+| Total time                     | 0.75 sec                  | 59 min, 30 sec            |
 | Number of decryptions / second | -                         | 2.34 x 10^6               |
 | Characters / second            | -                         | 130.83 x 10^6             |
 
