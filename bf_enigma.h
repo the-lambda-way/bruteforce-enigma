@@ -152,7 +152,7 @@ NBestList<N> smart_decipher (
 )
 {
      const int    length = ct.length();
-     char         pt[length];
+     char         pt[length + 1];
      double       score;
      NBestList<N> best_rotors;
      NBestList<N> best_rings;

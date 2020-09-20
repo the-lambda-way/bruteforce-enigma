@@ -112,6 +112,7 @@ public:
      }
 
 
+     // Out must have one extra element than input, for '\0'
      void encrypt (char* out, std::string_view input)
      {
           rotor1_offset = rotor1_pos;
@@ -120,9 +121,12 @@ public:
 
           for (int i = 0; i < input.length(); ++i)
                out[i] = encrypt_letter(input[i]);
+
+          out[input.length()] = '\0';
      }
 
 
+     // Out must have one extra element than length, for '\0'
      void encrypt (char* out, int* ordinals, int length)
      {
           rotor1_offset = rotor1_pos;
@@ -131,6 +135,8 @@ public:
 
           for (int i = 0; i < length; ++i)
                out[i] = alpha[encrypt_ordinal(ordinals[i])];
+
+          out[length] = '\0';
      }
 
 

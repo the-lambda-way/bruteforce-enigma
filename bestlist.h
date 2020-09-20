@@ -40,13 +40,13 @@ struct ScoreEntry
 
      void print (int i) const
      {
-          std::printf("%2i   % 8f   %-4s   %-4s %-4s %-4s   %2d %2d %2d   %2d %2d %2d   %s\n",
+          std::printf("%2i   % 8f   %-4s   %-4s %-4s %-4s   %2d %2d %2d   %2d %2d %2d   %.*s\n",
                       i, score,
                       config.reflector->pretty_name.data(),
                       config.rotor1->pretty_name.data(), config.rotor2->pretty_name.data(), config.rotor3->pretty_name.data(),
                       config.ring1_pos, config.ring2_pos, config.ring3_pos,
                       config.rotor1_pos, config.rotor2_pos, config.rotor3_pos,
-                      text.c_str());
+                      int(text.length()), text.c_str());
      }
 };
 
@@ -76,13 +76,13 @@ public:
           entries.pop();
 
           // // Hack to print during computation
-          // std::printf("% 8f   %-4s   %-4s %-4s %-4s   %2d %2d %2d   %2d %2d %2d   %s\n",
+          // std::printf("% 8f   %-4s   %-4s %-4s %-4s   %2d %2d %2d   %2d %2d %2d   %.*s\n",
           //             score,
           //             config.reflector.pretty_name.data(),
           //             config.rotor1->pretty_name.data(), config.rotor2->pretty_name.data(), config.rotor3->pretty_name.data(),
           //             config.ring1_pos, config.ring2_pos, config.ring3_pos,
           //             config.rotor1_pos, config.rotor2_pos, config.rotor3_pos,
-          //             text.data());
+          //             int(text.length()), text.c_str());
      }
 
 
