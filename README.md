@@ -9,7 +9,7 @@ Currently cracks ciphers where the plugboard is already known.
 
 Open up **crack_enigma.cpp** and in the main function place your code. Using one of the two provided algorithms, pass in an enigma model, a plugboard setting, and your ciphertext. Compile by running `make` or `make crack_enigma` and run with `./crack_enigma`. Takes about 7 seconds to compile on my machine.
 
-Two enigma models are currently provided, m3 and railway. Look in *enigma_models.h* to examine the definitions.
+Two enigma models are currently provided, m3 and railway. Look in *enigma_models.h* to examine the definitions. A [CrypTool2](https://www.cryptool.org/de/cryptool2) variant of railway is provided, since it uses different notches than the standard.
 
 Two algorithms are provided to bruteforce an enigma cipher. The first, called `smart_decipher`, should be sufficient for almost all ciphers. It uses a similar algorithm as [practical cryptography](http://www.practicalcryptography.com/cryptanalysis/breaking-machine-ciphers/cryptanalysis-enigma-part-2/), by first finding the best rotor combination and position, and then from the top result finding the best ring positions.
 
