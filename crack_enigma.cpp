@@ -67,9 +67,11 @@ int main (int argc, char** argv)
      Stopwatch sw;
      sw.click();
 
-     // NBestList<25> best = bf_1_thread(m3_model, plug, ct, 10);
+     // NBestList<25> best = bf_1_thread(m3_model, plug, ct, 10);     // quick test
+
      // NBestList<25> best = bf_4_threads(m3_model, plug, ct);
-     NBestList best = smart_4_threads<15>(m3_model, plug, ct);
+     NBestList best = smart_4_threads<25>(m3_model, plug, ct);
+     // NBestList best = smart_decipher<10>(m3_model, plug, ct);
 
      sw.click();
 

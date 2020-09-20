@@ -261,10 +261,12 @@ private:
      int plugboardB[26];
      char alpha[78];
 
-     // Rotor offsets combine
+     // Rotor offsets combine rotor position and ring position
      int rotor1_offset;
      int rotor2_offset;
      int rotor3_offset;
+
+     // Turnover offsets tracks the turnover position relative to the current offset
      int turnover1A_offset;
      int turnover1B_offset;
      int turnover2A_offset;

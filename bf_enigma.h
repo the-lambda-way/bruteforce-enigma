@@ -141,7 +141,6 @@ NBestList<N> bf_decipher (
 }
 
 
-
 // Get best rotor positions, then use those to determine best ring positions
 template <int N>
 NBestList<N> smart_decipher (
@@ -155,7 +154,6 @@ NBestList<N> smart_decipher (
      char         pt[length + 1];
      double       score;
      NBestList<N> best_rotors;
-     NBestList<N> best_rings;
 
      int ct_ordinal[length];
      str_to_ordinals(ct_ordinal, ct);
@@ -182,26 +180,26 @@ NBestList<N> smart_decipher (
      }
 
 
-     // Now find the best rings from the top result
-     std::vector<ScoreEntry> top_rotors = best_rotors.get_entries();
-     Enigma enigma {top_rotors[0].config};
+     // Now find the best rings from the top results
+     NBestList<N> best_rings;
 
-     for (int i = 0;     i < 26;     ++i, enigma.increment_ring(1), enigma.increment_rotor(1))
-     for (int i = 0;     i < 26;     ++i, enigma.increment_ring(2), enigma.increment_rotor(2))
-     for (int i = 0;     i < 26;     ++i, enigma.increment_ring(3), enigma.increment_rotor(3))
+     for (const ScoreEntry& entry : best_rotors.get_entries())
      {
-          enigma.encrypt(pt, ct_ordinal, length);
+          Enigma enigma {entry.config};
 
-          score = scoreTextQgram(pt, length);
+          for (int i = 0;     i < 26;     ++i, enigma.increment_ring(1), enigma.increment_rotor(1))
+          for (int i = 0;     i < 26;     ++i, enigma.increment_ring(2), enigma.increment_rotor(2))
+          for (int i = 0;     i < 26;     ++i, enigma.increment_ring(3), enigma.increment_rotor(3))
+          {
+               enigma.encrypt(pt, ct_ordinal, length);
 
-          if (best_rings.is_good_score(score))
-               best_rings.add(score, enigma.get_config(), pt);
+               score = scoreTextQgram(pt, length);
+
+               if (best_rings.is_good_score(score))
+                    best_rings.add(score, enigma.get_config(), pt);
+          }
      }
 
 
-     // Shorter ciphers may be incomplete at this point.
-     //
-
-
-     return best_rotors;
+     return best_rings;
 }
