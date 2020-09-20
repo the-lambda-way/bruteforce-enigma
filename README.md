@@ -7,7 +7,7 @@ Currently cracks ciphers where the plugboard is already known.
 
 # Usage
 
-Open up **crack_enigma.cpp** and in the main function place your code. Using one of the two provided algorithms, pass in an enigma model, a plugboard setting, and your ciphertext. Compile by running `make` or `make crack_enigma` and run with `./crack_enigma`. Takes about 7 seconds to compile on my machine.
+Open up **crack_enigma.cpp** and in the main function place your code. Using one of the two provided algorithms, pass in an enigma model, a plugboard setting, and your ciphertext. Compile by running `make` or `make crack_enigma` and run with `./crack_enigma`. Takes about 7 seconds to compile on my machine. You could precompile the headers to speed this up if you want.
 
 Two enigma models are currently provided, m3 and railway. Look in *enigma_models.h* to examine the definitions. A [CrypTool2](https://www.cryptool.org/de/cryptool2) variant of railway is provided, since it uses different notches than the standard.
 
