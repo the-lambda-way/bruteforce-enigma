@@ -99,9 +99,9 @@ public:
      // Operation ------------------------------------------------------------------------------------------------------
      std::string encrypt (std::string_view input)
      {
-          rotor1_offset = rotor1_pos;
-          rotor2_offset = rotor2_pos;
-          rotor3_offset = rotor3_pos;
+          offset1 = rotor1_offset;
+          offset2 = rotor2_offset;
+          offset3 = rotor3_offset;
 
           std::string s = "";
           s.reserve(input.length());
@@ -115,9 +115,9 @@ public:
      // Out must have one extra element than input, for '\0'
      void encrypt (char* out, std::string_view input)
      {
-          rotor1_offset = rotor1_pos;
-          rotor2_offset = rotor2_pos;
-          rotor3_offset = rotor3_pos;
+          offset1 = rotor1_offset;
+          offset2 = rotor2_offset;
+          offset3 = rotor3_offset;
 
           for (int i = 0; i < input.length(); ++i)
                out[i] = encrypt_letter(input[i]);
@@ -129,9 +129,9 @@ public:
      // Out must have one extra element than length, for '\0'
      void encrypt (char* out, int* ordinals, int length)
      {
-          rotor1_offset = rotor1_pos;
-          rotor2_offset = rotor2_pos;
-          rotor3_offset = rotor3_pos;
+          offset1 = rotor1_offset;
+          offset2 = rotor2_offset;
+          offset3 = rotor3_offset;
 
           for (int i = 0; i < length; ++i)
                out[i] = alpha[encrypt_ordinal(ordinals[i])];
@@ -150,22 +150,22 @@ public:
                case 1 :
                     config.ring1_pos = pos;
 
-                    rotor1_turnoverA = calculate_offset(config.rotor1->turnoverA, pos);
-                    rotor1_turnoverB = calculate_offset(config.rotor1->turnoverB, pos);
+                    turnover1A_offset = calculate_offset(config.rotor1->turnoverA, pos);
+                    turnover1B_offset = calculate_offset(config.rotor1->turnoverB, pos);
 
-                    rotor1_pos = calculate_offset(config.rotor1_pos, pos);
+                    rotor1_offset = calculate_offset(config.rotor1_pos, pos);
                     break;
                case 2 :
                     config.ring2_pos = pos;
 
-                    rotor2_turnoverA = calculate_offset(config.rotor2->turnoverA, pos);
-                    rotor2_turnoverB = calculate_offset(config.rotor2->turnoverB, pos);
+                    turnover2A_offset = calculate_offset(config.rotor2->turnoverA, pos);
+                    turnover2B_offset = calculate_offset(config.rotor2->turnoverB, pos);
 
-                    rotor2_pos = calculate_offset(config.rotor2_pos, pos);
+                    rotor2_offset = calculate_offset(config.rotor2_pos, pos);
                     break;
                case 3 :
                     config.ring3_pos = pos;
-                    rotor3_pos = calculate_offset(config.rotor3_pos, pos);
+                    rotor3_offset = calculate_offset(config.rotor3_pos, pos);
           }
      }
 
@@ -179,15 +179,15 @@ public:
           {
                case 1 :
                     config.rotor1_pos = pos;
-                    rotor1_pos = calculate_offset(pos, config.ring1_pos);
+                    rotor1_offset = calculate_offset(pos, config.ring1_pos);
                     break;
                case 2 :
                     config.rotor2_pos = pos;
-                    rotor2_pos = calculate_offset(pos, config.ring2_pos);
+                    rotor2_offset = calculate_offset(pos, config.ring2_pos);
                     break;
                case 3 :
                     config.rotor3_pos = pos;
-                    rotor3_pos = calculate_offset(pos, config.ring3_pos);
+                    rotor3_offset = calculate_offset(pos, config.ring3_pos);
           }
      }
 
@@ -202,19 +202,19 @@ public:
           {
                case 1 :
                     increment(config.ring1_pos);
-                    decrement(rotor1_pos);
-                    decrement(rotor1_turnoverA);
-                    decrement(rotor1_turnoverB);
+                    decrement(rotor1_offset);
+                    decrement(turnover1A_offset);
+                    decrement(turnover1B_offset);
                     break;
                case 2 :
                     increment(config.ring2_pos);
-                    decrement(rotor2_pos);
-                    decrement(rotor2_turnoverA);
-                    decrement(rotor2_turnoverB);
+                    decrement(rotor2_offset);
+                    decrement(turnover2A_offset);
+                    decrement(turnover2B_offset);
                     break;
                case 3 :
                     increment(config.ring3_pos);
-                    decrement(rotor3_pos);
+                    decrement(rotor3_offset);
           }
      }
 
@@ -228,15 +228,15 @@ public:
           {
                case 1 :
                     increment(config.rotor1_pos);
-                    increment(rotor1_pos);
+                    increment(rotor1_offset);
                     break;
                case 2 :
                     increment(config.rotor2_pos);
-                    increment(rotor2_pos);
+                    increment(rotor2_offset);
                     break;
                case 3 :
                     increment(config.rotor3_pos);
-                    increment(rotor3_pos);
+                    increment(rotor3_offset);
           }
      }
 
@@ -261,18 +261,19 @@ private:
      int plugboardB[26];
      char alpha[78];
 
-     int rotor1_turnoverA;
-     int rotor1_turnoverB;
-     int rotor2_turnoverA;
-     int rotor2_turnoverB;
-     int rotor1_pos;
-     int rotor2_pos;
-     int rotor3_pos;
-
-     // Relative positions during encryption
+     // Rotor offsets combine
      int rotor1_offset;
      int rotor2_offset;
      int rotor3_offset;
+     int turnover1A_offset;
+     int turnover1B_offset;
+     int turnover2A_offset;
+     int turnover2B_offset;
+
+     // Relative positions during encryption
+     int offset1;
+     int offset2;
+     int offset3;
 
 
      void init_rotor (const int* in, int* out)
@@ -291,7 +292,7 @@ private:
 
      int calculate_offset (int rotor_pos, int ring_pos) const
      {
-          return rotor_pos - ring_pos + (rotor_pos > ring_pos ? 0 : 26);
+          return rotor_pos - ring_pos + (rotor_pos < ring_pos ? 26 : 0);
      }
 
 
@@ -310,16 +311,16 @@ private:
 
      void step_positions ()
      {
-          if (rotor2_offset == rotor2_turnoverA || rotor2_offset == rotor2_turnoverB)
+          if (offset2 == turnover2A_offset || offset2 == turnover2B_offset)
           {
-               increment(rotor3_offset);
-               increment(rotor2_offset);
+               increment(offset3);
+               increment(offset2);
           }
 
-          if (rotor1_offset == rotor1_turnoverA || rotor1_offset == rotor1_turnoverB)
-               increment(rotor2_offset);
+          if (offset1 == turnover1A_offset || offset1 == turnover1B_offset)
+               increment(offset2);
 
-          increment(rotor1_offset);
+          increment(offset1);
      }
 
 
@@ -342,13 +343,13 @@ private:
           j = plugboardA[j];
 
           j = stator_forward[j];
-          j = run_rotor(rotor1_forward, rotor1_offset, j);
-          j = run_rotor(rotor2_forward, rotor2_offset, j);
-          j = run_rotor(rotor3_forward, rotor3_offset, j);
+          j = run_rotor(rotor1_forward, offset1, j);
+          j = run_rotor(rotor2_forward, offset2, j);
+          j = run_rotor(rotor3_forward, offset3, j);
           j = reflector[j];
-          j = run_rotor(rotor3_reverse, rotor3_offset, j);
-          j = run_rotor(rotor2_reverse, rotor2_offset, j);
-          j = run_rotor(rotor1_reverse, rotor1_offset, j);
+          j = run_rotor(rotor3_reverse, offset3, j);
+          j = run_rotor(rotor2_reverse, offset2, j);
+          j = run_rotor(rotor1_reverse, offset1, j);
           j = stator_reverse[j];
 
           return plugboardB[j];
