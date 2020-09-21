@@ -41,3 +41,5 @@ Copyright (c) 2020 Mike Castillo under the [MIT License](https://choosealicense.
 **Disclosure**: Developed with reference to [CrypTool 2](https://www.cryptool.org/en/cryptool2) and [Practical Cryptography](http://www.practicalcryptography.com/cryptanalysis/breaking-machine-ciphers/cryptanalysis-enigma-part-2/).
 
 Currently includes some code from Practical Cryptography (*de_qgr.h*, *qgr.h*, *scoreText.c*, *scoreText.h*). I did not find a license, but that code remains under copyright James Lyons © 2009-2012. This project's license will be updated to respect all copyrights as needed.
+
+Some engima model definitions are taken from [Cryptii](https://github.com/cryptii/cryptii), which is under the MIT license.
