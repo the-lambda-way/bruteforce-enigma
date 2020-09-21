@@ -14,8 +14,8 @@ struct Rotor
           init_rotor(str, forward);
           init_rotor(inverse_rotor_string(str), reverse);
 
-          turnoverA = turnovers[0] - 'A';
-          turnoverB = turnovers.length() == 1 ? turnoverA : turnovers[1] - 'A';
+          turnoverA = turnovers.length() > 0 ? turnovers[0] - 'A' : -1;
+          turnoverB = turnovers.length() > 1 ? turnovers[1] - 'A' : turnoverA;
      }
 
      // In the enigma machine, using ordinals instead of characters reduces the amount of arithmetic involved.
