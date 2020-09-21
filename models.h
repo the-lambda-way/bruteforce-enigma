@@ -40,7 +40,7 @@ EnigmaModel m3_extended_model = {.stator     = &ETW_ABCDEF,
 // M4 ------------------------------------------------------------------------------------------------------------------
 // https://github.com/cryptii/cryptii/blob/master/src/Encoder/Enigma.js
 
-// Note: Simulator currently only supports four rotors.
+// Note: Simulator currently only supports three rotors.
 
 Rotor m4_UKWB_thin = {"Bthin", "ENKQAUYWJICOPBLMDXZVFTHRGS", ""};
 Rotor m4_UKWC_thin = {"Cthin", "RDOBJNTKVEHMLFCWZAXGYIPSUQ", ""};
