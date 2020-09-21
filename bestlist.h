@@ -26,7 +26,7 @@ struct ScoreEntry
 
      ScoreEntry ()
      : ScoreEntry(-1e12,
-                  EnigmaConfiguration {m3_ETW, m3_I, m3_II, m3_III, m3_UKWB, ""},
+                  EnigmaConfiguration {ETW_ABCDEF, m3_I, m3_II, m3_III, UKWB, ""},
                   "(Empty)")
      {}
 

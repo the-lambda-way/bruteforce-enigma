@@ -13,7 +13,7 @@ Rotor ETW_QWERTZ = {"ETW", "QWERTZUIOASDFGHJKPYXCVBNML", ""};
 Rotor UKWA           = {"UKWA", "EJMZALYXVBWFCRQUONTSPIKHGD", ""};
 Rotor UKWB           = {"UKWB", "YRUHQSLDPXNGOKMIEBFZCWVJAT", ""};
 Rotor UKWC           = {"UKWC", "FVPJIAOYEDRZXWGCTKUQSBNMHL", ""};
-Rotor commercial_UKW = {"com",  "imetcgfraysqbzxwlhkdvupojn", ""};
+Rotor commercial_UKW = {"com",  "IMETCGFRAYSQBZXWLHKDVUPOJN", ""};
 
 
 // M3 ------------------------------------------------------------------------------------------------------------------
@@ -80,9 +80,9 @@ EnigmaModel CrypTool_railway_model = {.stator     = &ETW_QWERTZ,
 // Enigma I ------------------------------------------------------------------------------------------------------------
 // https://github.com/cryptii/cryptii/blob/master/src/Encoder/Enigma.js
 
-EnigmaModel enigma_I = {.stator     = &ETW_ABCDEF,
-                        .rotors     = {&m3_I, &m3_II, &m3_III, &m3_IV, &m3_V},
-                        .reflectors = {&UKWA, &UKWB, &UKWC}};
+EnigmaModel enigmaI_model = {.stator     = &ETW_ABCDEF,
+                             .rotors     = {&m3_I, &m3_II, &m3_III, &m3_IV, &m3_V},
+                             .reflectors = {&UKWA, &UKWB, &UKWC}};
 
 
 // Enigma I Norenigma --------------------------------------------------------------------------------------------------
@@ -96,9 +96,9 @@ Rotor norenigma_V   = {"V",   "HEJXQOTZBVFDASCILWPGYNMURK", "Z"};
 
 Rotor norenigma_UKW = {"UKW", "MOWJYPUXNDSRAIBFVLKZGQCHET", ""};
 
-EnigmaModel enigma_n = {.stator     = &ETW_ABCDEF,
-                        .rotors     = {&norengima_I, &norenigma_II, &norenigma_III, &norenigma_IV, &norenigma_V},
-                        .reflectors = {&norenigma_UKW}};
+EnigmaModel enigma_n_model = {.stator     = &ETW_ABCDEF,
+                              .rotors     = {&norenigma_I, &norenigma_II, &norenigma_III, &norenigma_IV, &norenigma_V},
+                              .reflectors = {&norenigma_UKW}};
 
 
 // Enigma I Sondermaschine ---------------------------------------------------------------------------------------------
@@ -110,9 +110,9 @@ Rotor sondermaschine_III = {"III", "TZHXMBSIPNURJFDKEQVCWGLAOY", "V"};
 
 Rotor sondermaschine_UKW = {"UKW", "CIAGSNDRBYTPZFULVHEKOQXWJM", ""};
 
-EnigmaModel enigma_n = {.stator     = &ETW_ABCDEF,
-                        .rotors     = {&sondermaschine_I, &sondermaschine_II, &sondermaschine_III},
-                        .reflectors = {&sondermaschine_UKW}};
+EnigmaModel enigma_s_model = {.stator     = &ETW_ABCDEF,
+                              .rotors     = {&sondermaschine_I, &sondermaschine_II, &sondermaschine_III},
+                              .reflectors = {&sondermaschine_UKW}};
 
 
 // Enigma D ------------------------------------------------------------------------------------------------------------
