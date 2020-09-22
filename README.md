@@ -9,7 +9,16 @@ Currently cracks ciphers where the plugboard is already known.
 
 Open up **crack_enigma.cpp** and in the main function place your code. Using one of the two provided algorithms, pass in an enigma model, a plugboard setting, and your ciphertext. Compile by running `make` or `make crack_enigma` and run with `./crack_enigma`. Takes about 7 seconds to compile on my machine. You could precompile the headers to speed this up if you want.
 
-Look in *models.h* to examine the model definitions provided. A [CrypTool2](https://www.cryptool.org/de/cryptool2) variant of railway is provided, since it uses different notches than the standard.
+Enigma models can be found in *models.h*. The current list includes:
+* m3
+* m3 extended (with rotors VI, VII, and VIII added)
+* m4 (with only three rotors at the moment)
+* railway
+* CrypTool railway (different notches)
+* enigma I
+* norenigma
+* sondermaschine
+* commercial enigma
 
 Two algorithms are provided to bruteforce an enigma cipher. The first, called `smart_decipher`, should be sufficient for almost all ciphers. It uses a similar algorithm to [practical cryptography](http://www.practicalcryptography.com/cryptanalysis/breaking-machine-ciphers/cryptanalysis-enigma-part-2/), by first finding the best rotor combination and position, and then from the top results finding the best ring positions.
 
@@ -38,7 +47,7 @@ Tested on my personal laptop, with a 56-character cipher.
 
 Copyright (c) 2020 Mike Castillo under the [MIT License](https://choosealicense.com/licenses/mit/). See LICENSE for the full terms.
 
-**Disclosure**: Developed with reference to [CrypTool 2](https://www.cryptool.org/en/cryptool2) and [Practical Cryptography](http://www.practicalcryptography.com/cryptanalysis/breaking-machine-ciphers/cryptanalysis-enigma-part-2/).
+Developed with reference to [CrypTool 2](https://www.cryptool.org/en/cryptool2) and [Practical Cryptography](http://www.practicalcryptography.com/cryptanalysis/breaking-machine-ciphers/cryptanalysis-enigma-part-2/).
 
 Currently includes some code from Practical Cryptography (*de_qgr.h*, *qgr.h*, *scoreText.c*, *scoreText.h*). I did not find a license, but that code remains under copyright James Lyons © 2009-2012. This project's license will be updated to respect all copyrights as needed.
 
