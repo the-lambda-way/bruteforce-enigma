@@ -9,7 +9,8 @@
 using namespace std;
 
 
-NBestList<25> bf_4_threads (EnigmaModel model, string_view plug, string_view ct, int ring_end = 25)
+template <int N>
+NBestList<N> bf_4_threads (EnigmaModel model, string_view plug, string_view ct, int ring_end = 25)
 {
      int quarter = ring_end / 4 ;
 
@@ -20,18 +21,12 @@ NBestList<25> bf_4_threads (EnigmaModel model, string_view plug, string_view ct,
      int e = ring_end;
      int max = ring_end;
 
-     auto future1 = async(launch::async, [&] () { return bf_decipher<15>(model, plug, ct, a,     b, max); });
-     auto future2 = async(launch::async, [&] () { return bf_decipher<15>(model, plug, ct, b + 1, c, max); });
-     auto future3 = async(launch::async, [&] () { return bf_decipher<15>(model, plug, ct, c + 1, d, max); });
-     auto future4 = async(launch::async, [&] () { return bf_decipher<15>(model, plug, ct, d + 1, e, max); });
+     auto future1 = async(launch::async, [&] () { return bf_decipher<N / 2>(model, plug, ct, a,     b, max); });
+     auto future2 = async(launch::async, [&] () { return bf_decipher<N / 2>(model, plug, ct, b + 1, c, max); });
+     auto future3 = async(launch::async, [&] () { return bf_decipher<N / 2>(model, plug, ct, c + 1, d, max); });
+     auto future4 = async(launch::async, [&] () { return bf_decipher<N / 2>(model, plug, ct, d + 1, e, max); });
 
-     return combine_best<25>(future1.get(), future2.get(), future3.get(), future4.get());
-}
-
-
-NBestList<25> bf_1_thread (EnigmaModel model, string_view plug, string_view ct, int ring_end = 25)
-{
-     return bf_decipher<25>(model, plug, ct, 0, ring_end, ring_end);
+     return combine_best<N>(future1.get(), future2.get(), future3.get(), future4.get());
 }
 
 
@@ -47,7 +42,6 @@ NBestList<N> smart_4_threads (EnigmaModel model, string_view plug, string_view c
 }
 
 
-
 int main (int argc, char** argv)
 {
      // string_view text = "Rc qipv jhx vld plson fhceuh itp jui gh qhzu dg sq xie dhw. "
@@ -55,22 +49,32 @@ int main (int argc, char** argv)
      // string ct = convert_to_ct(text);
      // string_view plug = "AYCDWZIHGJKLQNOPMVSTXREUBF";
 
-     // string_view ct = "YXBMXADQBDBAAYIMKDODAYIXNBDQZFJKOLFVEEQBCLUUXDFVQYGKEYBVRHONJKPJMKUNLYLZUKBKJOA"
-     //                  "JTWVWMOMDPGVXEPUKXBVSGHROFOSBCNKEHEHAKWKOGWTBZFXSYCGSUUPPIZTRTFVCXZVCXTFLMTPTAQ"
-     //                  "VMREGWSBFZBM";
-     // string_view plug = "ABCDEFGNUKJMLHPOQRSYIVWXTZ";
+     // string_view text = "Rc qipv jhx vld plson fhceuh itp jui gh qhzu dg sq xie dhw. ";
+     // string ct = convert_to_ct(text);
+     // string_view plug = "AYCDWZIHGJKLQNOPMVSTXREUBF";
 
-     string_view ct = "NPNKANVHWKPXORCDDTRJRXSJFLCIUAIIBUNQIUQFTHLOZOIMENDNGPCB";
-     string_view plug = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+     // string_view text = "U gbfl lf fluz pcag wrgkv zw, dinyg zw, qge gnvm L fhx.";
+     // string ct = convert_to_ct(text);
+     // string_view plug = "AYCDWZIHGJKLQNOPMVSTXREUBF";
+
+     string_view ct = "YXBMXADQBDBAAYIMKDODAYIXNBDQZFJKOLFVEEQBCLUUXDFVQYGKEYBVRHONJKPJMKUNLYLZUKBKJOA"
+                      "JTWVWMOMDPGVXEPUKXBVSGHROFOSBCNKEHEHAKWKOGWTBZFXSYCGSUUPPIZTRTFVCXZVCXTFLMTPTAQ"
+                      "VMREGWSBFZBM";
+     string_view plug = "ABCDEFGNUKJMLHPOQRSYIVWXTZ";
+
+     // string_view ct = "NPNKANVHWKPXORCDDTRJRXSJFLCIUAIIBUNQIUQFTHLOZOIMENDNGPCB";
+     // string_view plug = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
 
      Stopwatch sw;
      sw.click();
 
-     // NBestList<25> best = bf_1_thread(m3_model, plug, ct, 10);     // quick test
+     // NBestList<25> best = bf_decipher(m3_model, plug, ct;
 
-     // NBestList<25> best = bf_4_threads(m3_model, plug, ct);
-     NBestList best = smart_4_threads<30>(m3_model, plug, ct);
-     // NBestList best = smart_decipher<25>(m3_model, plug, ct);
+     // NBestList<25> best = bf_4_threads(m3_model, plug, ct, 10);     // quick test
+     // NBestList best = bf_4_threads<25>(m3_model, plug, ct);
+
+     NBestList best = smart_4_threads<50>(m3_model, plug, ct);
 
      sw.click();
 
