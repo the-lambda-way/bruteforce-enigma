@@ -2,7 +2,6 @@
 
 // Derived from Practical Cryptography scoreText.c
 
-#include "scoreText.h"
 #include "qgr.h"
 
 
