@@ -1,16 +1,14 @@
 #pragma once
 
 #include <array>
-#include <cstdio>
 #include <iostream>
-#include <future>
 #include <string>
 #include <string_view>
 #include <vector>
 #include "bestlist.h"
 #include "enigma.h"
 #include "rotors.h"
-#include "scoreText.h"
+#include "score.h"
 
 
 std::string convert_to_ct (std::string_view in)
@@ -94,6 +92,12 @@ void str_to_ordinals (int* out, std::string_view str)
 }
 
 
+void str_from_ordinals (std::string& out, int* ordinals, int length)
+{
+     for (int i = 0; i < length; ++i)     out[i] = ordinals[i] + 'A';
+}
+
+
 template <int N = 10>
 NBestList<N> bf_decipher (
      const EnigmaModel& model,
@@ -102,16 +106,20 @@ NBestList<N> bf_decipher (
      int ring1_start = 0, int ring1_end = 25, int ring_max = 25
 )
 {
-     const int    length = ct.length();
-     char         pt[length];
-     double       score;
-     NBestList<N> best;
+     double score;
 
-     int ct_ordinal[length];
+     const int    length = ct.length();
+     std::string  pt(length, 'A');
+     int          pt_ordinal[length];
+     int          ct_ordinal[length];
+
      str_to_ordinals(ct_ordinal, ct);
+
 
      std::puts("Breaking enigma...");
 
+
+     NBestList<N> best;
 
      for (const EnigmaBase& base : all_configurations(model))
      {
@@ -119,20 +127,21 @@ NBestList<N> bf_decipher (
 
           // TODO: Determine which settings are equivalent, and skip
 
-          for (int i = ring1_start;     i < ring1_end + 1;     ++i, enigma.increment_ring(1))
-          for (int i = 0;               i < ring_max + 1;      ++i, enigma.increment_ring(2))
-          for (int i = 0;               i < ring_max + 1;      ++i, enigma.increment_ring(3))
-          for (int i = 0;               i < ring_max + 1;      ++i, enigma.increment_rotor(1))
-          for (int i = 0;               i < ring_max + 1;      ++i, enigma.increment_rotor(2))
-          for (int i = 0;               i < ring_max + 1;      ++i, enigma.increment_rotor(3))
+          for (int i = ring1_start; i < ring1_end + 1; ++i,     enigma.increment_ring(1))
+          for (int i = 0;           i < ring_max + 1;  ++i,     enigma.increment_ring(2))
+          for (int i = 0;           i < ring_max + 1;  ++i,     enigma.increment_ring(3))
+          for (int i = 0;           i < ring_max + 1;  ++i,     enigma.increment_rotor(1))
+          for (int i = 0;           i < ring_max + 1;  ++i,     enigma.increment_rotor(2))
+          for (int i = 0;           i < ring_max + 1;  ++i,     enigma.increment_rotor(3))
           {
-               enigma.encrypt(pt, ct_ordinal, length);
-
-               // TODO: score based on ordinals instead of characters
-               score = scoreTextQgram(pt, length);
+               enigma.encrypt(pt_ordinal, ct_ordinal, length);
+               score = scoreIntQgram(pt_ordinal, length);
 
                if (best.is_good_score(score))
+               {
+                    str_from_ordinals(pt, pt_ordinal, length);
                     best.add(score, enigma.get_config(), pt);
+               }
           }
      }
 
@@ -150,12 +159,15 @@ NBestList<N> smart_decipher (
      int rotor1_start = 0, int rotor1_end = 25
 )
 {
-     const int length = ct.length();
-     char      pt[length + 1];
-     double    score;
+     double score;
 
-     int ct_ordinal[length];
+     const int   length = ct.length();
+     std::string pt(length, 'A');
+     int         pt_ordinal[length];
+     int         ct_ordinal[length];
+
      str_to_ordinals(ct_ordinal, ct);
+
 
      std::puts("Breaking enigma...");
 
@@ -167,16 +179,18 @@ NBestList<N> smart_decipher (
      {
           Enigma enigma {base, plugboard, 0, 0, 0, rotor1_start};
 
-          for (int i = rotor1_start;     i < rotor1_end + 1;     ++i, enigma.increment_rotor(1))
-          for (int i = 0;                i < 26;                 ++i, enigma.increment_rotor(2))
-          for (int i = 0;                i < 26;                 ++i, enigma.increment_rotor(3))
+          for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor(1))
+          for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor(2))
+          for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor(3))
           {
-               enigma.encrypt(pt, ct_ordinal, length);
-
-               score = scoreTextQgram(pt, length);
+               enigma.encrypt(pt_ordinal, ct_ordinal, length);
+               score = scoreIntQgram(pt_ordinal, length);
 
                if (best_rotors.is_good_score(score))
+               {
+                    str_from_ordinals(pt, pt_ordinal, length);
                     best_rotors.add(score, enigma.get_config(), pt);
+               }
           }
      }
 
@@ -188,19 +202,30 @@ NBestList<N> smart_decipher (
      {
           Enigma enigma {entry.config};
 
-          for (int i = 0;     i < 26;     ++i, enigma.increment_ring(1), enigma.increment_rotor(1))
-          for (int i = 0;     i < 26;     ++i, enigma.increment_ring(2), enigma.increment_rotor(2))
-          for (int i = 0;     i < 26;     ++i, enigma.increment_ring(3), enigma.increment_rotor(3))
+          for (int i = 0; i < 26; ++i,     enigma.increment_ring(1), enigma.increment_rotor(1))
+          for (int i = 0; i < 26; ++i,     enigma.increment_ring(2), enigma.increment_rotor(2))
+          // Third ring has no effect
           {
-               enigma.encrypt(pt, ct_ordinal, length);
-
-               score = scoreTextQgram(pt, length);
+               enigma.encrypt(pt_ordinal, ct_ordinal, length);
+               score = scoreIntQgram(pt_ordinal, length);
 
                if (best_rings.is_good_score(score))
+               {
+                    str_from_ordinals(pt, pt_ordinal, length);
                     best_rings.add(score, enigma.get_config(), pt);
+               }
           }
      }
 
 
      return best_rings;
 }
+
+
+// TODO: Add a parallelized algorithm.
+// Thoughts:
+//      * Create a closed-form solution to the rotor offset at each character position during an encryption.
+//      * Find a way to collect good-scoring results without requiring a lock. That would let us use the C++ unsequenced
+//        policy.
+//      * Separate rotors memory from positions and rings, so that calculations are separated from memory ownership.
+//      * Research whether precalculating all rotor positions would create vectorization opportunities.
