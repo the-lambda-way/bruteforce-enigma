@@ -5,23 +5,23 @@ COMPILE  = $(CXX) $(CXXFLAGS) $(CPPFLAGS)
 
 .PHONY: crack_enigma
 crack_enigma:
-	@$(COMPILE) crack_enigma.cpp scoreText.c -o $@
+	@$(COMPILE) crack_enigma.cpp -o $@
 
 
 .PHONY: test
 test:
-	@$(COMPILE) test.cpp scoreText.c -o $@
+	@$(COMPILE) test.cpp -o $@
 	@./test
 
 
 .PHONY: debug
 debug:
-	@$(CXX) -std=c++17 -pthread -ggdb crack_enigma.cpp scoreText.c -o crack_enigma
+	@$(CXX) -std=c++17 -pthread -ggdb crack_enigma.cpp -o crack_enigma
 
 
 .PHONY: debug-test
 debug-test:
-	@$(CXX) -std=c++17 -pthread -ggdb test.cpp scoreText.c -o test
+	@$(CXX) -std=c++17 -pthread -ggdb test.cpp -o test
 
 
 .PHONY: clean
