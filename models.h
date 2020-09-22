@@ -80,9 +80,9 @@ EnigmaModel CrypTool_railway_model = {.stator     = &ETW_QWERTZ,
 // Enigma I ------------------------------------------------------------------------------------------------------------
 // https://github.com/cryptii/cryptii/blob/master/src/Encoder/Enigma.js
 
-EnigmaModel enigmaI_model = {.stator     = &ETW_ABCDEF,
-                             .rotors     = {&m3_I, &m3_II, &m3_III, &m3_IV, &m3_V},
-                             .reflectors = {&UKWA, &UKWB, &UKWC}};
+EnigmaModel enigma_I_model = {.stator     = &ETW_ABCDEF,
+                              .rotors     = {&m3_I, &m3_II, &m3_III, &m3_IV, &m3_V},
+                              .reflectors = {&UKWA, &UKWB, &UKWC}};
 
 
 // Enigma I Norenigma --------------------------------------------------------------------------------------------------

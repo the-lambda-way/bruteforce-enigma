@@ -9,9 +9,9 @@ Currently cracks ciphers where the plugboard is already known.
 
 Open up **crack_enigma.cpp** and in the main function place your code. Using one of the two provided algorithms, pass in an enigma model, a plugboard setting, and your ciphertext. Compile by running `make` or `make crack_enigma` and run with `./crack_enigma`. Takes about 7 seconds to compile on my machine. You could precompile the headers to speed this up if you want.
 
-Two enigma models are currently provided, m3 and railway. Look in *models.h* to examine the definitions. A [CrypTool2](https://www.cryptool.org/de/cryptool2) variant of railway is provided, since it uses different notches than the standard.
+Look in *models.h* to examine the model definitions provided. A [CrypTool2](https://www.cryptool.org/de/cryptool2) variant of railway is provided, since it uses different notches than the standard.
 
-Two algorithms are provided to bruteforce an enigma cipher. The first, called `smart_decipher`, should be sufficient for almost all ciphers. It uses a similar algorithm as [practical cryptography](http://www.practicalcryptography.com/cryptanalysis/breaking-machine-ciphers/cryptanalysis-enigma-part-2/), by first finding the best rotor combination and position, and then from the top results finding the best ring positions.
+Two algorithms are provided to bruteforce an enigma cipher. The first, called `smart_decipher`, should be sufficient for almost all ciphers. It uses a similar algorithm to [practical cryptography](http://www.practicalcryptography.com/cryptanalysis/breaking-machine-ciphers/cryptanalysis-enigma-part-2/), by first finding the best rotor combination and position, and then from the top results finding the best ring positions.
 
 The second, called `bf_decipher`, goes through every combination of rotor, rotor position, and ring position of a given enigma model. This algorithm is useful for very short messages, or complex ones that wouldn't score well using a quadgram scoring model. Since this requires over 300 million decryptions per rotor configuration, it can take a very long time to finish. See below for the performance characteristics on my machine.
 
@@ -23,7 +23,7 @@ Tested on my personal laptop, with a 56-character cipher.
 
 
 
-| Core i7-6500U, 4 threads       | smart_decipher            | bc_decipher               |
+| Core i7-6500U, 4 threads       | smart_decipher            | bf_decipher               |
 | ------------------------------ | ------------------------- | ------------------------- |
 | Cipher length                  | 56                        | 56                        |
 | Enigma model                   | railway (27 combinations) | railway (27 combinations) |

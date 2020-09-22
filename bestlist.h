@@ -1,7 +1,8 @@
 #pragma once
 
 #include <cstdio>
-#include <functional>    // std::greater
+#include <utility>        // std::forward
+#include <functional>     // std::greater
 #include <string>
 #include <string_view>
 #include <queue>
@@ -13,7 +14,7 @@ template <class T, class F>
 class VectorQueue : public std::priority_queue<T, std::vector<T>, F>
 {
 public:
-    const std::vector<T>& base ()    { return this->c; }
+    const std::vector<T>& base () const    { return this->c; }
 }; // class VectorQueue
 
 
@@ -26,8 +27,8 @@ struct ScoreEntry
 
      ScoreEntry ()
      : ScoreEntry(-1e12,
-                  EnigmaConfiguration {ETW_ABCDEF, m3_I, m3_II, m3_III, UKWB, ""},
-                  "(Empty)")
+                  {ETW_ABCDEF, m3_I, m3_II, m3_III, UKWB, ""},
+                  "(Default)")
      {}
 
      ScoreEntry (double score, EnigmaConfiguration config, std::string_view text)
@@ -90,10 +91,10 @@ public:
      {
           for (auto entry : entries.base())
           {
-               if (e.score == entry.score && e.text == entry.text)    return;
+               if (e.score == entry.score && e.text == entry.text)     return;
           }
 
-          entries.push(e);
+          entries.push(std::move(e));
           entries.pop();
      }
 
@@ -121,6 +122,7 @@ public:
                copy.pop();
           }
 
+          // Typically we want the elements ordered by highest score first
           std::reverse(ordered_entries.begin(), ordered_entries.end());
 
           return ordered_entries;
@@ -131,39 +133,25 @@ private:
      VectorQueue<ScoreEntry, std::greater<>> entries;
 
      template <int M, int SizeA, int SizeB>
-     friend NBestList<M> combine_best (NBestList<SizeA> a, NBestList<SizeB> b);
-
-     template <int M, int SizeA, int SizeB, class... List>
-     friend NBestList<M> combine_best (NBestList<SizeA> a, NBestList<SizeB> b, List... rest);
+     friend NBestList<M> combine_best (const NBestList<SizeA>& a, const NBestList<SizeB>& b);
 
 }; // class NBestList
 
 
-
-
 template <int N, int SizeA, int SizeB>
-NBestList<N> combine_best (NBestList<SizeA> a, NBestList<SizeB> b)
+NBestList<N> combine_best (const NBestList<SizeA>& a, const NBestList<SizeB>& b)
 {
      NBestList<N> out;
 
-     while (!a.entries.empty())
-     {
-          out.add(a.entries.top());
-          a.entries.pop();
-     }
-
-     while (!b.entries.empty())
-     {
-          out.add(b.entries.top());
-          b.entries.pop();
-     }
+     for (const ScoreEntry& entry : a.entries.base())     out.add(entry);
+     for (const ScoreEntry& entry : b.entries.base())     out.add(entry);
 
      return out;
 }
 
 
 template <int N, int SizeA, int SizeB, class... List>
-NBestList<N> combine_best (NBestList<SizeA> a, NBestList<SizeB> b, List... rest)
+NBestList<N> combine_best (const NBestList<SizeA>& a, const NBestList<SizeB>& b, List&&... rest)
 {
-     return combine_best<N>(combine_best<N>(a, b), rest...);
+     return combine_best<N>(combine_best<N>(a, b), std::forward<List>(rest)...);
 }

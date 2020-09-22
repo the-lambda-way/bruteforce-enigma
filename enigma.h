@@ -86,8 +86,8 @@ public:
           init_plug(this->config.plugboard, plugboardB);
 
           // Note: alpha did not initialize correctly with default member initialization (compiler bug?)
-          const char* str = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ";
-          std::strncpy(alpha, str, 78);
+          const char* str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+          std::strncpy(alpha, str, 26);
 
           // Rings don't move during encryption, so we can precompute their effects
           reset_ring_pos(1, config.ring1_pos);
@@ -127,7 +127,7 @@ public:
 
 
      // Out must have one extra element than length, for '\0'
-     void encrypt (char* out, int* ordinals, int length)
+     void encrypt (char* out, const int* ordinals, int length)
      {
           offset1 = rotor1_offset;
           offset2 = rotor2_offset;
@@ -137,6 +137,17 @@ public:
                out[i] = alpha[encrypt_ordinal(ordinals[i])];
 
           out[length] = '\0';
+     }
+
+
+     void encrypt (int* out, const int* ordinals, int length)
+     {
+          offset1 = rotor1_offset;
+          offset2 = rotor2_offset;
+          offset3 = rotor3_offset;
+
+          for (int i = 0; i < length; ++i)
+               out[i] = encrypt_ordinal(ordinals[i]);
      }
 
 
@@ -259,7 +270,7 @@ private:
      int rotor1_reverse[78];
      int stator_reverse[78];
      int plugboardB[26];
-     char alpha[78];
+     char alpha[26];
 
      // Rotor offsets combine rotor position and ring position
      int rotor1_offset;
