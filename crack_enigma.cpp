@@ -10,7 +10,7 @@ using namespace std;
 
 
 template <int N>
-NBestList<N> bf_4_threads (EnigmaModel model, string_view plug, string_view ct, int ring_end = 25)
+BestList<N> bf_4_threads (EnigmaModel model, string_view plug, string_view ct, int ring_end = 25)
 {
      int quarter = ring_end / 4 ;
 
@@ -31,7 +31,7 @@ NBestList<N> bf_4_threads (EnigmaModel model, string_view plug, string_view ct, 
 
 
 template <int N>
-NBestList<N> smart_4_threads (EnigmaModel model, string_view plug, string_view ct)
+BestList<N> smart_4_threads (EnigmaModel model, string_view plug, string_view ct)
 {
      auto future1 = async(launch::async, [&] () { return smart_decipher<N>(model, plug, ct, 0,  5); });
      auto future2 = async(launch::async, [&] () { return smart_decipher<N>(model, plug, ct, 6,  11); });
@@ -42,12 +42,16 @@ NBestList<N> smart_4_threads (EnigmaModel model, string_view plug, string_view c
 }
 
 
+// smart_4_threads time approximations (85 characters):
+// m3_extended: 8 seconds
+// railway: 0.25 seconds
+
 int main (int argc, char** argv)
 {
-     // string_view text = "Rc qipv jhx vld plson fhceuh itp jui gh qhzu dg sq xie dhw. "
-     //                    "U gbfl lf fluz pcag wrgkv zw, dinyg zw, qge gnvm L fhx.";
-     // string ct = convert_to_ct(text);
-     // string_view plug = "AYCDWZIHGJKLQNOPMVSTXREUBF";
+     string_view text = "Rc qipv jhx vld plson fhceuh itp jui gh qhzu dg sq xie dhw. "
+                        "U gbfl lf fluz pcag wrgkv zw, dinyg zw, qge gnvm L fhx.";
+     string ct = convert_to_ct(text);
+     string_view plug = "AYCDWZIHGJKLQNOPMVSTXREUBF";
 
      // string_view text = "Rc qipv jhx vld plson fhceuh itp jui gh qhzu dg sq xie dhw. ";
      // string ct = convert_to_ct(text);
@@ -57,10 +61,10 @@ int main (int argc, char** argv)
      // string ct = convert_to_ct(text);
      // string_view plug = "AYCDWZIHGJKLQNOPMVSTXREUBF";
 
-     string_view ct = "YXBMXADQBDBAAYIMKDODAYIXNBDQZFJKOLFVEEQBCLUUXDFVQYGKEYBVRHONJKPJMKUNLYLZUKBKJOA"
-                      "JTWVWMOMDPGVXEPUKXBVSGHROFOSBCNKEHEHAKWKOGWTBZFXSYCGSUUPPIZTRTFVCXZVCXTFLMTPTAQ"
-                      "VMREGWSBFZBM";
-     string_view plug = "ABCDEFGNUKJMLHPOQRSYIVWXTZ";
+     // string_view ct = "YXBMXADQBDBAAYIMKDODAYIXNBDQZFJKOLFVEEQBCLUUXDFVQYGKEYBVRHONJKPJMKUNLYLZUKBKJOA"
+     //                  "JTWVWMOMDPGVXEPUKXBVSGHROFOSBCNKEHEHAKWKOGWTBZFXSYCGSUUPPIZTRTFVCXZVCXTFLMTPTAQ"
+     //                  "VMREGWSBFZBM";
+     // string_view plug = "ABCDEFGNUKJMLHPOQRSYIVWXTZ";
 
      // string_view ct = "NPNKANVHWKPXORCDDTRJRXSJFLCIUAIIBUNQIUQFTHLOZOIMENDNGPCB";
      // string_view plug = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -69,15 +73,17 @@ int main (int argc, char** argv)
      Stopwatch sw;
      sw.click();
 
-     // NBestList<25> best = bf_decipher(m3_model, plug, ct;
+     // BestList<25> best = bf_decipher(m3_model, plug, ct;
 
-     // NBestList<25> best = bf_4_threads(m3_model, plug, ct, 10);     // quick test
-     // NBestList best = bf_4_threads<25>(m3_model, plug, ct);
+     // BestList<25> best = bf_4_threads(m3_model, plug, ct, 10);     // quick test
+     // BestList best = bf_4_threads<25>(m3_model, plug, ct);
 
-     NBestList best = smart_4_threads<50>(m3_model, plug, ct);
+     BestList best = smart_4_threads<50>(m3_extended_model, plug, ct);
 
      sw.click();
 
      best.print();
+
+     std::cout << "\n";
      sw.read();
 }
