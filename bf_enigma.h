@@ -106,12 +106,10 @@ BestList<N> bf_decipher (
      int ring1_start = 0, int ring1_end = 25, int ring_max = 25
 )
 {
-     double score;
-
-     const int    length = ct.length();
-     std::string  pt(length, 'A');
-     int          pt_ordinal[length];
-     int          ct_ordinal[length];
+     double    score;
+     const int length = ct.length();
+     int       pt_ordinal[length];
+     int       ct_ordinal[length];
 
      str_to_ordinals(ct_ordinal, ct);
 
@@ -119,7 +117,7 @@ BestList<N> bf_decipher (
      std::puts("Breaking enigma...");
 
 
-     BestList<N> best;
+     BestList<N> best {ct};
 
      for (const EnigmaBase& base : all_configurations(model))
      {
@@ -138,10 +136,7 @@ BestList<N> bf_decipher (
                score = scoreIntQgram(pt_ordinal, length);
 
                if (best.is_good_score(score))
-               {
-                    str_from_ordinals(pt, pt_ordinal, length);
-                    best.add(score, enigma.get_config(), pt);
-               }
+                    best.add(score, enigma.get_config());
           }
      }
 
@@ -162,12 +157,10 @@ BestList<N> smart_decipher (
      int rotor1_start = 0, int rotor1_end = 25
 )
 {
-     double score;
-
-     const int   length = ct.length();
-     std::string pt(length, 'A');
-     int         pt_ordinal[length];
-     int         ct_ordinal[length];
+     double    score;
+     const int length = ct.length();
+     int       pt_ordinal[length];
+     int       ct_ordinal[length];
 
      str_to_ordinals(ct_ordinal, ct);
 
@@ -176,7 +169,7 @@ BestList<N> smart_decipher (
 
 
      // Find the N best rotors
-     BestList<N> best_rotors;
+     BestList<N> best_rotors {ct};
 
      for (const EnigmaBase& base : all_configurations(model))
      {
@@ -190,16 +183,13 @@ BestList<N> smart_decipher (
                score = scoreIntQgram(pt_ordinal, length);
 
                if (best_rotors.is_good_score(score))
-               {
-                    str_from_ordinals(pt, pt_ordinal, length);
-                    best_rotors.add(score, enigma.get_config(), pt);
-               }
+                    best_rotors.add(score, enigma.get_config());
           }
      }
 
 
      // Now find the best rings from the top results
-     BestList<N> best_rings;
+     BestList<N> best_rings {ct};
 
      for (const ScoreEntry& entry : best_rotors.get_entries())
      {
@@ -213,10 +203,7 @@ BestList<N> smart_decipher (
                score = scoreIntQgram(pt_ordinal, length);
 
                if (best_rings.is_good_score(score))
-               {
-                    str_from_ordinals(pt, pt_ordinal, length);
-                    best_rings.add(score, enigma.get_config(), pt);
-               }
+                    best_rings.add(score, enigma.get_config());
           }
      }
 
