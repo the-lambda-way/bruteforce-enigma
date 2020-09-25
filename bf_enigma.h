@@ -99,7 +99,7 @@ void str_from_ordinals (std::string& out, int* ordinals, int length)
 
 
 template <int N = 10>
-NBestList<N> bf_decipher (
+BestList<N> bf_decipher (
      const EnigmaModel& model,
      std::string_view plugboard,
      std::string_view ct,
@@ -119,7 +119,7 @@ NBestList<N> bf_decipher (
      std::puts("Breaking enigma...");
 
 
-     NBestList<N> best;
+     BestList<N> best;
 
      for (const EnigmaBase& base : all_configurations(model))
      {
@@ -150,9 +150,12 @@ NBestList<N> bf_decipher (
 }
 
 
+// TODO: It's probably faster if we don't save intermediate plaintexts. The can be regerated from the config.
+
+
 // Get best rotor positions, then use those to determine best ring positions
 template <int N>
-NBestList<N> smart_decipher (
+BestList<N> smart_decipher (
      const EnigmaModel& model,
      std::string_view plugboard,
      std::string_view ct,
@@ -173,7 +176,7 @@ NBestList<N> smart_decipher (
 
 
      // Find the N best rotors
-     NBestList<N> best_rotors;
+     BestList<N> best_rotors;
 
      for (const EnigmaBase& base : all_configurations(model))
      {
@@ -196,7 +199,7 @@ NBestList<N> smart_decipher (
 
 
      // Now find the best rings from the top results
-     NBestList<N> best_rings;
+     BestList<N> best_rings;
 
      for (const ScoreEntry& entry : best_rotors.get_entries())
      {
@@ -229,3 +232,7 @@ NBestList<N> smart_decipher (
 //        policy.
 //      * Separate rotors memory from positions and rings, so that calculations are separated from memory ownership.
 //      * Research whether precalculating all rotor positions would create vectorization opportunities.
+
+
+// TODO: Add a secondary encryption step. Pass in a function that gets called on a encrypted text before it gets scored.
+

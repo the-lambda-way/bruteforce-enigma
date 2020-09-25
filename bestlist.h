@@ -31,12 +31,13 @@ struct ScoreEntry
                   "(Default)")
      {}
 
+
      ScoreEntry (double score, EnigmaConfiguration config, std::string_view text)
-     : score {score}, config {config}, text {text}
+     : score {score}, config {std::move(config)}, text {text}
      {}
 
 
-     friend inline bool operator> (const ScoreEntry& a, const ScoreEntry& b)    { return a.score > b.score; }
+     friend bool operator> (const ScoreEntry& a, const ScoreEntry& b)     { return a.score > b.score; }
 
 
      void print (int i) const
@@ -53,25 +54,23 @@ struct ScoreEntry
 
 
 template <int N>
-class NBestList
+class BestList
 {
 public:
-     NBestList ()
+     BestList ()
      {
           ScoreEntry default_entry {};
-          for (int i = 0; i < N; ++i)    entries.push(default_entry);
+          for (int i = 0; i < N; ++i)     entries.push(default_entry);
      }
 
      // Must manually check that the score should be added first, to avoid needless copying of the settings.
-     bool is_good_score (double score)    { return score > entries.top().score; }
+     bool is_good_score (double score)     { return score > entries.top().score; }
 
 
-     void add (double score, EnigmaConfiguration config, std::string_view text)
+     void add (double score, const EnigmaConfiguration& config, std::string_view text)
      {
-          for (auto entry : entries.base())
-          {
+          for (const auto& entry : entries.base())
                if (score == entry.score && text == entry.text)     return;
-          }
 
           entries.emplace(score, config, text);
           entries.pop();
@@ -89,10 +88,8 @@ public:
 
      void add (ScoreEntry e)
      {
-          for (auto entry : entries.base())
-          {
+          for (const auto& entry : entries.base())
                if (e.score == entry.score && e.text == entry.text)     return;
-          }
 
           entries.push(std::move(e));
           entries.pop();
@@ -101,12 +98,10 @@ public:
 
      void print ()
      {
-          std::vector<ScoreEntry> ordered_entries = get_entries();
-
           std::printf("#    Score          Refl   Rotor Order      Ring Pos   Rotor Pos  Text  \n");
 
           int i = 0;
-          for (const ScoreEntry& entry : ordered_entries)
+          for (const ScoreEntry& entry : get_entries())
                entry.print(++i);
      }
 
@@ -133,15 +128,15 @@ private:
      VectorQueue<ScoreEntry, std::greater<>> entries;
 
      template <int M, int SizeA, int SizeB>
-     friend NBestList<M> combine_best (const NBestList<SizeA>& a, const NBestList<SizeB>& b);
+     friend BestList<M> combine_best (const BestList<SizeA>& a, const BestList<SizeB>& b);
 
-}; // class NBestList
+}; // class BestList
 
 
 template <int N, int SizeA, int SizeB>
-NBestList<N> combine_best (const NBestList<SizeA>& a, const NBestList<SizeB>& b)
+BestList<N> combine_best (const BestList<SizeA>& a, const BestList<SizeB>& b)
 {
-     NBestList<N> out;
+     BestList<N> out;
 
      for (const ScoreEntry& entry : a.entries.base())     out.add(entry);
      for (const ScoreEntry& entry : b.entries.base())     out.add(entry);
@@ -151,7 +146,7 @@ NBestList<N> combine_best (const NBestList<SizeA>& a, const NBestList<SizeB>& b)
 
 
 template <int N, int SizeA, int SizeB, class... List>
-NBestList<N> combine_best (const NBestList<SizeA>& a, const NBestList<SizeB>& b, List&&... rest)
+BestList<N> combine_best (const BestList<SizeA>& a, const BestList<SizeB>& b, List&&... rest)
 {
      return combine_best<N>(combine_best<N>(a, b), std::forward<List>(rest)...);
 }
