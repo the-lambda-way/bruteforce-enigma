@@ -11,37 +11,40 @@
 class Enigma
 {
 public:
-     Enigma (const EnigmaBase& base,
-             std::string_view plugboard,
-             std::string_view ring_positions,
-             std::string_view rotor_positions
+     constexpr Enigma (
+          const EnigmaBase& base,
+          std::string_view plugboard,
+          std::string_view ring_positions,
+          std::string_view rotor_positions
      )
      : Enigma(EnigmaConfiguration {base, plugboard, ring_positions, rotor_positions})
      {}
 
 
-     Enigma (const EnigmaBase& base,
-             std::string_view plugboard,
-             int ring1_pos  = 0,
-             int ring2_pos  = 0,
-             int ring3_pos  = 0,
-             int rotor1_pos = 0,
-             int rotor2_pos = 0,
-             int rotor3_pos = 0
+     constexpr Enigma (
+          const EnigmaBase& base,
+          std::string_view plugboard,
+          int ring1_pos  = 0,
+          int ring2_pos  = 0,
+          int ring3_pos  = 0,
+          int rotor1_pos = 0,
+          int rotor2_pos = 0,
+          int rotor3_pos = 0
      )
      : Enigma(EnigmaConfiguration {base, plugboard,
                                    ring1_pos, ring2_pos, ring3_pos, rotor1_pos, rotor2_pos, rotor3_pos})
      {}
 
 
-     Enigma (const Rotor& stator,        // ETW
-             const Rotor& rotor1,
-             const Rotor& rotor2,
-             const Rotor& rotor3,
-             const Rotor& reflector,     // UKW
-             std::string_view plugboard,
-             std::string_view ring_positions,
-             std::string_view rotor_positions
+     constexpr Enigma (
+          const Rotor& stator,        // ETW
+          const Rotor& rotor1,
+          const Rotor& rotor2,
+          const Rotor& rotor3,
+          const Rotor& reflector,     // UKW
+          std::string_view plugboard,
+          std::string_view ring_positions,
+          std::string_view rotor_positions
      )
      : Enigma(EnigmaConfiguration {stator, rotor1, rotor2, rotor3, reflector,
                                    plugboard,
@@ -50,25 +53,26 @@ public:
      {}
 
 
-     Enigma (const Rotor& stator,        // ETW
-             const Rotor& rotor1,
-             const Rotor& rotor2,
-             const Rotor& rotor3,
-             const Rotor& reflector,     // UKW
-             std::string_view plugboard,
-             int ring1_pos  = 0,
-             int ring2_pos  = 0,
-             int ring3_pos  = 0,
-             int rotor1_pos = 0,
-             int rotor2_pos = 0,
-             int rotor3_pos = 0
+     constexpr Enigma (
+          const Rotor& stator,        // ETW
+          const Rotor& rotor1,
+          const Rotor& rotor2,
+          const Rotor& rotor3,
+          const Rotor& reflector,     // UKW
+          std::string_view plugboard,
+          int ring1_pos  = 0,
+          int ring2_pos  = 0,
+          int ring3_pos  = 0,
+          int rotor1_pos = 0,
+          int rotor2_pos = 0,
+          int rotor3_pos = 0
      )
      : Enigma(EnigmaConfiguration {stator, rotor1, rotor2, rotor3, reflector, plugboard,
                                    ring1_pos, ring2_pos, ring3_pos, rotor1_pos, rotor2_pos, rotor3_pos})
      {}
 
 
-     Enigma (EnigmaConfiguration config)
+     constexpr Enigma (EnigmaConfiguration config)
      : config {std::move(config)}
      {
           init_plug(this->config.plugboard, plugboardA);
@@ -86,7 +90,7 @@ public:
           init_plug(this->config.plugboard, plugboardB);
 
           // Note: alpha did not initialize correctly with default member initialization (compiler bug?)
-          const char* str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+          constexpr const char* str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
           std::strncpy(alpha, str, 26);
 
           // Rings don't move during encryption, so we can precompute their effects
@@ -176,7 +180,7 @@ public:
                     break;
                case 3 :
                     config.ring3_pos = pos;
-                    rotor3_offset = calculate_offset(config.rotor3_pos, pos);
+                    rotor3_offset    = calculate_offset(config.rotor3_pos, pos);
           }
      }
 
@@ -190,15 +194,15 @@ public:
           {
                case 1 :
                     config.rotor1_pos = pos;
-                    rotor1_offset = calculate_offset(pos, config.ring1_pos);
+                    rotor1_offset     = calculate_offset(pos, config.ring1_pos);
                     break;
                case 2 :
                     config.rotor2_pos = pos;
-                    rotor2_offset = calculate_offset(pos, config.ring2_pos);
+                    rotor2_offset     = calculate_offset(pos, config.ring2_pos);
                     break;
                case 3 :
                     config.rotor3_pos = pos;
-                    rotor3_offset = calculate_offset(pos, config.ring3_pos);
+                    rotor3_offset     = calculate_offset(pos, config.ring3_pos);
           }
      }
 
@@ -212,20 +216,20 @@ public:
           switch (ring)
           {
                case 1 :
-                    increment(config.ring1_pos);
-                    decrement(rotor1_offset);
-                    decrement(turnover1A_offset);
-                    decrement(turnover1B_offset);
+                    config.ring1_pos  = increment_of(config.ring1_pos);
+                    rotor1_offset     = decrement_of(rotor1_offset);
+                    turnover1A_offset = decrement_of(turnover1A_offset);
+                    turnover1B_offset = decrement_of(turnover1B_offset);
                     break;
                case 2 :
-                    increment(config.ring2_pos);
-                    decrement(rotor2_offset);
-                    decrement(turnover2A_offset);
-                    decrement(turnover2B_offset);
+                    config.ring2_pos  = increment_of(config.ring2_pos);
+                    rotor2_offset     = decrement_of(rotor2_offset);
+                    turnover2A_offset = decrement_of(turnover2A_offset);
+                    turnover2B_offset = decrement_of(turnover2B_offset);
                     break;
                case 3 :
-                    increment(config.ring3_pos);
-                    decrement(rotor3_offset);
+                    config.ring3_pos = increment_of(config.ring3_pos);
+                    rotor3_offset    = decrement_of(rotor3_offset);
           }
      }
 
@@ -238,16 +242,16 @@ public:
           switch (rotor)
           {
                case 1 :
-                    increment(config.rotor1_pos);
-                    increment(rotor1_offset);
+                    config.rotor1_pos = increment_of(config.rotor1_pos);
+                    rotor1_offset     = increment_of(rotor1_offset);
                     break;
                case 2 :
-                    increment(config.rotor2_pos);
-                    increment(rotor2_offset);
+                    config.rotor2_pos = increment_of(config.rotor2_pos);
+                    rotor2_offset     = increment_of(rotor2_offset);
                     break;
                case 3 :
-                    increment(config.rotor3_pos);
-                    increment(rotor3_offset);
+                    config.rotor3_pos = increment_of(config.rotor3_pos);
+                    rotor3_offset     = increment_of(rotor3_offset);
           }
      }
 
@@ -303,22 +307,22 @@ private:
      }
 
 
-     int calculate_offset (int rotor_pos, int ring_pos) const
+     constexpr int calculate_offset (int rotor_pos, int ring_pos) const
      {
           return rotor_pos - ring_pos + (rotor_pos < ring_pos ? 26 : 0);
      }
 
 
      // Operation ------------------------------------------------------------------------------------------------------
-     void increment (int& pos)
+     constexpr int increment_of (int pos) const
      {
-          pos += pos < 25 ? 1 : -25;
+          return pos == 25 ? 0 : pos + 1;
      }
 
 
-     void decrement (int& pos)
+     constexpr int decrement_of (int pos) const
      {
-          pos -= pos > 0 ? 1 : -25;
+          return pos == 0 ? 25 : pos - 1;
      }
 
 
@@ -326,14 +330,14 @@ private:
      {
           if (offset2 == turnover2A_offset || offset2 == turnover2B_offset)
           {
-               increment(offset3);
-               increment(offset2);
+               offset3 = increment_of(offset3);
+               offset2 = increment_of(offset2);
           }
 
           if (offset1 == turnover1A_offset || offset1 == turnover1B_offset)
-               increment(offset2);
+               offset2 = increment_of(offset2);
 
-          increment(offset1);
+          offset1 = increment_of(offset1);
      }
 
 
