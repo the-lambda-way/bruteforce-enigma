@@ -2,6 +2,7 @@
 
 // Derived from Practical Cryptography scoreText.c
 
+#include <execution>
 #include "qgr.h"
 
 
@@ -11,17 +12,16 @@ extern float qgram[];
 // assumes that text consists only of uppercase letters (no punctuation or spaces)
 double scoreTextQgram (const char* text, int length)
 {
-     char temp[4];
      double score = 0;
 
      for (int i = 0; i < length - 3; ++i)
      {
-          temp[0] = text[i + 0] - 'A';
-          temp[1] = text[i + 1] - 'A';
-          temp[2] = text[i + 2] - 'A';
-          temp[3] = text[i + 3] - 'A';
+          int a = text[i + 0] - 'A';
+          int b = text[i + 1] - 'A';
+          int c = text[i + 2] - 'A';
+          int d = text[i + 3] - 'A';
 
-          score += qgram[17576 * temp[0] + 676 * temp[1] + 26 * temp[2] + temp[3]];
+          score += qgram[17576 * a + 676 * b + 26 * c + d];
      }
 
      return score;
@@ -30,18 +30,61 @@ double scoreTextQgram (const char* text, int length)
 
 double scoreIntQgram (const int* ordinals, int length)
 {
-     int a, b, c, d;
      double score = 0;
 
      for (int i = 0; i < length - 3; ++i)
      {
-          a = ordinals[i + 0];
-          b = ordinals[i + 1];
-          c = ordinals[i + 2];
-          d = ordinals[i + 3];
+          int a = ordinals[i + 0];
+          int b = ordinals[i + 1];
+          int c = ordinals[i + 2];
+          int d = ordinals[i + 3];
 
           score += qgram[17576 * a + 676 * b + 26 * c + d];
      }
+
+     return score;
+}
+
+
+// TODO: test performance
+double scoreIntQgram_parallel (const int* ordinals, int length)
+{
+     int indices1[length - 3];
+     int indices2[length - 3];
+     int indices3[length - 3];
+     int score = 0;
+
+     std::transform(
+          std::execution::par_unseq,
+          ordinals, ordinals + length - 3,
+          ordinals + 1,
+          indices1,
+          [] (int a, int b) { return 17576 * a + 676 * b; }
+     );
+
+     std::transform(
+          std::execution::par_unseq,
+          indices1, indices1 + length - 3,
+          ordinals + 2,
+          indices2,
+          [] (int a, int c) { return a + 26 * c; }
+     );
+
+     std::transform(
+          std::execution::par_unseq,
+          indices2, indices2 + length - 3,
+          ordinals + 3,
+          indices3,
+          [] (int a, int d) { return a + d; }
+     );
+
+     std::transform_reduce(
+          std::execution::par_unseq,
+          indices3, indices3 + length - 3,
+          score,
+          std::plus{},
+          [] (int index) { return qgram[index]; }
+     );
 
      return score;
 }
