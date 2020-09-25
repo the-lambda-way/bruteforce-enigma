@@ -28,10 +28,12 @@ Rotor m4_VI   = {"VI",   "JPGVOUMFYQBENHZRDKASXLICTW", "ZM"};
 Rotor m4_VII  = {"VII",  "NZJHGRCXMYSWBOUFAIVLPEKQDT", "ZM"};
 Rotor m4_VIII = {"VIII", "FKQHTLXOCBJSPDZRAMEWNIUYGV", "ZM"};
 
+// Combinations: 250
 EnigmaModel m3_model = {.stator     = &ETW_ABCDEF,
                         .rotors     = {&m3_I, &m3_II, &m3_III, &m3_IV, &m3_V},
                         .reflectors = {&UKWB, &UKWC}};
 
+// Combinations: 1024
 EnigmaModel m3_extended_model = {.stator     = &ETW_ABCDEF,
                                  .rotors     = {&m3_I, &m3_II, &m3_III, &m3_IV, &m3_V, &m4_VI, &m4_VII, &m4_VIII},
                                  .reflectors = {&UKWB, &UKWC}};
@@ -47,6 +49,7 @@ Rotor m4_UKWC_thin = {"Cthin", "RDOBJNTKVEHMLFCWZAXGYIPSUQ", ""};
 Rotor m4_beta      = {"beta",  "LEYJVCNIXWPBQMDRTAKZGFUHOS", ""};
 Rotor m4_gamma     = {"gamma", "FSOKANUERHMBTIYCWLQPZXVGJD", ""};
 
+// Combinations: 2000
 EnigmaModel m4_model = {.stator     = &ETW_ABCDEF,
                         .rotors     = {&m4_beta, &m4_gamma, &m3_I, &m3_II, &m3_III, &m3_IV, &m3_V, &m4_VI, &m4_VII, &m4_VIII},
                         .reflectors = {&m4_UKWB_thin, &m4_UKWC_thin}};
@@ -61,6 +64,7 @@ Rotor railway_III = {"III", "JVIUBHTCDYAKEQZPOSGXNRMWFL", "Y"};
 
 Rotor railway_UKW = {"UKW", "QYHOGNECVPUZTFDJAXWMKISRBL", ""};
 
+// Combinations: 27
 EnigmaModel railway_model = {.stator     = &ETW_QWERTZ,
                              .rotors     = {&railway_I, &railway_II, &railway_III},
                              .reflectors = {&railway_UKW}};
@@ -72,6 +76,7 @@ Rotor CrypTool_railway_I   = {"I",   "JGDQOXUSCAMIFRVTPNEWKBLZYH", "V"};
 Rotor CrypTool_railway_II  = {"II",  "NTZPSFBOKMWRCJDIVLAEYUXHGQ", "M"};
 Rotor CrypTool_railway_III = {"III", "JVIUBHTCDYAKEQZPOSGXNRMWFL", "G"};
 
+// Combinations: 27
 EnigmaModel CrypTool_railway_model = {.stator     = &ETW_QWERTZ,
                                       .rotors     = {&CrypTool_railway_I, &CrypTool_railway_II, &CrypTool_railway_III},
                                       .reflectors = {&railway_UKW}};
@@ -80,6 +85,7 @@ EnigmaModel CrypTool_railway_model = {.stator     = &ETW_QWERTZ,
 // Enigma I ------------------------------------------------------------------------------------------------------------
 // https://github.com/cryptii/cryptii/blob/master/src/Encoder/Enigma.js
 
+// Combinations: 375
 EnigmaModel enigma_I_model = {.stator     = &ETW_ABCDEF,
                               .rotors     = {&m3_I, &m3_II, &m3_III, &m3_IV, &m3_V},
                               .reflectors = {&UKWA, &UKWB, &UKWC}};
@@ -96,6 +102,7 @@ Rotor norenigma_V   = {"V",   "HEJXQOTZBVFDASCILWPGYNMURK", "Z"};
 
 Rotor norenigma_UKW = {"UKW", "MOWJYPUXNDSRAIBFVLKZGQCHET", ""};
 
+// Combinations: 125
 EnigmaModel enigma_n_model = {.stator     = &ETW_ABCDEF,
                               .rotors     = {&norenigma_I, &norenigma_II, &norenigma_III, &norenigma_IV, &norenigma_V},
                               .reflectors = {&norenigma_UKW}};
@@ -110,6 +117,7 @@ Rotor sondermaschine_III = {"III", "TZHXMBSIPNURJFDKEQVCWGLAOY", "V"};
 
 Rotor sondermaschine_UKW = {"UKW", "CIAGSNDRBYTPZFULVHEKOQXWJM", ""};
 
+// Combinations: 27
 EnigmaModel enigma_s_model = {.stator     = &ETW_ABCDEF,
                               .rotors     = {&sondermaschine_I, &sondermaschine_II, &sondermaschine_III},
                               .reflectors = {&sondermaschine_UKW}};
@@ -122,6 +130,7 @@ Rotor commercial_I   = {"I",   "LPGSZMHAEOQKVXRFYBUTNICJDW", "Y"};
 Rotor commercial_II  = {"II",  "SLVGBTFXJQOHEWIRZYAMKPCNDU", "E"};
 Rotor commercial_III = {"III", "CJGDPSHKTURAWZXFMYNQOBVLIE", "N"};
 
+// Combinations: 27
 EnigmaModel commercial_model = {.stator     = &ETW_QWERTZ,
                                 .rotors     = {&commercial_I, &commercial_II, &commercial_III},
                                 .reflectors = {&commercial_UKW}};
@@ -145,6 +154,7 @@ EnigmaModel commercial_model = {.stator     = &ETW_QWERTZ,
 
 // Rotor tirpitz_UKW  = {"UKW", "GEKPBTAUMOCNILJDXZYFHWVQSR", ""};
 
+// Combinations: 343
 // EnigmaModel tirpitz_model = {.stator     = &tirpitz_ETW,
 //                              .rotors     = {&tirpitz_I, &tirpitz_II, &tirpitz_III, &tirpitz_IV, &tirpitz_V, &tirpitz_VII, &tirpitz_VIII},
 //                              .reflectors = {&tirpitz_UKW}};
@@ -159,6 +169,7 @@ EnigmaModel commercial_model = {.stator     = &ETW_QWERTZ,
 // Rotor swissK_II  = {"II",  "ZOUESYDKFWPCIQXHMVBLGNJRAT", "E"};
 // Rotor swissK_III = {"III", "EHRVXGAOBQUSIMZFLYNWKTPDJC", "N"};
 
+// Combinations: 27
 // EnigmaModel swissK_model = {.stator     = &ETW_QWERTZ,
 //                             .rotors     = {&swissK_I, &swissK_II, &swissK_III},
 //                             .reflectors = {&commercial_UKW}};
@@ -173,6 +184,7 @@ EnigmaModel commercial_model = {.stator     = &ETW_QWERTZ,
 // Rotor zahlwerk_II  = {"II",  "SLVGBTFXJQOHEWIRZYAMKPCNDU", "STVYZACDFGHKMNQ"};
 // Rotor zahlwerk_III = {"III", "CJGDPSHKTURAWZXFMYNQOBVLIE", "UWXAEFHKMNR"};
 
+// Combinations: 27
 // EnigmaModel zahlwerk_model = {.stator     = &ETW_QWERTZ,
 //                               .rotors     = {&zahlwerk_I, &zahlwerk_II, &zahlwerk_III},
 //                               .reflectors = {&commercial_UKW}};
@@ -187,6 +199,7 @@ EnigmaModel commercial_model = {.stator     = &ETW_QWERTZ,
 // Rotor g111_II = {"II", "TFJQAZWMHLCUIXRDYGOEVBNSKP", "STVYZACDFGHKMNQ"};
 // Rotor g111_V  = {"V",  "QTPIXWVDFRMUSLJOHCANEZKYBG", "SWZFHMQ"};
 
+// Combinations: 27
 // EnigmaModel abwehr_model = {.stator     = &ETW_QWERTZ,
 //                             .rotors     = {&g111_I, &g111_II, &g111_V},
 //                             .reflectors = {&commercial_UKW}};
@@ -203,6 +216,7 @@ EnigmaModel commercial_model = {.stator     = &ETW_QWERTZ,
 
 // Rotor g312_UKW = {"UKW", "RULQMZJSYGOCETKWDAHNBXPVIF", ""};
 
+// Combinations: 27
 // EnigmaModel abwehr_model = {.stator     = &ETW_QWERTZ,
 //                             .rotors     = {&g312_I, &g312_II, &g312_III},
 //                             .reflectors = {&g312_UKW}};
@@ -217,6 +231,7 @@ EnigmaModel commercial_model = {.stator     = &ETW_QWERTZ,
 // Rotor g260_II  = {"II",  "WCMIBVPJXAROSGNDLZKEYHUFQT", "STVYZACDFGHKMNQ"};
 // Rotor g260_III = {"III", "FVDHZELSQMAXOKYIWPGCBUJTNR", "UWXAEFHKMNR"};
 
+// Combinations: 27
 // EnigmaModel abwehr_model = {.stator     = &ETW_QWERTZ,
 //                             .rotors     = {&g260_I, &g260_II, &g260_III},
 //                             .reflectors = {&commercial_UKW}};
