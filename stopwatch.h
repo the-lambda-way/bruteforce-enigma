@@ -28,7 +28,7 @@ public:
 
      void read () const
      {
-          std::printf("\nElapsed time: %.2f seconds\n\n", face.count());
+          std::printf("Elapsed time: %.2f seconds\n", face.count());
      }
 
 
