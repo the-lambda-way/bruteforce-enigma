@@ -21,10 +21,10 @@ BestList<N> bf_4_threads (EnigmaModel model, string_view plug, string_view ct, i
      int e = ring_end;
      int max = ring_end;
 
-     auto future1 = async(launch::async, [&] () { return bf_decipher<N / 2>(model, plug, ct, a,     b, max); });
-     auto future2 = async(launch::async, [&] () { return bf_decipher<N / 2>(model, plug, ct, b + 1, c, max); });
-     auto future3 = async(launch::async, [&] () { return bf_decipher<N / 2>(model, plug, ct, c + 1, d, max); });
-     auto future4 = async(launch::async, [&] () { return bf_decipher<N / 2>(model, plug, ct, d + 1, e, max); });
+     auto future1 = async(launch::async, [&] () { return bf_decipher<N>(model, plug, ct, a,     b, max); });
+     auto future2 = async(launch::async, [&] () { return bf_decipher<N>(model, plug, ct, b + 1, c, max); });
+     auto future3 = async(launch::async, [&] () { return bf_decipher<N>(model, plug, ct, c + 1, d, max); });
+     auto future4 = async(launch::async, [&] () { return bf_decipher<N>(model, plug, ct, d + 1, e, max); });
 
      return combine_best<N>(future1.get(), future2.get(), future3.get(), future4.get());
 }
@@ -40,6 +40,10 @@ BestList<N> smart_4_threads (EnigmaModel model, string_view plug, string_view ct
 
      return combine_best<N>(future1.get(), future2.get(), future3.get(), future4.get());
 }
+
+
+// Formula for number of encryptions run:
+//   num_of_encryptions = num_of_configurations * 26^3 + N * num_threads * 26^2
 
 
 // smart_4_threads time approximations (85 characters):
