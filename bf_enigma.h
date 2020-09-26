@@ -86,16 +86,15 @@ std::vector<EnigmaBase> all_configurations (const EnigmaModel& model)
 }
 
 
-void str_to_ordinals (int* out, std::string_view str)
+template <int N>
+void test_configuration (Enigma& enigma, int* ct_ordinal, int ct_length, int* pt_ordinal, BestList<N>& scores)
 {
-     for (int i = 0; i < str.length(); ++i)     out[i] = str[i] - 'A';
-}
+     enigma.encrypt(ct_ordinal, ct_length, pt_ordinal);
+     double score = scoreIntQgram(pt_ordinal, ct_length);
 
-
-void str_from_ordinals (std::string& out, int* ordinals, int length)
-{
-     for (int i = 0; i < length; ++i)     out[i] = ordinals[i] + 'A';
-}
+     if (scores.is_good_score(score))
+          scores.add(score, enigma.get_config());
+};
 
 
 template <int N = 10>
@@ -106,12 +105,11 @@ BestList<N> bf_decipher (
      int ring1_start = 0, int ring1_end = 25, int ring_max = 25
 )
 {
-     double    score;
      const int length = ct.length();
      int       pt_ordinal[length];
      int       ct_ordinal[length];
 
-     str_to_ordinals(ct_ordinal, ct);
+     str_to_ordinals(ct, ct_ordinal);
 
 
      std::puts("Breaking enigma...");
@@ -131,21 +129,11 @@ BestList<N> bf_decipher (
           for (int i = 0;           i < ring_max + 1;  ++i,     enigma.increment_rotor(1))
           for (int i = 0;           i < ring_max + 1;  ++i,     enigma.increment_rotor(2))
           for (int i = 0;           i < ring_max + 1;  ++i,     enigma.increment_rotor(3))
-          {
-               enigma.encrypt(pt_ordinal, ct_ordinal, length);
-               score = scoreIntQgram(pt_ordinal, length);
-
-               if (best.is_good_score(score))
-                    best.add(score, enigma.get_config());
-          }
+               test_configuration(enigma, ct_ordinal, length, pt_ordinal, best);
      }
-
 
      return best;
 }
-
-
-// TODO: It's probably faster if we don't save intermediate plaintexts. The can be regerated from the config.
 
 
 // Get best rotor positions, then use those to determine best ring positions
@@ -157,12 +145,11 @@ BestList<N> smart_decipher (
      int rotor1_start = 0, int rotor1_end = 25
 )
 {
-     double    score;
      const int length = ct.length();
      int       pt_ordinal[length];
      int       ct_ordinal[length];
 
-     str_to_ordinals(ct_ordinal, ct);
+     str_to_ordinals(ct, ct_ordinal);
 
 
      std::puts("Breaking enigma...");
@@ -178,13 +165,7 @@ BestList<N> smart_decipher (
           for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor(1))
           for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor(2))
           for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor(3))
-          {
-               enigma.encrypt(pt_ordinal, ct_ordinal, length);
-               score = scoreIntQgram(pt_ordinal, length);
-
-               if (best_rotors.is_good_score(score))
-                    best_rotors.add(score, enigma.get_config());
-          }
+               test_configuration(enigma, ct_ordinal, length, pt_ordinal, best_rotors);
      }
 
 
@@ -198,13 +179,7 @@ BestList<N> smart_decipher (
           for (int i = 0; i < 26; ++i,     enigma.increment_ring(1), enigma.increment_rotor(1))
           for (int i = 0; i < 26; ++i,     enigma.increment_ring(2), enigma.increment_rotor(2))
           // Third ring has no effect
-          {
-               enigma.encrypt(pt_ordinal, ct_ordinal, length);
-               score = scoreIntQgram(pt_ordinal, length);
-
-               if (best_rings.is_good_score(score))
-                    best_rings.add(score, enigma.get_config());
-          }
+               test_configuration(enigma, ct_ordinal, length, pt_ordinal, best_rings);
      }
 
 
