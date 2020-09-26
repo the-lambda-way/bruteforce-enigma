@@ -3,9 +3,30 @@
 #include <algorithm>     // std::copy
 #include <cassert>       // set_ring, set_rotor
 #include <cstring>       // std::strncpy
+#include <execution>
 #include <string>
 #include <string_view>
 #include "rotors.h"
+
+
+void str_to_ordinals (std::string_view str, int* out)
+{
+     std::transform(
+          std::execution::par_unseq,
+          str.begin(), str.end(), out,
+          [] (char c) { return c - 'A'; }
+     );
+}
+
+
+void str_from_ordinals (int* ordinals, int length, std::string& out)
+{
+     std::transform(
+          std::execution::par_unseq,
+          ordinals, ordinals + length, out.begin(),
+          [] (int o) { return o + 'A'; }
+     );
+}
 
 
 class Enigma
@@ -75,7 +96,7 @@ public:
      constexpr Enigma (EnigmaConfiguration config)
      : config {std::move(config)}
      {
-          init_plug(this->config.plugboard, plugboardA);
+          str_to_ordinals(this->config.plugboard, plugboardA);
 
           init_rotor(this->config.stator->forward,    stator_forward);
           init_rotor(this->config.rotor1->forward,    rotor1_forward);
@@ -87,7 +108,7 @@ public:
           init_rotor(this->config.rotor1->reverse,    rotor1_reverse);
           init_rotor(this->config.stator->reverse,    stator_reverse);
 
-          init_plug(this->config.plugboard, plugboardB);
+          std::copy(plugboardA, plugboardA + 26, plugboardB);
 
           // Note: alpha did not initialize correctly with default member initialization (compiler bug?)
           constexpr const char* str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -107,17 +128,17 @@ public:
           offset2 = rotor2_offset;
           offset3 = rotor3_offset;
 
-          std::string s = "";
+          std::string s;
           s.reserve(input.length());
 
-          for (auto c : input)     s += encrypt_letter(c);
+          for (auto c : input)     s.push_back(encrypt_letter(c));
 
           return s;
      }
 
 
      // Out must have one extra element than input, for '\0'
-     void encrypt (char* out, std::string_view input)
+     void encrypt (std::string_view input, char* out)
      {
           offset1 = rotor1_offset;
           offset2 = rotor2_offset;
@@ -131,7 +152,7 @@ public:
 
 
      // Out must have one extra element than length, for '\0'
-     void encrypt (char* out, const int* ordinals, int length)
+     void encrypt (const int* ordinals, int length, char* out)
      {
           offset1 = rotor1_offset;
           offset2 = rotor2_offset;
@@ -144,7 +165,7 @@ public:
      }
 
 
-     void encrypt (int* out, const int* ordinals, int length)
+     void encrypt (const int* ordinals, int length, int* out)
      {
           offset1 = rotor1_offset;
           offset2 = rotor2_offset;
@@ -299,17 +320,10 @@ private:
      }
 
 
-     void init_plug (std::string_view str, int* out)
-     {
-          std::copy(str.begin(), str.end(), out);
-
-          for (int i = 0; i < 26; ++i)     *out++ -= 'A';
-     }
-
-
      constexpr int calculate_offset (int rotor_pos, int ring_pos) const
      {
-          return rotor_pos - ring_pos + (rotor_pos < ring_pos ? 26 : 0);
+          int offset = rotor_pos - ring_pos;
+          return offset < 0 ? offset + 26 : offset;
      }
 
 
