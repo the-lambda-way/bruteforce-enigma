@@ -27,10 +27,6 @@ struct Rotor
      int turnoverB;
 
 
-     // Deep comparison would be expensive, with little benefit
-     bool operator== (const Rotor& rhs) const     { return this == &rhs; }
-
-
 private:
      // str must have 26 characters
      void init_rotor (std::string_view str, int* out)
@@ -39,7 +35,7 @@ private:
           std::copy(str.begin(), str.end(), out + 26);
           std::copy(str.begin(), str.end(), out + 52);
 
-          chars_to_ordinals(out, 78);
+          for (int i = 0; i < 78; ++i)     *out++ -= 'A';
      }
 
      // Assumes all uppercase and length 26
@@ -48,16 +44,9 @@ private:
           std::string inverse(26, '-');
 
           for (int i = 0; i < 26; ++i)
-          {
                inverse[forward[i] - 'A'] = 'A' + i;
-          }
 
           return inverse;
-     }
-
-     void chars_to_ordinals (int* arr, int length)
-     {
-          for (int i = 0; i < length; ++i)     *arr++ -= 'A';
      }
 };
 
@@ -90,7 +79,6 @@ struct EnigmaBase
      constexpr EnigmaBase (const EnigmaBase&) = default;
      constexpr EnigmaBase (EnigmaBase&&) = default;
      constexpr EnigmaBase& operator= (const EnigmaBase&) = default;
-     bool operator== (const EnigmaBase&) const = default;
 };
 
 
@@ -182,6 +170,4 @@ struct EnigmaConfiguration
      constexpr EnigmaConfiguration (const EnigmaConfiguration& c) = default;
      constexpr EnigmaConfiguration (EnigmaConfiguration&& c) = default;
      constexpr EnigmaConfiguration& operator= (const EnigmaConfiguration&) = default;
-     bool operator== (const EnigmaConfiguration&) const = default;
-
 };

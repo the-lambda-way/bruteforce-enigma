@@ -1,23 +1,16 @@
 #pragma once
 
 #include <cstdio>
+#include <deque>
 #include <utility>        // std::forward
 #include <functional>     // std::greater
+#include <queue>
 #include <string>
 #include <string_view>
-#include <queue>
+#include <vector>
 #include "enigma.h"
 #include "models.h"
 #include "rotors.h"
-
-
-// priority_queue does not give access to its member container, but we need it to iterate over the entries
-template <class T, class F>
-class VectorQueue : public std::priority_queue<T, std::vector<T>, F>
-{
-public:
-    const std::vector<T>& base () const    { return this->c; }
-}; // class VectorQueue
 
 
 struct ScoreEntry
@@ -27,17 +20,14 @@ struct ScoreEntry
 
 
      constexpr ScoreEntry ()
-     : ScoreEntry(-1e12,
-                  {ETW_ABCDEF, m3_I, m3_II, m3_III, UKWB, ""})
+     : ScoreEntry(-1e12, {ETW_ABCDEF, m3_I, m3_II, m3_III, UKWB, ""})
      {}
 
 
      constexpr ScoreEntry (double score, EnigmaConfiguration config)
-          : score {score}, config {std::move(config)}
+     : score {score}, config {std::move(config)}
      {}
 
-
-     bool operator== (const ScoreEntry& b) const = default;
 
      friend bool operator> (const ScoreEntry& a, const ScoreEntry& b)     { return a.score > b.score; }
 
@@ -57,6 +47,15 @@ struct ScoreEntry
 };
 
 
+// priority_queue does not give access to its member container, but we need it to iterate over the entries
+template <class T, class F>
+class VectorQueue : public std::priority_queue<T, std::vector<T>, F>
+{
+public:
+    const std::vector<T>& base () const    { return this->c; }
+}; // class VectorQueue
+
+
 template <int N>
 class BestList
 {
@@ -74,9 +73,6 @@ public:
 
      void add (double score, const EnigmaConfiguration& config)
      {
-          for (const auto& entry : entries.base())
-               if (score == entry.score && config == entry.config)     return;
-
           entries.emplace(score, config);
           entries.pop();
      }
@@ -84,15 +80,12 @@ public:
 
      void add (ScoreEntry e)
      {
-          for (const auto& entry : entries.base())
-               if (e.score == entry.score && e.config == entry.config)     return;
-
           entries.push(std::move(e));
           entries.pop();
      }
 
 
-     void print ()
+     void print () const
      {
           std::printf("#    Score          Refl   Rotor Order      Ring Pos   Rotor Pos  Text  \n");
 
@@ -101,19 +94,16 @@ public:
      }
 
 
-     std::vector<ScoreEntry> get_entries ()
+     std::deque<ScoreEntry> get_entries () const
      {
           auto copy = entries;
-          std::vector<ScoreEntry> ordered_entries;
+          std::deque<ScoreEntry> ordered_entries;
 
           while (!copy.empty())
           {
-               ordered_entries.push_back(copy.top());
+               ordered_entries.push_front(copy.top());
                copy.pop();
           }
-
-          // Typically we want the elements ordered by highest score first
-          std::reverse(ordered_entries.begin(), ordered_entries.end());
 
           return ordered_entries;
      }
@@ -132,12 +122,33 @@ private:
 template <int N, int SizeA, int SizeB>
 BestList<N> combine_best (const BestList<SizeA>& a, const BestList<SizeB>& b)
 {
-     BestList<N> out {a.ct};
+     if constexpr (N == SizeA && N != SizeB)
+     {
+          BestList<N> out {a};
 
-     for (const ScoreEntry& entry : a.entries.base())     out.add(entry);
-     for (const ScoreEntry& entry : b.entries.base())     out.add(entry);
+          for (const ScoreEntry& entry : b.entries.base())     out.add(entry);
 
-     return out;
+          return out;
+     }
+
+     else if constexpr (N == SizeB)     // also catches N == SizeA && N == SizeB
+     {
+          BestList<N> out {b};
+
+          for (const ScoreEntry& entry : a.entries.base())     out.add(entry);
+
+          return out;
+     }
+
+     else
+     {
+          BestList<N> out {a.ct};
+
+          for (const ScoreEntry& entry : a.entries.base())     out.add(entry);
+          for (const ScoreEntry& entry : b.entries.base())     out.add(entry);
+
+          return out;
+     }
 }
 
 
