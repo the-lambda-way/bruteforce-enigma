@@ -28,6 +28,62 @@ double scoreTextQgram (const char* text, int length)
 }
 
 
+// double scoreTextQgram_parallel (const char* text, int length)
+// {
+//      int ordinals[length];
+
+//      std::transform(
+//           std::execution::par_unseq,
+//           text, text + length,
+//           ordinals,
+//           [] (char c) { return c - 'A'; }
+//      );
+
+
+//      int indices1[length - 3];
+
+//      std::transform(
+//           std::execution::par_unseq,
+//           ordinals, ordinals + length - 3,
+//           ordinals + 1,
+//           indices1,
+//           [] (int a, int b) { return 17576 * a + 676 * b; }
+//      );
+
+
+//      int indices2[length - 3];
+
+//      std::transform(
+//           std::execution::par_unseq,
+//           indices1, indices1 + length - 3,
+//           ordinals + 2,
+//           indices2,
+//           [] (int a, int c) { return a + 26 * c; }
+//      );
+
+
+//      int indices3[length - 3];
+
+//      std::transform(
+//           std::execution::par_unseq,
+//           indices2, indices2 + length - 3,
+//           ordinals + 3,
+//           indices3,
+//           [] (int a, int d) { return a + d; }
+//      );
+
+
+//      return std::transform_reduce(
+//           std::execution::par_unseq,
+//           indices3, indices3 + length - 3,
+//           0.0,
+//           std::plus{},
+//           [] (int index) -> double { return qgram[index]; }
+//      );
+// }
+
+
+
 double scoreIntQgram (const int* ordinals, int length)
 {
      double score = 0;
@@ -46,48 +102,51 @@ double scoreIntQgram (const int* ordinals, int length)
 }
 
 
-// Tested 35% faster than scoreIntQgram
-double scoreIntQgram_parallel (const int* ordinals, int length)
-{
-     int indices1[length - 3];
-     int indices2[length - 3];
-     int indices3[length - 3];
-     int score = 0;
+// Tested 18% slower than scoreIntQgram
+// But can this method be made faster, in theory? If I find a way to calculate the index in one algorithm, in parallel?
+// double scoreIntQgram_parallel (const int* ordinals, int length)
+// {
+//      int indices1[length - 3];
 
-     std::transform(
-          std::execution::par_unseq,
-          ordinals, ordinals + length - 3,
-          ordinals + 1,
-          indices1,
-          [] (int a, int b) { return 17576 * a + 676 * b; }
-     );
+//      std::transform(
+//           std::execution::par_unseq,
+//           ordinals, ordinals + length - 3,
+//           ordinals + 1,
+//           indices1,
+//           [] (int a, int b) { return 17576 * a + 676 * b; }
+//      );
 
-     std::transform(
-          std::execution::par_unseq,
-          indices1, indices1 + length - 3,
-          ordinals + 2,
-          indices2,
-          [] (int a, int c) { return a + 26 * c; }
-     );
 
-     std::transform(
-          std::execution::par_unseq,
-          indices2, indices2 + length - 3,
-          ordinals + 3,
-          indices3,
-          [] (int a, int d) { return a + d; }
-     );
+//      int indices2[length - 3];
 
-     std::transform_reduce(
-          std::execution::par_unseq,
-          indices3, indices3 + length - 3,
-          score,
-          std::plus{},
-          [] (int index) { return qgram[index]; }
-     );
+//      std::transform(
+//           std::execution::par_unseq,
+//           indices1, indices1 + length - 3,
+//           ordinals + 2,
+//           indices2,
+//           [] (int a, int c) { return a + 26 * c; }
+//      );
 
-     return score;
-}
+
+//      int indices3[length - 3];
+
+//      std::transform(
+//           std::execution::par_unseq,
+//           indices2, indices2 + length - 3,
+//           ordinals + 3,
+//           indices3,
+//           [] (int a, int d) { return a + d; }
+//      );
+
+
+//      return std::transform_reduce(
+//           std::execution::par_unseq,
+//           indices3, indices3 + length - 3,
+//           0.0,
+//           std::plus{},
+//           [] (int index) -> double { return qgram[index]; }
+//      );
+// }
 
 
 // TODO: Test using a sparse matrix
