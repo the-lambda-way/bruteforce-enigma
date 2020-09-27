@@ -71,9 +71,9 @@ public:
      bool is_good_score (double score)     { return score > entries.top().score; }
 
 
-     void add (double score, const EnigmaConfiguration& config)
+     void add (double score, EnigmaConfiguration config)
      {
-          entries.emplace(score, config);
+          entries.emplace(score, std::move(config));
           entries.pop();
      }
 
