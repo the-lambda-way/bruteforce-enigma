@@ -28,6 +28,7 @@ std::string convert_to_ct (std::string_view in)
 std::vector<std::array<int, 3>> three_permutations_of_n (int n)
 {
      std::vector<std::array<int, 3>> out;
+     out.reserve(n * (n - 1) * (n - 2));
 
      int i, j, k;
      int* permutations[6][3] = {{&i, &j, &k}, {&i, &k, &j}, {&j, &i, &k}, {&j, &k, &i}, {&k, &i, &j}, {&k, &j, &i}};
@@ -46,6 +47,7 @@ std::vector<std::array<int, 3>> three_permutations_of_n (int n)
 std::vector<std::array<int, 3>> triples_from_n (int n)
 {
      std::vector<std::array<int, 3>> out;
+     out.reserve(n * n * n);
 
      for (int i = 0; i < n; ++i)
      for (int j = 0; j < n; ++j)
