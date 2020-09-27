@@ -82,6 +82,14 @@ EnigmaModel CrypTool_railway_model = {.stator     = &ETW_QWERTZ,
                                       .reflectors = {&railway_UKW}};
 
 
+// CrypTool M3 ---------------------------------------------------------------------------------------------------------
+// CrypTool includes UKWA in its m3 model
+// Combinations: 2048
+EnigmaModel CrypTool_m3_model = {.stator     = &ETW_ABCDEF,
+                                 .rotors     = {&m3_I, &m3_II, &m3_III, &m3_IV, &m3_V, &m4_VI, &m4_VII, &m4_VIII},
+                                 .reflectors = {&UKWA, &UKWB, &UKWC}};
+
+
 // Enigma I ------------------------------------------------------------------------------------------------------------
 // https://github.com/cryptii/cryptii/blob/master/src/Encoder/Enigma.js
 
