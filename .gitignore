@@ -1,3 +1,4 @@
 .vscode
 crack_enigma
 test
+*.o

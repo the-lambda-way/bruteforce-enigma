@@ -7,9 +7,9 @@ Currently cracks ciphers where the plugboard is already known.
 
 # Usage
 
-Open up **crack_enigma.cpp** and in the main function place your code. Using one of the two provided algorithms, pass in an enigma model, a plugboard setting, and your ciphertext. Compile by running `make` or `make crack_enigma` and run with `./crack_enigma`. Takes about 7 seconds to compile on my machine. You could precompile the headers to speed this up if you want.
+Open up **crack_enigma.cpp** and in the main function place your code. Using one of the two provided algorithms, pass in an enigma model, a plugboard setting, and your ciphertext. Compile by running `make` or `make crack_enigma` and run with `./crack_enigma`.
 
-Enigma models can be found in *models.h*. The current list includes:
+Enigma models can be found in *models.cpp*. The current list includes:
 * m3
 * m3 extended (with rotors VI, VII, and VIII added)
 * m4 (with only three rotors at the moment)

@@ -63,6 +63,7 @@ struct EnigmaBase
      constexpr EnigmaBase (const EnigmaBase&) = default;
      constexpr EnigmaBase (EnigmaBase&&) = default;
      constexpr EnigmaBase& operator= (const EnigmaBase&) = default;
+     constexpr bool operator== (const EnigmaBase&) const = default;
 };
 
 
@@ -154,4 +155,5 @@ struct EnigmaConfiguration
      constexpr EnigmaConfiguration (const EnigmaConfiguration& c) = default;
      constexpr EnigmaConfiguration (EnigmaConfiguration&& c) = default;
      constexpr EnigmaConfiguration& operator= (const EnigmaConfiguration&) = default;
+     constexpr bool operator== (const EnigmaConfiguration&) const = default;
 };
