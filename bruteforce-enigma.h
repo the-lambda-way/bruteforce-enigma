@@ -70,8 +70,42 @@ BestList<N> bf_decipher (
 }
 
 
+template <int N = 10>
+BestList<N> bf_decipher (
+     const EnigmaBase& base,
+     std::string_view plugboard,
+     std::string_view ct,
+     int ring1_start = 0, int ring1_end = 25, int ring_max = 25
+)
+{
+     const int length = ct.length();
+     int       pt_ordinal[length];
+     int       ct_ordinal[length];
+
+     str_to_ordinals(ct, ct_ordinal);
+
+
+     std::puts("Breaking enigma...");
+
+
+     BestList<N> best {ct};
+
+     Enigma enigma {base, plugboard, ring1_start};
+
+     for (int i = ring1_start; i < ring1_end + 1; ++i,     enigma.increment_ring(1))
+     for (int i = 0;           i < ring_max + 1;  ++i,     enigma.increment_ring(2))
+     for (int i = 0;           i < ring_max + 1;  ++i,     enigma.increment_ring(3))
+     for (int i = 0;           i < ring_max + 1;  ++i,     enigma.increment_rotor(1))
+     for (int i = 0;           i < ring_max + 1;  ++i,     enigma.increment_rotor(2))
+     for (int i = 0;           i < ring_max + 1;  ++i,     enigma.increment_rotor(3))
+          test_configuration(enigma, ct_ordinal, length, pt_ordinal, best);
+
+     return best;
+}
+
+
 template <int N>
-BestList<N> bf_4_threads (EnigmaModel model, std::string_view plug, std::string_view ct, int ring_end = 25)
+BestList<N> bf_4_threads (const EnigmaModel& model, std::string_view plug, std::string_view ct, int ring_end = 25)
 {
      int quarter = ring_end / 4 ;
 
@@ -86,6 +120,27 @@ BestList<N> bf_4_threads (EnigmaModel model, std::string_view plug, std::string_
      auto future2 = std::async(std::launch::async, [&] () { return bf_decipher<N>(model, plug, ct, b + 1, c, max); });
      auto future3 = std::async(std::launch::async, [&] () { return bf_decipher<N>(model, plug, ct, c + 1, d, max); });
      auto future4 = std::async(std::launch::async, [&] () { return bf_decipher<N>(model, plug, ct, d + 1, e, max); });
+
+     return combine_best<N>(future1.get(), future2.get(), future3.get(), future4.get());
+}
+
+
+template <int N>
+BestList<N> bf_4_threads (const EnigmaBase& base, std::string_view plug, std::string_view ct, int ring_end = 25)
+{
+     int quarter = ring_end / 4 ;
+
+     int a = 0 * quarter;
+     int b = 1 * quarter;
+     int c = 2 * quarter;
+     int d = 3 * quarter;
+     int e = ring_end;
+     int max = ring_end;
+
+     auto future1 = std::async(std::launch::async, [&] () { return bf_decipher<N>(base, plug, ct, a,     b, max); });
+     auto future2 = std::async(std::launch::async, [&] () { return bf_decipher<N>(base, plug, ct, b + 1, c, max); });
+     auto future3 = std::async(std::launch::async, [&] () { return bf_decipher<N>(base, plug, ct, c + 1, d, max); });
+     auto future4 = std::async(std::launch::async, [&] () { return bf_decipher<N>(base, plug, ct, d + 1, e, max); });
 
      return combine_best<N>(future1.get(), future2.get(), future3.get(), future4.get());
 }
@@ -143,7 +198,51 @@ BestList<N> smart_decipher (
 
 
 template <int N>
-BestList<N> smart_4_threads (EnigmaModel model, std::string_view plug, std::string_view ct)
+BestList<N> smart_decipher (
+     const EnigmaBase& base,
+     std::string_view plugboard,
+     std::string_view ct,
+     int rotor1_start = 0, int rotor1_end = 25
+)
+{
+     const int length = ct.length();
+     int       pt_ordinal[length];
+     int       ct_ordinal[length];
+
+     str_to_ordinals(ct, ct_ordinal);
+
+
+     std::puts("Breaking enigma...");
+
+
+     BestList<N> best_rotors {ct};
+     Enigma enigma {base, plugboard, 0, 0, 0, rotor1_start};
+
+     for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor(1))
+     for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor(2))
+     for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor(3))
+          test_configuration(enigma, ct_ordinal, length, pt_ordinal, best_rotors);
+
+
+     BestList<N> best_rings {ct};
+
+     for (const ScoreEntry& entry : best_rotors.get_entries())
+     {
+          Enigma enigma {entry.config};
+
+          for (int i = 0; i < 26; ++i,     enigma.increment_ring(1), enigma.increment_rotor(1))
+          for (int i = 0; i < 26; ++i,     enigma.increment_ring(2), enigma.increment_rotor(2))
+          // Third ring has no effect
+               test_configuration(enigma, ct_ordinal, length, pt_ordinal, best_rings);
+     }
+
+
+     return best_rings;
+}
+
+
+template <int N>
+BestList<N> smart_4_threads (const EnigmaModel& model, std::string_view plug, std::string_view ct)
 {
      auto future1 = std::async(std::launch::async, [&] () { return smart_decipher<N>(model, plug, ct, 0,  5); });
      auto future2 = std::async(std::launch::async, [&] () { return smart_decipher<N>(model, plug, ct, 6,  11); });
@@ -153,6 +252,17 @@ BestList<N> smart_4_threads (EnigmaModel model, std::string_view plug, std::stri
      return combine_best<N>(future1.get(), future2.get(), future3.get(), future4.get());
 }
 
+
+template <int N>
+BestList<N> smart_4_threads (const EnigmaBase& base, std::string_view plug, std::string_view ct)
+{
+     auto future1 = std::async(std::launch::async, [&] () { return smart_decipher<N>(base, plug, ct, 0,  5); });
+     auto future2 = std::async(std::launch::async, [&] () { return smart_decipher<N>(base, plug, ct, 6,  11); });
+     auto future3 = std::async(std::launch::async, [&] () { return smart_decipher<N>(base, plug, ct, 12, 17); });
+     auto future4 = std::async(std::launch::async, [&] () { return smart_decipher<N>(base, plug, ct, 18, 25); });
+
+     return combine_best<N>(future1.get(), future2.get(), future3.get(), future4.get());
+}
 
 
 // TODO: Add a parallelized algorithm.
