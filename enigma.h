@@ -17,25 +17,25 @@ public:
      constexpr Enigma (
           const EnigmaBase& base,
           std::string_view plugboard,
-          std::string_view ring_positions,
-          std::string_view rotor_positions
+          std::string_view rotor_positions,
+          std::string_view ring_positions
      )
-     : Enigma(EnigmaConfiguration {base, plugboard, ring_positions, rotor_positions})
+     : Enigma(EnigmaConfiguration {base, plugboard, rotor_positions, ring_positions})
      {}
 
 
      constexpr Enigma (
           const EnigmaBase& base,
           std::string_view plugboard,
-          int ring1_pos  = 0,
-          int ring2_pos  = 0,
-          int ring3_pos  = 0,
           int rotor1_pos = 0,
           int rotor2_pos = 0,
-          int rotor3_pos = 0
+          int rotor3_pos = 0,
+          int ring1_pos  = 0,
+          int ring2_pos  = 0,
+          int ring3_pos  = 0
      )
      : Enigma(EnigmaConfiguration {base, plugboard,
-                                   ring1_pos, ring2_pos, ring3_pos, rotor1_pos, rotor2_pos, rotor3_pos})
+                                   rotor1_pos, rotor2_pos, rotor3_pos, ring1_pos, ring2_pos, ring3_pos})
      {}
 
 
@@ -46,13 +46,13 @@ public:
           const Rotor& rotor3,
           const Rotor& reflector,     // UKW
           std::string_view plugboard,
-          std::string_view ring_positions,
-          std::string_view rotor_positions
+          std::string_view rotor_positions,
+          std::string_view ring_positions
      )
      : Enigma(EnigmaConfiguration {stator, rotor1, rotor2, rotor3, reflector,
                                    plugboard,
-                                   ring_positions[0] - 'A', ring_positions[1] - 'A', ring_positions[2] - 'A',
-                                   rotor_positions[0] - 'A', rotor_positions[1] - 'A', rotor_positions[2] - 'A'})
+                                   rotor_positions[0] - 'A', rotor_positions[1] - 'A', rotor_positions[2] - 'A',
+                                   ring_positions[0] - 'A', ring_positions[1] - 'A', ring_positions[2] - 'A'})
      {}
 
 
@@ -63,15 +63,15 @@ public:
           const Rotor& rotor3,
           const Rotor& reflector,     // UKW
           std::string_view plugboard,
-          int ring1_pos  = 0,
-          int ring2_pos  = 0,
-          int ring3_pos  = 0,
           int rotor1_pos = 0,
           int rotor2_pos = 0,
-          int rotor3_pos = 0
+          int rotor3_pos = 0,
+          int ring1_pos  = 0,
+          int ring2_pos  = 0,
+          int ring3_pos  = 0
      )
      : Enigma(EnigmaConfiguration {stator, rotor1, rotor2, rotor3, reflector, plugboard,
-                                   ring1_pos, ring2_pos, ring3_pos, rotor1_pos, rotor2_pos, rotor3_pos})
+                                   rotor1_pos, rotor2_pos, rotor3_pos, ring1_pos, ring2_pos, ring3_pos})
      {}
 
 

@@ -36,7 +36,7 @@ BestList<N> bf_decipher (
      const EnigmaModel& model,
      std::string_view plugboard,
      std::string_view ct,
-     int ring1_start = 0, int ring1_end = 25, int ring_max = 25
+     int rotor1_start = 0, int rotor1_end = 25, int rotor_max = 25
 )
 {
      const int length = ct.length();
@@ -53,16 +53,16 @@ BestList<N> bf_decipher (
 
      for (const EnigmaBase& base : all_configurations(model))
      {
-          Enigma enigma {base, plugboard, ring1_start};
+          Enigma enigma {base, plugboard, rotor1_start};
 
           // TODO: Determine which settings are equivalent, and skip
 
-          for (int i = ring1_start; i < ring1_end + 1; ++i,     enigma.increment_ring(1))
-          for (int i = 0;           i < ring_max + 1;  ++i,     enigma.increment_ring(2))
-          for (int i = 0;           i < ring_max + 1;  ++i,     enigma.increment_ring(3))
-          for (int i = 0;           i < ring_max + 1;  ++i,     enigma.increment_rotor(1))
-          for (int i = 0;           i < ring_max + 1;  ++i,     enigma.increment_rotor(2))
-          for (int i = 0;           i < ring_max + 1;  ++i,     enigma.increment_rotor(3))
+          for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor(1))
+          for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_rotor(2))
+          for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_rotor(3))
+          for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring(1))
+          for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring(2))
+          // Third ring has no effect
                test_configuration(enigma, ct_ordinal, length, pt_ordinal, best);
      }
 
@@ -75,7 +75,7 @@ BestList<N> bf_decipher (
      const EnigmaBase& base,
      std::string_view plugboard,
      std::string_view ct,
-     int ring1_start = 0, int ring1_end = 25, int ring_max = 25
+     int rotor1_start = 0, int rotor1_end = 25, int rotor_max = 25
 )
 {
      const int length = ct.length();
@@ -89,15 +89,14 @@ BestList<N> bf_decipher (
 
 
      BestList<N> best {ct};
+     Enigma enigma {base, plugboard, rotor1_start};
 
-     Enigma enigma {base, plugboard, ring1_start};
-
-     for (int i = ring1_start; i < ring1_end + 1; ++i,     enigma.increment_ring(1))
-     for (int i = 0;           i < ring_max + 1;  ++i,     enigma.increment_ring(2))
-     for (int i = 0;           i < ring_max + 1;  ++i,     enigma.increment_ring(3))
-     for (int i = 0;           i < ring_max + 1;  ++i,     enigma.increment_rotor(1))
-     for (int i = 0;           i < ring_max + 1;  ++i,     enigma.increment_rotor(2))
-     for (int i = 0;           i < ring_max + 1;  ++i,     enigma.increment_rotor(3))
+     for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor(1))
+     for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_rotor(2))
+     for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_rotor(3))
+     for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring(1))
+     for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring(2))
+     // Third ring has no effect
           test_configuration(enigma, ct_ordinal, length, pt_ordinal, best);
 
      return best;
@@ -105,9 +104,9 @@ BestList<N> bf_decipher (
 
 
 template <int N>
-BestList<N> bf_4_threads (const EnigmaModel& model, std::string_view plug, std::string_view ct, int ring_end = 25)
+BestList<N> bf_4_threads (const EnigmaModel& model, std::string_view plug, std::string_view ct, int rotor_end = 25)
 {
-     int quarter = ring_end / 4 ;
+     int quarter = rotor_end / 4 ;
 
      int a = 0 * quarter;
      int b = 1 * quarter;
@@ -126,9 +125,9 @@ BestList<N> bf_4_threads (const EnigmaModel& model, std::string_view plug, std::
 
 
 template <int N>
-BestList<N> bf_4_threads (const EnigmaBase& base, std::string_view plug, std::string_view ct, int ring_end = 25)
+BestList<N> bf_4_threads (const EnigmaBase& base, std::string_view plug, std::string_view ct, int rotor_end = 25)
 {
-     int quarter = ring_end / 4 ;
+     int quarter = rotor_end / 4 ;
 
      int a = 0 * quarter;
      int b = 1 * quarter;
