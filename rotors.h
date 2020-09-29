@@ -76,12 +76,12 @@ struct EnigmaConfiguration
      const Rotor* rotor3;
      const Rotor* reflector;     // UKW
      std::string_view plugboard;
-     int ring1_pos;
-     int ring2_pos;
-     int ring3_pos;
      int rotor1_pos;
      int rotor2_pos;
      int rotor3_pos;
+     int ring1_pos;
+     int ring2_pos;
+     int ring3_pos;
 
 
      constexpr EnigmaConfiguration (
@@ -92,25 +92,25 @@ struct EnigmaConfiguration
      )
      : EnigmaConfiguration(*config.stator, *config.rotor1, *config.rotor2, *config.rotor3, *config.reflector,
                            plugboard,
-                           ring_positions[0] - 'A', ring_positions[1] - 'A', ring_positions[2] - 'A',
-                           rotor_positions[0] - 'A', rotor_positions[1] - 'A', rotor_positions[2] - 'A')
+                           rotor_positions[0] - 'A', rotor_positions[1] - 'A', rotor_positions[2] - 'A',
+                           ring_positions[0] - 'A', ring_positions[1] - 'A', ring_positions[2] - 'A')
      {}
 
 
      constexpr EnigmaConfiguration (
           const EnigmaBase& base,
           std::string_view plugboard,
-          int ring1_pos  = 0,
-          int ring2_pos  = 0,
-          int ring3_pos  = 0,
           int rotor1_pos = 0,
           int rotor2_pos = 0,
-          int rotor3_pos = 0
+          int rotor3_pos = 0,
+          int ring1_pos  = 0,
+          int ring2_pos  = 0,
+          int ring3_pos  = 0
      )
      : EnigmaConfiguration(*base.stator, *base.rotor1, *base.rotor2, *base.rotor3, *base.reflector,
                            plugboard,
-                           ring1_pos, ring2_pos, ring3_pos,
-                           rotor1_pos, rotor2_pos, rotor3_pos)
+                           rotor1_pos, rotor2_pos, rotor3_pos,
+                           ring1_pos, ring2_pos, ring3_pos)
      {}
 
 
@@ -121,13 +121,13 @@ struct EnigmaConfiguration
           const Rotor& rotor3,
           const Rotor& reflector,     // UKW
           std::string_view plugboard,
-          std::string_view ring_positions,
-          std::string_view rotor_positions
+          std::string_view rotor_positions,
+          std::string_view ring_positions
      )
      : EnigmaConfiguration(stator, rotor1, rotor2, rotor3, reflector,
                            plugboard,
-                           ring_positions[0] - 'A', ring_positions[1] - 'A', ring_positions[2] - 'A',
-                           rotor_positions[0] - 'A', rotor_positions[1] - 'A', rotor_positions[2] - 'A')
+                           rotor_positions[0] - 'A', rotor_positions[1] - 'A', rotor_positions[2] - 'A',
+                           ring_positions[0] - 'A', ring_positions[1] - 'A', ring_positions[2] - 'A')
      {}
 
 
@@ -138,17 +138,17 @@ struct EnigmaConfiguration
           const Rotor& rotor3,
           const Rotor& reflector,     // UKW
           std::string_view plugboard,
-          int ring1_pos  = 0,
-          int ring2_pos  = 0,
-          int ring3_pos  = 0,
           int rotor1_pos = 0,
           int rotor2_pos = 0,
-          int rotor3_pos = 0
+          int rotor3_pos = 0,
+          int ring1_pos  = 0,
+          int ring2_pos  = 0,
+          int ring3_pos  = 0
      )
      : stator {&stator}, rotor1 {&rotor1}, rotor2 {&rotor2}, rotor3 {&rotor3}, reflector {&reflector},
        plugboard {plugboard},
-       ring1_pos {ring1_pos}, ring2_pos {ring2_pos}, ring3_pos {ring3_pos},
-       rotor1_pos {rotor1_pos}, rotor2_pos {rotor2_pos}, rotor3_pos {rotor3_pos}
+       rotor1_pos {rotor1_pos}, rotor2_pos {rotor2_pos}, rotor3_pos {rotor3_pos},
+       ring1_pos {ring1_pos}, ring2_pos {ring2_pos}, ring3_pos {ring3_pos}
      {}
 
 
