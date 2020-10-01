@@ -16,31 +16,38 @@ Enigma models can be found in *models.cpp*. The current list includes:
 * m3 extended (with rotors VI, VII, and VIII added)
 * m4 (with only three rotors at the moment)
 * railway
+* CrypTool m3 (adds reflector UKWA)
 * CrypTool railway (different notches)
 * enigma I
 * norenigma
 * sondermaschine
 * commercial enigma
 
-Two algorithms are provided to bruteforce an enigma cipher. The first, called `smart_decipher`, should be sufficient for almost all ciphers. It uses a similar algorithm to [practical cryptography](http://www.practicalcryptography.com/cryptanalysis/breaking-machine-ciphers/cryptanalysis-enigma-part-2/), by first finding the best rotor combination and position, and then from the top results finding the best ring positions.
+Two algorithms are provided to bruteforce an enigma cipher. The first, called `smart_decipher`, should be sufficient for almost all ciphers. It uses a similar algorithm to [Practical Cryptography](http://www.practicalcryptography.com/cryptanalysis/breaking-machine-ciphers/cryptanalysis-enigma-part-2/), by first finding the best rotor combination and position, and then from the top results finding the best ring positions.
 
-The second, called `bf_decipher`, goes through every combination of rotor, rotor position, and ring position (except the third ring, which has no effect) of a given enigma model. This algorithm is useful for very short messages, or complex ones that wouldn't score well using a quadgram scoring model. Since this requires over 300 million decryptions per rotor configuration, it can take a very long time to finish. See below for the performance characteristics on my machine.
+The second, called `bf_decipher`, goes through every combination of rotor, rotor position, and ring position (except the third ring, which has no effect on finding a solution) of a given enigma model. Since this requires 11.9 million decryptions per rotor configuration, it takes a bit of time to finish. See below for the performance characteristics on my machine.
 
 
 
 # Performance
 
-Tested on my personal laptop, with a 56-character cipher.
+Tested on my personal laptop, with a 56-character cipher from Practical Cryptography.
+
+```
+ct: NPNKANVHWKPXORCDDTRJRXSJFLCIUAIIBUNQIUQFTHLOZOIMENDNGPCB
+pt: INTELLIGENCEPOINTSTOATTACKONTHEEASTWALLOFTHECASTLEATDAWN
+```
+
+From: http://practicalcryptography.com/cryptanalysis/breaking-machine-ciphers/cryptanalysis-enigma/
 
 
-
-| Core i7-6500U, 4 threads       | smart_decipher            | bf_decipher               |
-| ------------------------------ | ------------------------- | ------------------------- |
-| Cipher length                  | 56                        | 56                        |
-| Enigma model                   | railway (27 combinations) | railway (27 combinations) |
-| Total time                     | 0.75 sec                  | 59 min, 30 sec            |
-| Number of decryptions / second | -                         | 2.34 x 10^6               |
-| Characters / second            | -                         | 130.83 x 10^6             |
+| Core i7-6500U, 4 threads       | smart_decipher        | bf_decipher           |
+| ------------------------------ | ----------------------| ----------------------|
+| Cipher length                  | 56                    | 56                    |
+| Enigma model                   | m3 (250 combinations) | m3 (250 combinations) |
+| Solve time                     | 1.48 sec              | 13 min, 37 sec        |
+| Number of decryptions / second | -                     | 3.63 x 10^6           |
+| Characters / second            | -                     | 203.52 x 10^6         |
 
 
 
