@@ -4,9 +4,9 @@ CPPFLAGS = -flto
 COMPILE  = $(CXX) $(CPPFLAGS) $(CXXFLAGS)
 
 # Since de_qgr.h and qgr.h cannot be compiled together, it is convenient to auto generate the dependency list
-GCC_DEPS = $(subst \,,$(shell $(CXX) $(CXXFLAGS) -MM include/bruteforce-enigma.h))
-DEPS     = $(wordlist 3, $(words $(GCC_DEPS)), $(GCC_DEPS))
-OBJS 	 = $(patsubst include/../src/%,build/%,$(DEPS:.h=.o))
+DEPS = $(subst \,,$(shell $(CXX) $(CXXFLAGS) -MM include/bruteforce-enigma.h))
+HDRS = $(wordlist 3, $(words $(DEPS)), $(DEPS))
+OBJS = $(patsubst include/../src/%,build/%,$(HDRS:.h=.o))
 
 MAIN = crack_enigma
 
