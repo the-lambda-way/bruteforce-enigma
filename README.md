@@ -9,6 +9,8 @@ Currently cracks ciphers where the plugboard is already known.
 
 Open up **crack_enigma.cpp** and in the main function place your code. Using one of the two provided algorithms, pass in an enigma model, a plugboard setting, and your ciphertext. Compile by running `make` or `make crack_enigma` and run with `./crack_enigma`.
 
+To import into an existing project, drop the repo into your source tree, include include/bruteforce-enigma.h in a file, and compile and link with the .cpp files in src/. You can only compile against one quadgram language file (qgr.cpp or de_qgr.cpp) at a time.
+
 Enigma models can be found in *models.cpp*. The current list includes:
 * m3
 * m3 extended (with rotors VI, VII, and VIII added)
@@ -22,7 +24,7 @@ Enigma models can be found in *models.cpp*. The current list includes:
 
 Two algorithms are provided to bruteforce an enigma cipher. The first, called `smart_decipher`, should be sufficient for almost all ciphers. It uses a similar algorithm to [practical cryptography](http://www.practicalcryptography.com/cryptanalysis/breaking-machine-ciphers/cryptanalysis-enigma-part-2/), by first finding the best rotor combination and position, and then from the top results finding the best ring positions.
 
-The second, called `bf_decipher`, goes through every combination of rotor, rotor position, and ring position of a given enigma model. This algorithm is useful for very short messages, or complex ones that wouldn't score well using a quadgram scoring model. Since this requires over 300 million decryptions per rotor configuration, it can take a very long time to finish. See below for the performance characteristics on my machine.
+The second, called `bf_decipher`, goes through every combination of rotor, rotor position, and ring position (except the third ring, which has no effect) of a given enigma model. This algorithm is useful for very short messages, or complex ones that wouldn't score well using a quadgram scoring model. Since this requires over 300 million decryptions per rotor configuration, it can take a very long time to finish. See below for the performance characteristics on my machine.
 
 
 
