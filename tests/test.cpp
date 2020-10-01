@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 #include <string_view>
-#include "bruteforce-enigma.h"
+#include "../include/bruteforce-enigma.h"
 
 using namespace std;
 
@@ -24,8 +24,8 @@ int main (int argc, char** argv)
                          m3_IV, m3_V, m3_II,
                          UKWB,
                          plug,
-                         "PAA",
-                         "GWD"};
+                         "GWD",
+                         "PAA"};
 
           string pt = enigma.encrypt(ct);
           string rt = enigma.encrypt(pt);
@@ -61,8 +61,8 @@ int main (int argc, char** argv)
                          m3_I, m3_V, m3_II,
                          UKWB,
                          plug,
-                         "BFA",
-                         "SAO"};
+                         "SAO",
+                         "BFA"};
 
           string pt = enigma.encrypt(ct);
           string rt = enigma.encrypt(pt);
@@ -97,8 +97,8 @@ int main (int argc, char** argv)
                          CrypTool_railway_II, CrypTool_railway_I, CrypTool_railway_III,
                          railway_UKW,
                          plug,
-                         3, 1, 2,
-                         0, 1, 3};
+                         0, 1, 3,
+                         3, 1, 2};
 
           string pt = enigma.encrypt(ct);
           string rt = enigma.encrypt(pt);
@@ -159,7 +159,7 @@ int main (int argc, char** argv)
           string_view ct = "NPNKANVHWKPXORCDDTRJRXSJFLCIUAIIBUNQIUQFTHLOZOIMENDNGPCB";
           string_view plug = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-          EnigmaConfiguration expected {ETW_ABCDEF, m3_IV, m3_V, m3_II, UKWB, plug, "PAA", "GWD"};
+          EnigmaConfiguration expected {ETW_ABCDEF, m3_IV, m3_V, m3_II, UKWB, plug, "GWD", "PAA"};
 
           cout << "smart_decipher test\n"
                << "-------------------\n";

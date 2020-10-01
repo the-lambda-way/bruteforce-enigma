@@ -2,7 +2,7 @@
 Aug 2012
 this code is from http://www.practicalcryptography.com/cryptanalysis/breaking-machine-ciphers/cryptanalysis-enigma/
 */
-float qgram[457030] = {
+float qgram[] = {
 -6.48802713256,
 -9.5,
 -9.5,

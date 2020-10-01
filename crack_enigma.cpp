@@ -8,9 +8,13 @@
 using namespace std;
 
 
-// Formula for number of encryptions run:
+// Formula for number of encryptions run on smart_decipher:
 //   num_of_encryptions = num_of_configurations * 26^3 + BestList_N * num_threads * 26^2
 
+
+// bf_4_threads time approximations (40 characters):
+// CrypTool_m3: 58 min 32 seconds
+// CrypTool_railway: 1 min 4 seconds
 
 // smart_4_threads time approximations (85 characters):
 // m3_extended: 9.50 seconds
@@ -18,10 +22,10 @@ using namespace std;
 
 int main (int argc, char** argv)
 {
-     // string_view text = "Rc qipv jhx vld plson fhceuh itp jui gh qhzu dg sq xie dhw. "
-     //                    "U gbfl lf fluz pcag wrgkv zw, dinyg zw, qge gnvm L fhx.";
-     // string ct = convert_to_ct(text);
-     // string_view plug = "AYCDWZIHGJKLQNOPMVSTXREUBF";
+     string_view text = "Rc qipv jhx vld plson fhceuh itp jui gh qhzu dg sq xie dhw. "
+                        "U gbfl lf fluz pcag wrgkv zw, dinyg zw, qge gnvm L fhx.";
+     string ct = convert_to_ct(text);
+     string_view plug = "AYCDWZIHGJKLQNOPMVSTXREUBF";
 
      // string_view text = "Rc qipv jhx vld plson fhceuh itp jui gh qhzu dg sq xie dhw. ";
      // string ct = convert_to_ct(text);
@@ -31,21 +35,21 @@ int main (int argc, char** argv)
      // string ct = convert_to_ct(text);
      // string_view plug = "AYCDWZIHGJKLQNOPMVSTXREUBF";
 
-     string_view ct = "YXBMXADQBDBAAYIMKDODAYIXNBDQZFJKOLFVEEQBCLUUXDFVQYGKEYBVRHONJKPJMKUNLYLZUKBKJOA"
-                      "JTWVWMOMDPGVXEPUKXBVSGHROFOSBCNKEHEHAKWKOGWTBZFXSYCGSUUPPIZTRTFVCXZVCXTFLMTPTAQ"
-                      "VMREGWSBFZBM";
-     string_view plug = "ABCDEFGNUKJMLHPOQRSYIVWXTZ";
+     // string_view text = "WPEEN ZDYPG OTHVE KCLXA GNKGN AVGVF AWTMA XTWFW";
+     // string ct = convert_to_ct(text);
+     // string_view plug = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+     // EnigmaBase rotors {ETW_ABCDEF, m3_III, m3_II, m3_I, UKWB};
 
 
      Stopwatch sw;
      sw.click();
 
      // BestList<25> best = bf_decipher(m3_model, plug, ct;
-     
-     // BestList<25> best = bf_4_threads(m3_model, plug, ct, 10);     // quick test
-     // BestList best = bf_4_threads<25>(m3_model, plug, ct);
 
-     BestList best = smart_4_threads<25>(m3_model, plug, ct);
+     // BestList best = bf_4_threads<25>(rotors, plug, ct, 13);     // quick test
+     // BestList best = bf_4_threads<25>(railway_model, plug, ct);
+
+     BestList best = smart_4_threads<25>(CrypTool_m3_model, plug, ct);
 
      sw.click();
 

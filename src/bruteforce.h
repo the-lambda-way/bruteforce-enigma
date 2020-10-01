@@ -112,8 +112,8 @@ BestList<N> bf_4_threads (const EnigmaModel& model, std::string_view plug, std::
      int b = 1 * quarter;
      int c = 2 * quarter;
      int d = 3 * quarter;
-     int e = ring_end;
-     int max = ring_end;
+     int e = rotor_end;
+     int max = rotor_end;
 
      auto future1 = std::async(std::launch::async, [&] () { return bf_decipher<N>(model, plug, ct, a,     b, max); });
      auto future2 = std::async(std::launch::async, [&] () { return bf_decipher<N>(model, plug, ct, b + 1, c, max); });
@@ -133,8 +133,8 @@ BestList<N> bf_4_threads (const EnigmaBase& base, std::string_view plug, std::st
      int b = 1 * quarter;
      int c = 2 * quarter;
      int d = 3 * quarter;
-     int e = ring_end;
-     int max = ring_end;
+     int e = rotor_end;
+     int max = rotor_end;
 
      auto future1 = std::async(std::launch::async, [&] () { return bf_decipher<N>(base, plug, ct, a,     b, max); });
      auto future2 = std::async(std::launch::async, [&] () { return bf_decipher<N>(base, plug, ct, b + 1, c, max); });
@@ -264,13 +264,13 @@ BestList<N> smart_4_threads (const EnigmaBase& base, std::string_view plug, std:
 }
 
 
-// TODO: Add a parallelized algorithm.
+// TODO: Add a fully parallelized algorithm.
 // Thoughts:
 //      * Create a closed-form solution to the rotor offset at each character position during an encryption.
 //      * Find a way to collect good-scoring results without requiring a lock. That would let us use the C++ unsequenced
 //        policy.
 //      * Separate rotors memory from positions and rings, so that calculations are separated from memory ownership.
-//      * Research whether precalculating all rotor positions would create vectorization opportunities.
+//      * Maybe a map-reduce design would help.
 
 
 // TODO: Add a secondary encryption step. Pass in a function that gets called on a encrypted text before it gets scored.

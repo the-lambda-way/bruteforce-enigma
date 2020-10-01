@@ -28,16 +28,16 @@ const Rotor m4_VIII = {"VIII", "FKQHTLXOCBJSPDZRAMEWNIUYGV", "ZM"};
 
 // Combinations: 250
 const EnigmaModel m3_model = {
-    .stator     = &ETW_ABCDEF,
-    .rotors     = {&m3_I, &m3_II, &m3_III, &m3_IV, &m3_V},
-    .reflectors = {&UKWB, &UKWC}
+     .stator     = &ETW_ABCDEF,
+     .rotors     = {&m3_I, &m3_II, &m3_III, &m3_IV, &m3_V},
+     .reflectors = {&UKWB, &UKWC}
 };
 
 // Combinations: 1024
 const EnigmaModel m3_extended_model = {
-    .stator     = &ETW_ABCDEF,
-    .rotors     = {&m3_I, &m3_II, &m3_III, &m3_IV, &m3_V, &m4_VI, &m4_VII, &m4_VIII},
-    .reflectors = {&UKWB, &UKWC}
+     .stator     = &ETW_ABCDEF,
+     .rotors     = {&m3_I, &m3_II, &m3_III, &m3_IV, &m3_V, &m4_VI, &m4_VII, &m4_VIII},
+     .reflectors = {&UKWB, &UKWC}
 };
 
 
@@ -53,9 +53,9 @@ const Rotor m4_gamma     = {"gamma", "FSOKANUERHMBTIYCWLQPZXVGJD", ""};
 
 // Combinations: 2000
 const EnigmaModel m4_model = {
-    .stator     = &ETW_ABCDEF,
-    .rotors     = {&m4_beta, &m4_gamma, &m3_I, &m3_II, &m3_III, &m3_IV, &m3_V, &m4_VI, &m4_VII, &m4_VIII},
-    .reflectors = {&m4_UKWB_thin, &m4_UKWC_thin}
+     .stator     = &ETW_ABCDEF,
+     .rotors     = {&m4_beta, &m4_gamma, &m3_I, &m3_II, &m3_III, &m3_IV, &m3_V, &m4_VI, &m4_VII, &m4_VIII},
+     .reflectors = {&m4_UKWB_thin, &m4_UKWC_thin}
 };
 
 
@@ -70,9 +70,9 @@ const Rotor railway_UKW = {"UKW", "QYHOGNECVPUZTFDJAXWMKISRBL", ""};
 
 // Combinations: 27
 const EnigmaModel railway_model = {
-    .stator     = &ETW_QWERTZ,
-    .rotors     = {&railway_I, &railway_II, &railway_III},
-    .reflectors = {&railway_UKW}
+     .stator     = &ETW_QWERTZ,
+     .rotors     = {&railway_I, &railway_II, &railway_III},
+     .reflectors = {&railway_UKW}
 };
 
 
@@ -85,9 +85,9 @@ const Rotor CrypTool_railway_III = {"III", "JVIUBHTCDYAKEQZPOSGXNRMWFL", "G"};
 
 // Combinations: 27
 const EnigmaModel CrypTool_railway_model = {
-    .stator     = &ETW_QWERTZ,
-    .rotors     = {&CrypTool_railway_I, &CrypTool_railway_II, &CrypTool_railway_III},
-    .reflectors = {&railway_UKW}
+     .stator     = &ETW_QWERTZ,
+     .rotors     = {&CrypTool_railway_I, &CrypTool_railway_II, &CrypTool_railway_III},
+     .reflectors = {&railway_UKW}
 };
 
 
@@ -96,9 +96,9 @@ const EnigmaModel CrypTool_railway_model = {
 
 // Combinations: 2048
 const EnigmaModel CrypTool_m3_model = {
-    .stator     = &ETW_ABCDEF,
-    .rotors     = {&m3_I, &m3_II, &m3_III, &m3_IV, &m3_V, &m4_VI, &m4_VII, &m4_VIII},
-    .reflectors = {&UKWA, &UKWB, &UKWC}
+     .stator     = &ETW_ABCDEF,
+     .rotors     = {&m3_I, &m3_II, &m3_III, &m3_IV, &m3_V, &m4_VI, &m4_VII, &m4_VIII},
+     .reflectors = {&UKWA, &UKWB, &UKWC}
 };
 
 
@@ -107,9 +107,9 @@ const EnigmaModel CrypTool_m3_model = {
 
 // Combinations: 375
 const EnigmaModel enigma_I_model = {
-    .stator     = &ETW_ABCDEF,
-    .rotors     = {&m3_I, &m3_II, &m3_III, &m3_IV, &m3_V},
-    .reflectors = {&UKWA, &UKWB, &UKWC}
+     .stator     = &ETW_ABCDEF,
+     .rotors     = {&m3_I, &m3_II, &m3_III, &m3_IV, &m3_V},
+     .reflectors = {&UKWA, &UKWB, &UKWC}
 };
 
 
@@ -126,9 +126,9 @@ const Rotor norenigma_UKW = {"UKW", "MOWJYPUXNDSRAIBFVLKZGQCHET", ""};
 
 // Combinations: 125
 const EnigmaModel enigma_n_model = {
-    .stator     = &ETW_ABCDEF,
-    .rotors     = {&norenigma_I, &norenigma_II, &norenigma_III, &norenigma_IV, &norenigma_V},
-    .reflectors = {&norenigma_UKW}
+     .stator     = &ETW_ABCDEF,
+     .rotors     = {&norenigma_I, &norenigma_II, &norenigma_III, &norenigma_IV, &norenigma_V},
+     .reflectors = {&norenigma_UKW}
 };
 
 
@@ -142,9 +142,9 @@ const Rotor sondermaschine_UKW = {"UKW", "CIAGSNDRBYTPZFULVHEKOQXWJM", ""};
 
 // Combinations: 27
 const EnigmaModel enigma_s_model = {
-    .stator     = &ETW_ABCDEF,
-    .rotors     = {&sondermaschine_I, &sondermaschine_II, &sondermaschine_III},
-    .reflectors = {&sondermaschine_UKW}
+     .stator     = &ETW_ABCDEF,
+     .rotors     = {&sondermaschine_I, &sondermaschine_II, &sondermaschine_III},
+     .reflectors = {&sondermaschine_UKW}
 };
 
 
@@ -157,9 +157,9 @@ const Rotor commercial_III = {"III", "CJGDPSHKTURAWZXFMYNQOBVLIE", "N"};
 
 // Combinations: 27
 const EnigmaModel commercial_model = {
-    .stator     = &ETW_QWERTZ,
-    .rotors     = {&commercial_I, &commercial_II, &commercial_III},
-    .reflectors = {&commercial_UKW}
+     .stator     = &ETW_QWERTZ,
+     .rotors     = {&commercial_I, &commercial_II, &commercial_III},
+     .reflectors = {&commercial_UKW}
 };
 
 

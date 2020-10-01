@@ -3,42 +3,49 @@ CXXFLAGS = -std=c++20 -pthread
 CPPFLAGS = -flto
 COMPILE  = $(CXX) $(CPPFLAGS) $(CXXFLAGS)
 
-OBJS     = bestlist.o bruteforce-enigma.o enigma.o models.o qgr.o score.o
-MAIN     = crack_enigma
+# Since de_qgr.h and qgr.h cannot be compiled together, it is convenient to auto generate the dependency list
+GCC_DEPS = $(subst \,,$(shell $(CXX) $(CXXFLAGS) -MM include/bruteforce-enigma.h))
+DEPS     = $(wordlist 3, $(words $(GCC_DEPS)), $(GCC_DEPS))
+OBJS 	 = $(patsubst include/../src/%,build/%,$(DEPS:.h=.o))
+
+MAIN = crack_enigma
 
 
-crack_enigma: $(MAIN).cpp $(OBJS)
-	@$(COMPILE) -O3 $(MAIN).cpp $(OBJS) -o $@
+$(MAIN): $(MAIN).cpp $(OBJS)
+	@$(COMPILE) -O3 -Iinclude/ $(MAIN).cpp $(OBJS) -o $@
 
 
 .PHONY: debug
 debug: $(OBJS)
-	@$(COMPILE) -ggdb -Og $(MAIN).cpp $(OBJS) -o crack_enigma
+	@$(COMPILE) -ggdb -Og $(MAIN).cpp $(OBJS) -o $(MAIN)
 
 
-crack_enigma_callgrind: $(MAIN).cpp $(OBJS)
-	@$(COMPILE) -ggdb -Og $(MAIN).cpp $(OBJS) -o crack_enigma
+$(MAIN)_callgrind: $(MAIN).cpp $(OBJS)
+	@$(COMPILE) -ggdb -Og $(MAIN).cpp $(OBJS) -o $(MAIN)
 
 
-crack_enigma_cachegrind: $(MAIN).cpp $(OBJS)
-	@$(COMPILE) -ggdb -O3 $(MAIN).cpp $(OBJS) -o crack_enigma
+$(MAIN)_cachegrind: $(MAIN).cpp $(OBJS)
+	@$(COMPILE) -ggdb -O3 $(MAIN).cpp $(OBJS) -o $(MAIN)
 
 
 .PHONY: test
 test: $(OBJS)
-	@$(COMPILE) -O3 test.cpp $(OBJS) -o $@
+	@$(COMPILE) -O3 tests/test.cpp $(OBJS) -o $@
 	@./test
 
 
 .PHONY: debug-test
 debug-test: $(OBJS)
-	@$(COMPILE) -ggdb -Og test.cpp $(OBJS) -o test
+	@$(COMPILE) -ggdb -Og tests/test.cpp $(OBJS) -o test
 
 
 .PHONY: clean
 clean:
-	rm -f *.o $(MAIN) test
+	rm -f $(MAIN) test
+	rm -rf build/
 
 
-%.o: %.cpp
-	$(COMPILE) -O3 $< -c
+build/%.o: src/%.cpp src/%.h
+	@mkdir -p build
+	$(COMPILE) -O3 $< -c -o $@
+

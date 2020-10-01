@@ -1,4 +1,4 @@
-#include "bruteforce-enigma.h"
+#include "bruteforce.h"
 
 
 std::string convert_to_ct (std::string_view in)
