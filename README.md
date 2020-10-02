@@ -45,7 +45,7 @@ From: http://practicalcryptography.com/cryptanalysis/breaking-machine-ciphers/cr
 | ------------------------------ | ----------------------| ----------------------|
 | Cipher length                  | 56                    | 56                    |
 | Enigma model                   | m3 (250 combinations) | m3 (250 combinations) |
-| Solve time                     | 1.48 sec              | 13 min, 37 sec        |
+| Solve time                     | 1.75 sec              | 13 min, 37 sec        |
 | Number of decryptions / second | -                     | 3.63 x 10^6           |
 | Characters / second            | -                     | 203.52 x 10^6         |
 
@@ -58,6 +58,6 @@ Copyright (c) 2020 Mike Castillo under the [MIT License](https://choosealicense.
 
 Developed with reference to [CrypTool 2](https://www.cryptool.org/en/cryptool2) and [Practical Cryptography](http://www.practicalcryptography.com/cryptanalysis/breaking-machine-ciphers/cryptanalysis-enigma-part-2/).
 
-Currently includes some code from Practical Cryptography (*de_qgr.h*, *qgr.h*, in *score.cpp*). I did not find a license, but that code remains under copyright James Lyons © 2009-2012. This project's license will be updated to respect all copyrights as needed.
+Currently includes some code from Practical Cryptography (*de_qgr.h*, *qgr.h*). I did not find a license, but that code remains under copyright James Lyons © 2009-2012. This project's license will be updated to respect all copyrights as needed.
 
 Some engima model definitions are taken from [Cryptii](https://github.com/cryptii/cryptii), which is under the MIT license.

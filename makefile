@@ -12,7 +12,7 @@ MAIN = crack_enigma
 
 
 $(MAIN): $(MAIN).cpp $(OBJS)
-	@$(COMPILE) -O3 -Iinclude/ $(MAIN).cpp $(OBJS) -o $@
+	time $(COMPILE) -O3 -Iinclude/ $(MAIN).cpp $(OBJS) -o $@
 
 
 .PHONY: debug
@@ -47,5 +47,5 @@ clean:
 
 build/%.o: src/%.cpp src/%.h
 	@mkdir -p build
-	$(COMPILE) -O3 $< -c -o $@
+	time $(COMPILE) -O3 $< -c -o $@
 

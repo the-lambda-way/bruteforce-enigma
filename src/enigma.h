@@ -2,13 +2,14 @@
 
 #include <algorithm>     // std::copy
 #include <cstring>       // std::strncpy
+#include <span>
 #include <string>
 #include <string_view>
 #include "rotors.h"
 
 
-void str_to_ordinals (std::string_view str, int* out);
-void str_from_ordinals (int* ordinals, int length, std::string& out);
+// Out must have the same length or greater as str
+void str_to_ordinals (std::string_view str, std::span<int> out);
 
 
 class Enigma
@@ -106,12 +107,9 @@ public:
      // Operation ------------------------------------------------------------------------------------------------------
      std::string encrypt (std::string_view input);
 
-     // Out must have one extra element than input, for '\0'
-     void encrypt (std::string_view input, char* out);
-
-     // Out must have one extra element than length, for '\0'
-     void encrypt (const int* ordinals, int length, char* out);
-     void encrypt (const int* ordinals, int length, int* out);
+     // Until the C++ standard includes static strings, the user must ensure the lengths of ordinals and out are equal.
+     // I could require a template parameter, but that would propogate throughout all interfaces, which is undesirable.
+     void encrypt (std::span<const int> ordinals, std::span<int> out);
 
      void reset_ring_pos (int ring, int pos);
      void reset_rotor_pos (int rotor, int pos);

@@ -28,7 +28,7 @@ struct ScoreEntry
      {}
 
 
-     friend bool operator> (const ScoreEntry& a, const ScoreEntry& b);
+     friend bool operator> (const ScoreEntry& a, const ScoreEntry& b) const;
      void print (int i, std::string_view ct) const;
 };
 
@@ -54,7 +54,7 @@ public:
      }
 
      // Must manually check that the score should be added first, to avoid needless copying of the settings.
-     bool is_good_score (double score)     { return score > entries.top().score; }
+     bool is_good_score (double score) const     { return score > entries.top().score; }
 
 
      void add (double score, EnigmaConfiguration config)

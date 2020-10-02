@@ -21,10 +21,12 @@ std::vector<EnigmaBase> all_configurations (const EnigmaModel& model);
 
 
 template <int N>
-void test_configuration (Enigma& enigma, int* ct_ordinal, int ct_length, int* pt_ordinal, BestList<N>& scores)
+void test_configuration (Enigma& enigma,
+                         std::span<int> ct_ordinal, std::span<int> pt_ordinal,
+                         BestList<N>& scores)
 {
-     enigma.encrypt(ct_ordinal, ct_length, pt_ordinal);
-     double score = scoreIntQgram(pt_ordinal, ct_length);
+     enigma.encrypt(ct_ordinal, pt_ordinal);
+     double score = scoreIntQgram(pt_ordinal);
 
      if (scores.is_good_score(score))
           scores.add(score, enigma.get_config());
@@ -39,9 +41,8 @@ BestList<N> bf_decipher (
      int rotor1_start = 0, int rotor1_end = 25, int rotor_max = 25
 )
 {
-     const int length = ct.length();
-     int       pt_ordinal[length];
-     int       ct_ordinal[length];
+     std::vector<int> pt_ordinal(ct.length());
+     std::vector<int> ct_ordinal(ct.length());
 
      str_to_ordinals(ct, ct_ordinal);
 
@@ -63,7 +64,7 @@ BestList<N> bf_decipher (
           for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring(1))
           for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring(2))
           // Third ring has no effect
-               test_configuration(enigma, ct_ordinal, length, pt_ordinal, best);
+               test_configuration(enigma, ct_ordinal, pt_ordinal, best);
      }
 
      return best;
@@ -78,9 +79,8 @@ BestList<N> bf_decipher (
      int rotor1_start = 0, int rotor1_end = 25, int rotor_max = 25
 )
 {
-     const int length = ct.length();
-     int       pt_ordinal[length];
-     int       ct_ordinal[length];
+     std::vector<int> pt_ordinal(ct.length());
+     std::vector<int> ct_ordinal(ct.length());
 
      str_to_ordinals(ct, ct_ordinal);
 
@@ -97,23 +97,23 @@ BestList<N> bf_decipher (
      for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring(1))
      for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring(2))
      // Third ring has no effect
-          test_configuration(enigma, ct_ordinal, length, pt_ordinal, best);
+          test_configuration(enigma, ct_ordinal, pt_ordinal, best);
 
      return best;
 }
 
 
 template <int N>
-BestList<N> bf_4_threads (const EnigmaModel& model, std::string_view plug, std::string_view ct, int rotor_end = 25)
+BestList<N> bf_4_threads (const EnigmaModel& model, std::string_view plug, std::string_view ct, int rotor_max = 25)
 {
-     int quarter = rotor_end / 4 ;
+     int quarter = rotor_max / 4 ;
 
      int a = 0 * quarter;
      int b = 1 * quarter;
      int c = 2 * quarter;
      int d = 3 * quarter;
-     int e = rotor_end;
-     int max = rotor_end;
+     int e = rotor_max;
+     int max = rotor_max;
 
      auto future1 = std::async(std::launch::async, [&] () { return bf_decipher<N>(model, plug, ct, a,     b, max); });
      auto future2 = std::async(std::launch::async, [&] () { return bf_decipher<N>(model, plug, ct, b + 1, c, max); });
@@ -125,16 +125,16 @@ BestList<N> bf_4_threads (const EnigmaModel& model, std::string_view plug, std::
 
 
 template <int N>
-BestList<N> bf_4_threads (const EnigmaBase& base, std::string_view plug, std::string_view ct, int rotor_end = 25)
+BestList<N> bf_4_threads (const EnigmaBase& base, std::string_view plug, std::string_view ct, int rotor_max = 25)
 {
-     int quarter = rotor_end / 4 ;
+     int quarter = rotor_max / 4 ;
 
      int a = 0 * quarter;
      int b = 1 * quarter;
      int c = 2 * quarter;
      int d = 3 * quarter;
-     int e = rotor_end;
-     int max = rotor_end;
+     int e = rotor_max;
+     int max = rotor_max;
 
      auto future1 = std::async(std::launch::async, [&] () { return bf_decipher<N>(base, plug, ct, a,     b, max); });
      auto future2 = std::async(std::launch::async, [&] () { return bf_decipher<N>(base, plug, ct, b + 1, c, max); });
@@ -154,9 +154,8 @@ BestList<N> smart_decipher (
      int rotor1_start = 0, int rotor1_end = 25
 )
 {
-     const int length = ct.length();
-     int       pt_ordinal[length];
-     int       ct_ordinal[length];
+     std::vector<int> pt_ordinal(ct.length());
+     std::vector<int> ct_ordinal(ct.length());
 
      str_to_ordinals(ct, ct_ordinal);
 
@@ -174,7 +173,7 @@ BestList<N> smart_decipher (
           for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor(1))
           for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor(2))
           for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor(3))
-               test_configuration(enigma, ct_ordinal, length, pt_ordinal, best_rotors);
+               test_configuration(enigma, ct_ordinal, pt_ordinal, best_rotors);
      }
 
 
@@ -188,7 +187,7 @@ BestList<N> smart_decipher (
           for (int i = 0; i < 26; ++i,     enigma.increment_ring(1), enigma.increment_rotor(1))
           for (int i = 0; i < 26; ++i,     enigma.increment_ring(2), enigma.increment_rotor(2))
           // Third ring has no effect
-               test_configuration(enigma, ct_ordinal, length, pt_ordinal, best_rings);
+               test_configuration(enigma, ct_ordinal, pt_ordinal, best_rings);
      }
 
 
@@ -204,9 +203,8 @@ BestList<N> smart_decipher (
      int rotor1_start = 0, int rotor1_end = 25
 )
 {
-     const int length = ct.length();
-     int       pt_ordinal[length];
-     int       ct_ordinal[length];
+     std::vector<int> pt_ordinal(ct.length());
+     std::vector<int> ct_ordinal(ct.length());
 
      str_to_ordinals(ct, ct_ordinal);
 
@@ -220,7 +218,7 @@ BestList<N> smart_decipher (
      for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor(1))
      for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor(2))
      for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor(3))
-          test_configuration(enigma, ct_ordinal, length, pt_ordinal, best_rotors);
+          test_configuration(enigma, ct_ordinal, pt_ordinal, best_rotors);
 
 
      BestList<N> best_rings {ct};
@@ -232,7 +230,7 @@ BestList<N> smart_decipher (
           for (int i = 0; i < 26; ++i,     enigma.increment_ring(1), enigma.increment_rotor(1))
           for (int i = 0; i < 26; ++i,     enigma.increment_ring(2), enigma.increment_rotor(2))
           // Third ring has no effect
-               test_configuration(enigma, ct_ordinal, length, pt_ordinal, best_rings);
+               test_configuration(enigma, ct_ordinal, pt_ordinal, best_rings);
      }
 
 

@@ -5,7 +5,7 @@
 #include "enigma.h"
 
 
-bool operator> (const ScoreEntry& a, const ScoreEntry& b)     { return a.score > b.score; }
+bool operator> (const ScoreEntry& a, const ScoreEntry& b) const     { return a.score > b.score; }
 
 
 void ScoreEntry::print (int i, std::string_view ct) const

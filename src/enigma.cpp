@@ -2,26 +2,15 @@
 
 #include <cassert>       // set_ring, set_rotor
 #include <execution>
-#include <string>
-#include <string_view>
 
 
-void str_to_ordinals (std::string_view str, int* out)
+// Out must have the same length or greater as str
+void str_to_ordinals (std::string_view str, std::span<int> out)
 {
      std::transform(
           std::execution::par_unseq,
-          str.begin(), str.end(), out,
+          str.begin(), str.end(), out.begin(),
           [] (char c) { return c - 'A'; }
-     );
-}
-
-
-void str_from_ordinals (int* ordinals, int length, std::string& out)
-{
-     std::transform(
-          std::execution::par_unseq,
-          ordinals, ordinals + length, out.begin(),
-          [] (int o) { return o + 'A'; }
      );
 }
 
@@ -42,43 +31,15 @@ std::string Enigma::encrypt (std::string_view input)
 }
 
 
-// Out must have one extra element than input, for '\0'
-void Enigma::encrypt (std::string_view input, char* out)
+void Enigma::encrypt (std::span<const int> ordinals, std::span<int> out)
 {
      offset1 = rotor1_offset;
      offset2 = rotor2_offset;
      offset3 = rotor3_offset;
 
-     for (int i = 0; i < input.length(); ++i)
-          out[i] = encrypt_letter(input[i]);
-
-     out[input.length()] = '\0';
+     std::ranges::transform(ordinals, out.begin(), [this] (int o) { return encrypt_ordinal(o); });
 }
 
-
-// Out must have one extra element than length, for '\0'
-void Enigma::encrypt (const int* ordinals, int length, char* out)
-{
-     offset1 = rotor1_offset;
-     offset2 = rotor2_offset;
-     offset3 = rotor3_offset;
-
-     for (int i = 0; i < length; ++i)
-          out[i] = alpha[encrypt_ordinal(ordinals[i])];
-
-     out[length] = '\0';
-}
-
-
-void Enigma::encrypt (const int* ordinals, int length, int* out)
-{
-     offset1 = rotor1_offset;
-     offset2 = rotor2_offset;
-     offset3 = rotor3_offset;
-
-     for (int i = 0; i < length; ++i)
-          out[i] = encrypt_ordinal(ordinals[i]);
-}
 
 
 void Enigma::reset_ring_pos (int ring, int pos)
