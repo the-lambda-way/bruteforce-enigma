@@ -92,10 +92,6 @@ public:
 
           std::copy(plugboardA, plugboardA + 26, plugboardB);
 
-          // Note: alpha did not initialize correctly with default member initialization (compiler bug?)
-          constexpr const char* str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-          std::strncpy(alpha, str, 26);
-
           // Rings don't move during encryption, so we can precompute their effects
           reset_ring_pos(1, key.ring1_pos);
           reset_ring_pos(2, key.ring2_pos);
@@ -137,7 +133,6 @@ private:
      int rotor1_reverse[78];
      int stator_reverse[78];
      int plugboardB[26];
-     char alpha[26];
 
      // Rotor offsets combine rotor position and ring position
      int rotor1_offset;

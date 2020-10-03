@@ -197,7 +197,7 @@ int Enigma::run_rotor (const int* rotor, int offset, int pos) const
 
 char Enigma::encrypt_letter (char keypressed)
 {
-     return alpha[encrypt_ordinal(keypressed - 'A')];
+     return encrypt_ordinal(keypressed - 'A') + 'A';
 }
 
 
