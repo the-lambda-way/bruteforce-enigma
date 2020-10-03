@@ -3,33 +3,7 @@
 #include <numeric>       // std::transform_reduce
 
 
-// assumes that text consists only of uppercase letters (no punctuation or spaces)
-double scoreTextQgram (std::string_view text)
-{
-     int length = text.size() - 3;
-     int indices[length];
-
-     for (int i = 0; i < length; ++i)
-     {
-          int a = text[i + 0] - 'A';
-          int b = text[i + 1] - 'A';
-          int c = text[i + 2] - 'A';
-          int d = text[i + 3] - 'A';
-
-          indices[i] = 17576 * a + 676 * b + 26 * c + d;
-     }
-
-     return std::transform_reduce(
-          std::execution::par_unseq,
-          indices, indices + length,
-          0.0,
-          std::plus{},
-          [] (int index) -> double { return qgram[index]; }
-     );
-}
-
-
-double scoreIntQgram (std::span<const int> ordinals)
+double score_by_Qgram (std::span<const int> ordinals)
 {
      int length = ordinals.size() - 3;
      int indices[length];
@@ -54,6 +28,30 @@ double scoreIntQgram (std::span<const int> ordinals)
 }
 
 
+// Not the actual IOC, but maintains the same IOC sort order.
+// Given the IOC forumula sum(0, 25, f[i]*(f[i] - 1)) / (N*(N-1)) for letter frequencies f and length of text N, returns
+// -abs(sum(0, 25, f[i]*(f[i] - 1)) - 0.066*N*(N-1))
+// which orders the IOC scores by closeness to the English expected IOC 0.066.
+
+double score_by_IOC_order (std::span<const int> ordinals)
+{
+     int frequencies[26] = {0};
+
+     for (int o : ordinals)     ++frequencies[o];
+
+     double score = std::transform_reduce(
+          std::execution::par_unseq,
+          frequencies, frequencies + 26,
+          0,
+          std::plus{},
+          [] (int freq) -> int { return freq * (freq - 1); }
+     );
+
+     score -= 0.066 * ordinals.size() * (ordinals.size() - 1);
+     return score < 0 ? score : -score;
+}
+
+
 // TODO: Test using a sparse matrix
 // TODO: Test other scoring methods
 
@@ -63,7 +61,7 @@ double scoreIntQgram (std::span<const int> ordinals)
 // Original solution
 // ---------------------------------------------------------------------------------------------------------------------
 // 10-15% slower than current solution
-// double scoreIntQgram (const int* ordinals, int length)
+// double score_by_Qgram (const int* ordinals, int length)
 // {
 //      double score = 0.0;
 
@@ -86,7 +84,7 @@ double scoreIntQgram (std::span<const int> ordinals)
 // ---------------------------------------------------------------------------------------------------------------------
 // Same speed
 // ---------------------------------------------------------------------------------------------------------------------
-// double scoreIntQgram2 (const int* ordinals, int length)
+// double score_by_Qgram2 (const int* ordinals, int length)
 // {
 //      double score = 0.0;
 //      int a = 17576 * ordinals[0] + 676 * ordinals[1] + 26 * ordinals[2];
@@ -123,7 +121,7 @@ double scoreIntQgram (std::span<const int> ordinals)
 //             17576 * ordinal};                           // c
 // }
 
-// double scoreIntQgram3 (const int* ordinals, int length)
+// double score_by_Qgram3 (const int* ordinals, int length)
 // {
 //      int a = 17576 * ordinals[0] + 676 * ordinals[1] + 26 * ordinals[2];
 //      int b = 17576 * ordinals[1] + 676 * ordinals[2];
@@ -141,7 +139,7 @@ double scoreIntQgram (std::span<const int> ordinals)
 // ---------------------------------------------------------------------------------------------------------------------
 // #include <execution>
 // #include <numeric>
-// double scoreIntQgram_parallel (const int* ordinals, int length)
+// double score_by_Qgram_parallel (const int* ordinals, int length)
 // {
 //      int indices1[length - 3];
 
@@ -190,7 +188,7 @@ double scoreIntQgram (std::span<const int> ordinals)
 // ---------------------------------------------------------------------------------------------------------------------
 // #include <execution>
 // #include <numeric>     // std::iota
-// double scoreIntQgram_parallel2 (const int* ordinals, int length)
+// double score_by_Qgram_parallel2 (const int* ordinals, int length)
 // {
 //      int indices[length - 3];
 //      std::iota(indices, indices + length - 3, 0);

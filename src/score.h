@@ -4,9 +4,9 @@
 
 #include "qgr.h"
 #include <span>
-#include <string_view>
 
 
-// assumes that text consists only of uppercase letters (no punctuation or spaces)
-double scoreTextQgram (std::string_view text);
-double scoreIntQgram (std::span<const int> ordinals);
+double score_by_Qgram (std::span<const int> ordinals);
+
+// Not the actual IOC, but maintains the same IOC sort order.
+double score_by_IOC_order (std::span<const int> ordinals);

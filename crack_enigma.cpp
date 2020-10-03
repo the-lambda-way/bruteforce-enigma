@@ -22,10 +22,10 @@ using namespace std;
 
 int main (int argc, char** argv)
 {
-     string_view text = "Rc qipv jhx vld plson fhceuh itp jui gh qhzu dg sq xie dhw. "
-                        "U gbfl lf fluz pcag wrgkv zw, dinyg zw, qge gnvm L fhx.";
-     string ct = convert_to_ct(text);
-     string_view plug = "AYCDWZIHGJKLQNOPMVSTXREUBF";
+     // string_view text = "Rc qipv jhx vld plson fhceuh itp jui gh qhzu dg sq xie dhw. "
+     //                    "U gbfl lf fluz pcag wrgkv zw, dinyg zw, qge gnvm L fhx.";
+     // string ct = convert_to_ct(text);
+     // string_view plug = "AYCDWZIHGJKLQNOPMVSTXREUBF";
 
      // string_view text = "Rc qipv jhx vld plson fhceuh itp jui gh qhzu dg sq xie dhw. ";
      // string ct = convert_to_ct(text);
@@ -40,16 +40,17 @@ int main (int argc, char** argv)
      // string_view plug = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
      // EnigmaBase rotors {ETW_ABCDEF, m3_III, m3_II, m3_I, UKWB};
 
+     string_view ct = "NPNKANVHWKPXORCDDTRJRXSJFLCIUAIIBUNQIUQFTHLOZOIMENDNGPCB";
+     string_view plug = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
 
      Stopwatch sw;
      sw.click();
 
-     // BestList<25> best = bf_decipher(m3_model, plug, ct;
-
      // BestList best = bf_4_threads<25>(rotors, plug, ct, 13);     // quick test
-     // BestList best = bf_4_threads<25>(railway_model, plug, ct);
+     BestList best = bf_4_threads<25>(m3_model, plug, ct, 25, score_by_IOC_order);
 
-     BestList best = smart_4_threads<25>(CrypTool_m3_model, plug, ct);
+     // BestList best = smart_4_threads<25>(m3_model, plug, ct, score_by_IOC_order);
 
      sw.click();
 

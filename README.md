@@ -27,11 +27,13 @@ Two algorithms are provided to bruteforce an enigma cipher. The first, called `s
 
 The second, called `bf_decipher`, goes through every combination of rotor, rotor position, and ring position (except the third ring, which has no effect on finding a solution) of a given enigma model. Since this requires 11.9 million decryptions per rotor configuration, it takes a bit of time to finish. See below for the performance characteristics on my machine.
 
+To different scoring functions are provided, `score_by_Qgram` for quadgram scoring, and `score_by_IOC_order` for IOC scoring (maintains ordering, but does not return the actual IOC).
+
 
 
 # Performance
 
-Tested on my personal laptop, with a 56-character cipher from Practical Cryptography.
+Test using quadgram scoring on my personal laptop, with a 56-character cipher from Practical Cryptography.
 
 ```
 ct: NPNKANVHWKPXORCDDTRJRXSJFLCIUAIIBUNQIUQFTHLOZOIMENDNGPCB
@@ -51,6 +53,30 @@ From: http://practicalcryptography.com/cryptanalysis/breaking-machine-ciphers/cr
 
 
 
+Scoring with IOC is faster than quadgram, but also is less accurate. IOC scoring fails to solve the above cipher, as due to the plaintext's short length, its IOC is 0.080519, while the IOC scorer looks for the average English score of 0.066.
+
+A longer cipher test was done on a text with IOC of 0.062931, which is much closer to the average English score. Even so, the smart_decipher function fails to solve the longer text, likely because IOC does not score well on the partial solutions found during the first part of the decryption process.
+
+```
+ct: YXBMXADQBDBAAYIMKDODAYIXNBDQZFJKOLFVEEQBCLUUXDFVQYGKEYBVRHONJKPJMKUNLYLZUKBKJOA
+    JTWVWMOMDPGVXEPUKXBVSGHROFOSBCNKEHEHAKWKOGWTBZFXSYCGSUUPPIZTRTFVCXZVCXTFLMTPTAQ
+    VMREGWSBFZBM
+pt: THEENIGMACIPHERWASAFIELDCIPHERUSEDBYTHEGERMANSDURINGWORLDWARIITHEENIGMAISONEOFT
+    HEBETTERKNOWNHISTORICALENCRYPTIONMACHINESANDITACTUALLYREFERSTOARANGEOFSIMILARCI
+    PHERMACHINES
+```
+
+From: http://www.practicalcryptography.com/cryptanalysis/breaking-machine-ciphers/cryptanalysis-enigma-part-2/
+
+| Core i7-6500U, 4 threads       | bf_decipher           |
+| ------------------------------ | --------------------- |
+| Cipher length                  | 170                   |
+| Enigma model                   | m3 (250 combinations) |
+| Solve time                     | 34 min, 51 sec        |
+| Number of decryptions / second | 1.42 x 10^6           |
+| Characters / second            | 241.53 x 10^6         |
+
+
 
 # License
 
@@ -60,4 +86,4 @@ Developed with reference to [CrypTool 2](https://www.cryptool.org/en/cryptool2) 
 
 Currently includes some code from Practical Cryptography (*de_qgr.h*, *qgr.h*). I did not find a license, but that code remains under copyright James Lyons © 2009-2012. This project's license will be updated to respect all copyrights as needed.
 
-Some engima model definitions are taken from [Cryptii](https://github.com/cryptii/cryptii), which is under the MIT license.
+Some enigma model definitions are taken from [Cryptii](https://github.com/cryptii/cryptii), which is under the MIT license.

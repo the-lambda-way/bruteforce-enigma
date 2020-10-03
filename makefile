@@ -1,3 +1,5 @@
+TIME_FORMAT="     %E elapsed"
+
 CXX      = g++-10
 CXXFLAGS = -std=c++20 -pthread
 CPPFLAGS = -flto
@@ -12,7 +14,8 @@ MAIN = crack_enigma
 
 
 $(MAIN): $(MAIN).cpp $(OBJS)
-	time $(COMPILE) -O3 -Iinclude/ $(MAIN).cpp $(OBJS) -o $@
+	@printf "Building $@ ..."
+	@time -f $(TIME_FORMAT) -- $(COMPILE) -O3 -Iinclude/ $(MAIN).cpp $(OBJS) -o $@
 
 
 .PHONY: debug
@@ -30,7 +33,7 @@ $(MAIN)_cachegrind: $(MAIN).cpp $(OBJS)
 
 .PHONY: test
 test: $(OBJS)
-	@$(COMPILE) -O3 tests/test.cpp $(OBJS) -o $@
+	@time -f $(TIME_FORMAT) -- $(COMPILE) -O3 tests/test.cpp $(OBJS) -o $@
 	@./test
 
 
@@ -47,5 +50,6 @@ clean:
 
 build/%.o: src/%.cpp src/%.h
 	@mkdir -p build
-	time $(COMPILE) -O3 $< -c -o $@
+	@printf "Building $@ ..."
+	@time -f $(TIME_FORMAT) -- $(COMPILE) -O3 $< -c -o $@
 

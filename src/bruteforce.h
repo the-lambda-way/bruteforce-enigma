@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <functional>      // std::invoke
 #include <future>
 #include <iostream>
 #include <string>
@@ -20,25 +21,27 @@ std::vector<EnigmaBase> all_configurations_no_replace (const EnigmaModel& model)
 std::vector<EnigmaBase> all_configurations (const EnigmaModel& model);
 
 
-template <int N>
+template <int N, class F>
 void test_configuration (Enigma& enigma,
                          std::span<int> ct_ordinal, std::span<int> pt_ordinal,
-                         BestList<N>& scores)
+                         BestList<N>& scores,
+                         F scoring_function = score_by_Qgram)
 {
      enigma.encrypt(ct_ordinal, pt_ordinal);
-     double score = scoreIntQgram(pt_ordinal);
+     double score = std::invoke(scoring_function, pt_ordinal);
 
      if (scores.is_good_score(score))
-          scores.add(score, enigma.get_config());
+          scores.add(score, enigma.get_key());
 };
 
 
-template <int N = 10>
+template <int N = 10, class F = decltype(score_by_Qgram)>
 BestList<N> bf_decipher (
      const EnigmaModel& model,
      std::string_view plugboard,
      std::string_view ct,
-     int rotor1_start = 0, int rotor1_end = 25, int rotor_max = 25
+     int rotor1_start = 0, int rotor1_end = 25, int rotor_max = 25,
+     F scoring_function = score_by_Qgram
 )
 {
      std::vector<int> pt_ordinal(ct.length());
@@ -64,19 +67,20 @@ BestList<N> bf_decipher (
           for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring(1))
           for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring(2))
           // Third ring has no effect
-               test_configuration(enigma, ct_ordinal, pt_ordinal, best);
+               test_configuration(enigma, ct_ordinal, pt_ordinal, best, scoring_function);
      }
 
      return best;
 }
 
 
-template <int N = 10>
+template <int N = 10, class F = decltype(score_by_Qgram)>
 BestList<N> bf_decipher (
      const EnigmaBase& base,
      std::string_view plugboard,
      std::string_view ct,
-     int rotor1_start = 0, int rotor1_end = 25, int rotor_max = 25
+     int rotor1_start = 0, int rotor1_end = 25, int rotor_max = 25,
+     F scoring_function = score_by_Qgram
 )
 {
      std::vector<int> pt_ordinal(ct.length());
@@ -97,14 +101,15 @@ BestList<N> bf_decipher (
      for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring(1))
      for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring(2))
      // Third ring has no effect
-          test_configuration(enigma, ct_ordinal, pt_ordinal, best);
+          test_configuration(enigma, ct_ordinal, pt_ordinal, best, scoring_function);
 
      return best;
 }
 
 
-template <int N>
-BestList<N> bf_4_threads (const EnigmaModel& model, std::string_view plug, std::string_view ct, int rotor_max = 25)
+template <int N, class F = decltype(score_by_Qgram)>
+BestList<N> bf_4_threads (const EnigmaModel& model, std::string_view plug, std::string_view ct,
+                          int rotor_max = 25, F scoring_function = score_by_Qgram)
 {
      int quarter = rotor_max / 4 ;
 
@@ -115,17 +120,18 @@ BestList<N> bf_4_threads (const EnigmaModel& model, std::string_view plug, std::
      int e = rotor_max;
      int max = rotor_max;
 
-     auto future1 = std::async(std::launch::async, [&] () { return bf_decipher<N>(model, plug, ct, a,     b, max); });
-     auto future2 = std::async(std::launch::async, [&] () { return bf_decipher<N>(model, plug, ct, b + 1, c, max); });
-     auto future3 = std::async(std::launch::async, [&] () { return bf_decipher<N>(model, plug, ct, c + 1, d, max); });
-     auto future4 = std::async(std::launch::async, [&] () { return bf_decipher<N>(model, plug, ct, d + 1, e, max); });
+     auto future1 = std::async(std::launch::async, [&] () { return bf_decipher<N>(model, plug, ct, a,     b, max, scoring_function); });
+     auto future2 = std::async(std::launch::async, [&] () { return bf_decipher<N>(model, plug, ct, b + 1, c, max, scoring_function); });
+     auto future3 = std::async(std::launch::async, [&] () { return bf_decipher<N>(model, plug, ct, c + 1, d, max, scoring_function); });
+     auto future4 = std::async(std::launch::async, [&] () { return bf_decipher<N>(model, plug, ct, d + 1, e, max, scoring_function); });
 
      return combine_best<N>(future1.get(), future2.get(), future3.get(), future4.get());
 }
 
 
-template <int N>
-BestList<N> bf_4_threads (const EnigmaBase& base, std::string_view plug, std::string_view ct, int rotor_max = 25)
+template <int N, class F = decltype(score_by_Qgram)>
+BestList<N> bf_4_threads (const EnigmaBase& base, std::string_view plug, std::string_view ct,
+                          int rotor_max = 25, F scoring_function = score_by_Qgram)
 {
      int quarter = rotor_max / 4 ;
 
@@ -136,22 +142,23 @@ BestList<N> bf_4_threads (const EnigmaBase& base, std::string_view plug, std::st
      int e = rotor_max;
      int max = rotor_max;
 
-     auto future1 = std::async(std::launch::async, [&] () { return bf_decipher<N>(base, plug, ct, a,     b, max); });
-     auto future2 = std::async(std::launch::async, [&] () { return bf_decipher<N>(base, plug, ct, b + 1, c, max); });
-     auto future3 = std::async(std::launch::async, [&] () { return bf_decipher<N>(base, plug, ct, c + 1, d, max); });
-     auto future4 = std::async(std::launch::async, [&] () { return bf_decipher<N>(base, plug, ct, d + 1, e, max); });
+     auto future1 = std::async(std::launch::async, [&] () { return bf_decipher<N>(base, plug, ct, a,     b, max, scoring_function); });
+     auto future2 = std::async(std::launch::async, [&] () { return bf_decipher<N>(base, plug, ct, b + 1, c, max, scoring_function); });
+     auto future3 = std::async(std::launch::async, [&] () { return bf_decipher<N>(base, plug, ct, c + 1, d, max, scoring_function); });
+     auto future4 = std::async(std::launch::async, [&] () { return bf_decipher<N>(base, plug, ct, d + 1, e, max, scoring_function); });
 
      return combine_best<N>(future1.get(), future2.get(), future3.get(), future4.get());
 }
 
 
 // Get best rotor positions, then use those to determine best ring positions
-template <int N>
+template <int N, class F = decltype(score_by_Qgram)>
 BestList<N> smart_decipher (
      const EnigmaModel& model,
      std::string_view plugboard,
      std::string_view ct,
-     int rotor1_start = 0, int rotor1_end = 25
+     int rotor1_start = 0, int rotor1_end = 25,
+     F scoring_function = score_by_Qgram
 )
 {
      std::vector<int> pt_ordinal(ct.length());
@@ -173,7 +180,7 @@ BestList<N> smart_decipher (
           for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor(1))
           for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor(2))
           for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor(3))
-               test_configuration(enigma, ct_ordinal, pt_ordinal, best_rotors);
+               test_configuration(enigma, ct_ordinal, pt_ordinal, best_rotors, scoring_function);
      }
 
 
@@ -182,12 +189,12 @@ BestList<N> smart_decipher (
 
      for (const ScoreEntry& entry : best_rotors.get_entries())
      {
-          Enigma enigma {entry.config};
+          Enigma enigma {entry.key};
 
           for (int i = 0; i < 26; ++i,     enigma.increment_ring(1), enigma.increment_rotor(1))
           for (int i = 0; i < 26; ++i,     enigma.increment_ring(2), enigma.increment_rotor(2))
           // Third ring has no effect
-               test_configuration(enigma, ct_ordinal, pt_ordinal, best_rings);
+               test_configuration(enigma, ct_ordinal, pt_ordinal, best_rings, scoring_function);
      }
 
 
@@ -195,12 +202,13 @@ BestList<N> smart_decipher (
 }
 
 
-template <int N>
+template <int N, class F = decltype(score_by_Qgram)>
 BestList<N> smart_decipher (
      const EnigmaBase& base,
      std::string_view plugboard,
      std::string_view ct,
-     int rotor1_start = 0, int rotor1_end = 25
+     int rotor1_start = 0, int rotor1_end = 25,
+     F scoring_function = score_by_Qgram
 )
 {
      std::vector<int> pt_ordinal(ct.length());
@@ -218,19 +226,19 @@ BestList<N> smart_decipher (
      for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor(1))
      for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor(2))
      for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor(3))
-          test_configuration(enigma, ct_ordinal, pt_ordinal, best_rotors);
+          test_configuration(enigma, ct_ordinal, pt_ordinal, best_rotors, scoring_function);
 
 
      BestList<N> best_rings {ct};
 
      for (const ScoreEntry& entry : best_rotors.get_entries())
      {
-          Enigma enigma {entry.config};
+          Enigma enigma {entry.key};
 
           for (int i = 0; i < 26; ++i,     enigma.increment_ring(1), enigma.increment_rotor(1))
           for (int i = 0; i < 26; ++i,     enigma.increment_ring(2), enigma.increment_rotor(2))
           // Third ring has no effect
-               test_configuration(enigma, ct_ordinal, pt_ordinal, best_rings);
+               test_configuration(enigma, ct_ordinal, pt_ordinal, best_rings, scoring_function);
      }
 
 
@@ -238,25 +246,27 @@ BestList<N> smart_decipher (
 }
 
 
-template <int N>
-BestList<N> smart_4_threads (const EnigmaModel& model, std::string_view plug, std::string_view ct)
+template <int N, class F = decltype(score_by_Qgram)>
+BestList<N> smart_4_threads (const EnigmaModel& model, std::string_view plug, std::string_view ct,
+                             F scoring_function = score_by_Qgram)
 {
-     auto future1 = std::async(std::launch::async, [&] () { return smart_decipher<N>(model, plug, ct, 0,  5); });
-     auto future2 = std::async(std::launch::async, [&] () { return smart_decipher<N>(model, plug, ct, 6,  11); });
-     auto future3 = std::async(std::launch::async, [&] () { return smart_decipher<N>(model, plug, ct, 12, 17); });
-     auto future4 = std::async(std::launch::async, [&] () { return smart_decipher<N>(model, plug, ct, 18, 25); });
+     auto future1 = std::async(std::launch::async, [&] () { return smart_decipher<N>(model, plug, ct, 0,  5 , scoring_function); });
+     auto future2 = std::async(std::launch::async, [&] () { return smart_decipher<N>(model, plug, ct, 6,  11, scoring_function); });
+     auto future3 = std::async(std::launch::async, [&] () { return smart_decipher<N>(model, plug, ct, 12, 17, scoring_function); });
+     auto future4 = std::async(std::launch::async, [&] () { return smart_decipher<N>(model, plug, ct, 18, 25, scoring_function); });
 
      return combine_best<N>(future1.get(), future2.get(), future3.get(), future4.get());
 }
 
 
-template <int N>
-BestList<N> smart_4_threads (const EnigmaBase& base, std::string_view plug, std::string_view ct)
+template <int N, class F = decltype(score_by_Qgram)>
+BestList<N> smart_4_threads (const EnigmaBase& base, std::string_view plug, std::string_view ct,
+                             F scoring_function = score_by_Qgram)
 {
-     auto future1 = std::async(std::launch::async, [&] () { return smart_decipher<N>(base, plug, ct, 0,  5); });
-     auto future2 = std::async(std::launch::async, [&] () { return smart_decipher<N>(base, plug, ct, 6,  11); });
-     auto future3 = std::async(std::launch::async, [&] () { return smart_decipher<N>(base, plug, ct, 12, 17); });
-     auto future4 = std::async(std::launch::async, [&] () { return smart_decipher<N>(base, plug, ct, 18, 25); });
+     auto future1 = std::async(std::launch::async, [&] () { return smart_decipher<N>(base, plug, ct, 0,  5 , scoring_function); });
+     auto future2 = std::async(std::launch::async, [&] () { return smart_decipher<N>(base, plug, ct, 6,  11, scoring_function); });
+     auto future3 = std::async(std::launch::async, [&] () { return smart_decipher<N>(base, plug, ct, 12, 17, scoring_function); });
+     auto future4 = std::async(std::launch::async, [&] () { return smart_decipher<N>(base, plug, ct, 18, 25, scoring_function); });
 
      return combine_best<N>(future1.get(), future2.get(), future3.get(), future4.get());
 }
