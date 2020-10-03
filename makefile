@@ -18,7 +18,6 @@ $(MAIN): $(MAIN).cpp $(OBJS)
 	@time -f $(TIME_FORMAT) -- $(COMPILE) -O3 -Iinclude/ $(MAIN).cpp $(OBJS) -o $@
 
 
-.PHONY: debug
 debug: $(OBJS)
 	@$(COMPILE) -ggdb -Og $(MAIN).cpp $(OBJS) -o $(MAIN)
 
@@ -31,13 +30,12 @@ $(MAIN)_cachegrind: $(MAIN).cpp $(OBJS)
 	@$(COMPILE) -ggdb -O3 $(MAIN).cpp $(OBJS) -o $(MAIN)
 
 
-.PHONY: test
 test: $(OBJS)
+	@printf "Building $@ ..."
 	@time -f $(TIME_FORMAT) -- $(COMPILE) -O3 tests/test.cpp $(OBJS) -o $@
 	@./test
 
 
-.PHONY: debug-test
 debug-test: $(OBJS)
 	@$(COMPILE) -ggdb -Og tests/test.cpp $(OBJS) -o test
 
