@@ -27,7 +27,7 @@ Two algorithms are provided to bruteforce an enigma cipher. The first, called `s
 
 The second, called `bf_decipher`, goes through every combination of rotor, rotor position, and ring position (except the third ring, which has no effect on finding a solution) of a given enigma model. Since this requires 11.9 million decryptions per rotor configuration, it takes a bit of time to finish. See below for the performance characteristics on my machine.
 
-To different scoring functions are provided, `score_by_Qgram` for quadgram scoring, and `score_by_IOC_order` for IOC scoring (maintains ordering, but does not return the actual IOC).
+Two different scoring functions are provided, `score_by_Qgram` for quadgram scoring, and `score_by_IOC_order` for IOC scoring (maintains ordering, but does not return the actual IOC).
 
 
 
