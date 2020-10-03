@@ -159,7 +159,7 @@ int main (int argc, char** argv)
           string_view ct = "NPNKANVHWKPXORCDDTRJRXSJFLCIUAIIBUNQIUQFTHLOZOIMENDNGPCB";
           string_view plug = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-          EnigmaConfiguration expected {ETW_ABCDEF, m3_IV, m3_V, m3_II, UKWB, plug, "GWD", "PAA"};
+          EnigmaKey expected {ETW_ABCDEF, m3_IV, m3_V, m3_II, UKWB, plug, "GWD", "PAA"};
 
           cout << "smart_decipher test\n"
                << "-------------------\n";
@@ -167,7 +167,7 @@ int main (int argc, char** argv)
           const auto& scores = smart_4_threads<50>(m3_model, plug, ct).get_entries();
 
           bool solution_was_found = std::any_of(scores.begin(), scores.end(), [&] (const ScoreEntry& entry) {
-               return entry.config == expected;
+               return entry.key == expected;
           });
 
           cout << "\nSolution was found: " << (solution_was_found ? "yes\n\n" : "no\n\n");

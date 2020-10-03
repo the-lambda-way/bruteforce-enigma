@@ -21,7 +21,7 @@ public:
           std::string_view rotor_positions,
           std::string_view ring_positions
      )
-     : Enigma(EnigmaConfiguration {base, plugboard, rotor_positions, ring_positions})
+     : Enigma(EnigmaKey {base, plugboard, rotor_positions, ring_positions})
      {}
 
 
@@ -35,8 +35,7 @@ public:
           int ring2_pos  = 0,
           int ring3_pos  = 0
      )
-     : Enigma(EnigmaConfiguration {base, plugboard,
-                                   rotor1_pos, rotor2_pos, rotor3_pos, ring1_pos, ring2_pos, ring3_pos})
+     : Enigma(EnigmaKey {base, plugboard, rotor1_pos, rotor2_pos, rotor3_pos, ring1_pos, ring2_pos, ring3_pos})
      {}
 
 
@@ -50,10 +49,10 @@ public:
           std::string_view rotor_positions,
           std::string_view ring_positions
      )
-     : Enigma(EnigmaConfiguration {stator, rotor1, rotor2, rotor3, reflector,
-                                   plugboard,
-                                   rotor_positions[0] - 'A', rotor_positions[1] - 'A', rotor_positions[2] - 'A',
-                                   ring_positions[0] - 'A', ring_positions[1] - 'A', ring_positions[2] - 'A'})
+     : Enigma(EnigmaKey {stator, rotor1, rotor2, rotor3, reflector,
+                         plugboard,
+                         rotor_positions[0] - 'A', rotor_positions[1] - 'A', rotor_positions[2] - 'A',
+                         ring_positions[0] - 'A', ring_positions[1] - 'A', ring_positions[2] - 'A'})
      {}
 
 
@@ -71,25 +70,25 @@ public:
           int ring2_pos  = 0,
           int ring3_pos  = 0
      )
-     : Enigma(EnigmaConfiguration {stator, rotor1, rotor2, rotor3, reflector, plugboard,
-                                   rotor1_pos, rotor2_pos, rotor3_pos, ring1_pos, ring2_pos, ring3_pos})
+     : Enigma(EnigmaKey {stator, rotor1, rotor2, rotor3, reflector, plugboard,
+                         rotor1_pos, rotor2_pos, rotor3_pos, ring1_pos, ring2_pos, ring3_pos})
      {}
 
 
-     constexpr Enigma (EnigmaConfiguration config)
-     : config {std::move(config)}
+     constexpr Enigma (EnigmaKey key)
+     : key {std::move(key)}
      {
-          str_to_ordinals(this->config.plugboard, plugboardA);
+          str_to_ordinals(this->key.plugboard, plugboardA);
 
-          init_rotor(this->config.stator->forward,    stator_forward);
-          init_rotor(this->config.rotor1->forward,    rotor1_forward);
-          init_rotor(this->config.rotor2->forward,    rotor2_forward);
-          init_rotor(this->config.rotor3->forward,    rotor3_forward);
-          init_rotor(this->config.reflector->forward, reflector);
-          init_rotor(this->config.rotor3->reverse,    rotor3_reverse);
-          init_rotor(this->config.rotor2->reverse,    rotor2_reverse);
-          init_rotor(this->config.rotor1->reverse,    rotor1_reverse);
-          init_rotor(this->config.stator->reverse,    stator_reverse);
+          init_rotor(this->key.stator->forward,    stator_forward);
+          init_rotor(this->key.rotor1->forward,    rotor1_forward);
+          init_rotor(this->key.rotor2->forward,    rotor2_forward);
+          init_rotor(this->key.rotor3->forward,    rotor3_forward);
+          init_rotor(this->key.reflector->forward, reflector);
+          init_rotor(this->key.rotor3->reverse,    rotor3_reverse);
+          init_rotor(this->key.rotor2->reverse,    rotor2_reverse);
+          init_rotor(this->key.rotor1->reverse,    rotor1_reverse);
+          init_rotor(this->key.stator->reverse,    stator_reverse);
 
           std::copy(plugboardA, plugboardA + 26, plugboardB);
 
@@ -98,9 +97,9 @@ public:
           std::strncpy(alpha, str, 26);
 
           // Rings don't move during encryption, so we can precompute their effects
-          reset_ring_pos(1, config.ring1_pos);
-          reset_ring_pos(2, config.ring2_pos);
-          reset_ring_pos(3, config.ring3_pos);
+          reset_ring_pos(1, key.ring1_pos);
+          reset_ring_pos(2, key.ring2_pos);
+          reset_ring_pos(3, key.ring3_pos);
      }
 
 
@@ -120,11 +119,11 @@ public:
      // While bruteforcing rotor positions, save calculations by rotating the rotor instead of recalculating it
      void increment_rotor (int rotor);
 
-     EnigmaConfiguration get_config ();
+     EnigmaKey get_key ();
 
 
 private:
-     EnigmaConfiguration config;
+     EnigmaKey key;
 
      // Optimization ---------------------------------------------------------------------------------------------------
      int plugboardA[26];

@@ -55,7 +55,7 @@ struct EnigmaBase
 
 
 // Useful for passing in settings, or retaining notable results.
-struct EnigmaConfiguration
+struct EnigmaKey
 {
      const Rotor* stator;        // ETW
      const Rotor* rotor1;
@@ -71,20 +71,20 @@ struct EnigmaConfiguration
      int ring3_pos;
 
 
-     constexpr EnigmaConfiguration (
-          const EnigmaBase& config,
+     constexpr EnigmaKey (
+          const EnigmaBase& base,
           std::string_view plugboard,
           std::string_view ring_positions,
           std::string_view rotor_positions
      )
-     : EnigmaConfiguration(*config.stator, *config.rotor1, *config.rotor2, *config.rotor3, *config.reflector,
-                           plugboard,
-                           rotor_positions[0] - 'A', rotor_positions[1] - 'A', rotor_positions[2] - 'A',
-                           ring_positions[0] - 'A', ring_positions[1] - 'A', ring_positions[2] - 'A')
+     : EnigmaKey(*base.stator, *base.rotor1, *base.rotor2, *base.rotor3, *base.reflector,
+                 plugboard,
+                 rotor_positions[0] - 'A', rotor_positions[1] - 'A', rotor_positions[2] - 'A',
+                 ring_positions[0] - 'A', ring_positions[1] - 'A', ring_positions[2] - 'A')
      {}
 
 
-     constexpr EnigmaConfiguration (
+     constexpr EnigmaKey (
           const EnigmaBase& base,
           std::string_view plugboard,
           int rotor1_pos = 0,
@@ -94,14 +94,14 @@ struct EnigmaConfiguration
           int ring2_pos  = 0,
           int ring3_pos  = 0
      )
-     : EnigmaConfiguration(*base.stator, *base.rotor1, *base.rotor2, *base.rotor3, *base.reflector,
-                           plugboard,
-                           rotor1_pos, rotor2_pos, rotor3_pos,
-                           ring1_pos, ring2_pos, ring3_pos)
+     : EnigmaKey(*base.stator, *base.rotor1, *base.rotor2, *base.rotor3, *base.reflector,
+                 plugboard,
+                 rotor1_pos, rotor2_pos, rotor3_pos,
+                 ring1_pos, ring2_pos, ring3_pos)
      {}
 
 
-     constexpr EnigmaConfiguration (
+     constexpr EnigmaKey (
           const Rotor& stator,        // ETW
           const Rotor& rotor1,
           const Rotor& rotor2,
@@ -111,14 +111,14 @@ struct EnigmaConfiguration
           std::string_view rotor_positions,
           std::string_view ring_positions
      )
-     : EnigmaConfiguration(stator, rotor1, rotor2, rotor3, reflector,
-                           plugboard,
-                           rotor_positions[0] - 'A', rotor_positions[1] - 'A', rotor_positions[2] - 'A',
-                           ring_positions[0] - 'A', ring_positions[1] - 'A', ring_positions[2] - 'A')
+     : EnigmaKey(stator, rotor1, rotor2, rotor3, reflector,
+                 plugboard,
+                 rotor_positions[0] - 'A', rotor_positions[1] - 'A', rotor_positions[2] - 'A',
+                 ring_positions[0] - 'A', ring_positions[1] - 'A', ring_positions[2] - 'A')
      {}
 
 
-     constexpr EnigmaConfiguration (
+     constexpr EnigmaKey (
           const Rotor& stator,        // ETW
           const Rotor& rotor1,
           const Rotor& rotor2,
@@ -139,8 +139,8 @@ struct EnigmaConfiguration
      {}
 
 
-     constexpr EnigmaConfiguration (const EnigmaConfiguration& c) = default;
-     constexpr EnigmaConfiguration (EnigmaConfiguration&& c) = default;
-     constexpr EnigmaConfiguration& operator= (const EnigmaConfiguration&) = default;
-     constexpr bool operator== (const EnigmaConfiguration&) const = default;
+     constexpr EnigmaKey (const EnigmaKey& c) = default;
+     constexpr EnigmaKey (EnigmaKey&& c) = default;
+     constexpr EnigmaKey& operator= (const EnigmaKey&) = default;
+     constexpr bool operator== (const EnigmaKey&) const = default;
 };

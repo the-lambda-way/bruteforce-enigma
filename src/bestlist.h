@@ -14,8 +14,8 @@
 
 struct ScoreEntry
 {
-     double              score;
-     EnigmaConfiguration config;
+     double    score;
+     EnigmaKey key;
 
 
      constexpr ScoreEntry ()
@@ -23,12 +23,12 @@ struct ScoreEntry
      {}
 
 
-     constexpr ScoreEntry (double score, EnigmaConfiguration config)
-     : score {score}, config {std::move(config)}
+     constexpr ScoreEntry (double score, EnigmaKey key)
+     : score {score}, key {std::move(key)}
      {}
 
 
-     friend bool operator> (const ScoreEntry& a, const ScoreEntry& b) const;
+     friend bool operator> (const ScoreEntry& a, const ScoreEntry& b);
      void print (int i, std::string_view ct) const;
 };
 
@@ -57,9 +57,9 @@ public:
      bool is_good_score (double score) const     { return score > entries.top().score; }
 
 
-     void add (double score, EnigmaConfiguration config)
+     void add (double score, EnigmaKey key)
      {
-          entries.emplace(score, std::move(config));
+          entries.emplace(score, std::move(key));
           entries.pop();
      }
 

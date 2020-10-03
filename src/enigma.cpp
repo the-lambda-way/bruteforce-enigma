@@ -50,24 +50,24 @@ void Enigma::reset_ring_pos (int ring, int pos)
      switch (ring)
      {
           case 1 :
-               config.ring1_pos = pos;
+               key.ring1_pos = pos;
 
-               turnover1A_offset = calculate_offset(config.rotor1->turnoverA, pos);
-               turnover1B_offset = calculate_offset(config.rotor1->turnoverB, pos);
+               turnover1A_offset = calculate_offset(key.rotor1->turnoverA, pos);
+               turnover1B_offset = calculate_offset(key.rotor1->turnoverB, pos);
 
-               rotor1_offset = calculate_offset(config.rotor1_pos, pos);
+               rotor1_offset = calculate_offset(key.rotor1_pos, pos);
                break;
           case 2 :
-               config.ring2_pos = pos;
+               key.ring2_pos = pos;
 
-               turnover2A_offset = calculate_offset(config.rotor2->turnoverA, pos);
-               turnover2B_offset = calculate_offset(config.rotor2->turnoverB, pos);
+               turnover2A_offset = calculate_offset(key.rotor2->turnoverA, pos);
+               turnover2B_offset = calculate_offset(key.rotor2->turnoverB, pos);
 
-               rotor2_offset = calculate_offset(config.rotor2_pos, pos);
+               rotor2_offset = calculate_offset(key.rotor2_pos, pos);
                break;
           case 3 :
-               config.ring3_pos = pos;
-               rotor3_offset    = calculate_offset(config.rotor3_pos, pos);
+               key.ring3_pos = pos;
+               rotor3_offset = calculate_offset(key.rotor3_pos, pos);
      }
 }
 
@@ -80,16 +80,16 @@ void Enigma::reset_rotor_pos (int rotor, int pos)
      switch (rotor)
      {
           case 1 :
-               config.rotor1_pos = pos;
-               rotor1_offset     = calculate_offset(pos, config.ring1_pos);
+               key.rotor1_pos = pos;
+               rotor1_offset  = calculate_offset(pos, key.ring1_pos);
                break;
           case 2 :
-               config.rotor2_pos = pos;
-               rotor2_offset     = calculate_offset(pos, config.ring2_pos);
+               key.rotor2_pos = pos;
+               rotor2_offset  = calculate_offset(pos, key.ring2_pos);
                break;
           case 3 :
-               config.rotor3_pos = pos;
-               rotor3_offset     = calculate_offset(pos, config.ring3_pos);
+               key.rotor3_pos = pos;
+               rotor3_offset  = calculate_offset(pos, key.ring3_pos);
      }
 }
 
@@ -99,24 +99,24 @@ void Enigma::increment_ring (int ring)
 {
      assert(1 <= ring && ring <= 3);
 
-     // incrementing the ring decrements the rotor position
+     // incrementing the ring decrements the rotor offset
      switch (ring)
      {
           case 1 :
-               config.ring1_pos  = increment_of(config.ring1_pos);
+               key.ring1_pos     = increment_of(key.ring1_pos);
                rotor1_offset     = decrement_of(rotor1_offset);
                turnover1A_offset = decrement_of(turnover1A_offset);
                turnover1B_offset = decrement_of(turnover1B_offset);
                break;
           case 2 :
-               config.ring2_pos  = increment_of(config.ring2_pos);
+               key.ring2_pos     = increment_of(key.ring2_pos);
                rotor2_offset     = decrement_of(rotor2_offset);
                turnover2A_offset = decrement_of(turnover2A_offset);
                turnover2B_offset = decrement_of(turnover2B_offset);
                break;
           case 3 :
-               config.ring3_pos = increment_of(config.ring3_pos);
-               rotor3_offset    = decrement_of(rotor3_offset);
+               key.ring3_pos = increment_of(key.ring3_pos);
+               rotor3_offset = decrement_of(rotor3_offset);
      }
 }
 
@@ -129,21 +129,21 @@ void Enigma::increment_rotor (int rotor)
      switch (rotor)
      {
           case 1 :
-               config.rotor1_pos = increment_of(config.rotor1_pos);
-               rotor1_offset     = increment_of(rotor1_offset);
+               key.rotor1_pos = increment_of(key.rotor1_pos);
+               rotor1_offset  = increment_of(rotor1_offset);
                break;
           case 2 :
-               config.rotor2_pos = increment_of(config.rotor2_pos);
-               rotor2_offset     = increment_of(rotor2_offset);
+               key.rotor2_pos = increment_of(key.rotor2_pos);
+               rotor2_offset  = increment_of(rotor2_offset);
                break;
           case 3 :
-               config.rotor3_pos = increment_of(config.rotor3_pos);
-               rotor3_offset     = increment_of(rotor3_offset);
+               key.rotor3_pos = increment_of(key.rotor3_pos);
+               rotor3_offset  = increment_of(rotor3_offset);
      }
 }
 
 
-EnigmaConfiguration Enigma::get_config ()     { return config; }
+EnigmaKey Enigma::get_key ()     { return key; }
 
 
 
