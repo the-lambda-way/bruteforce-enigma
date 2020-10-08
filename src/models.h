@@ -68,8 +68,6 @@ extern const EnigmaModel enigma_n_model;
 
 
 // Enigma I Sondermaschine ---------------------------------------------------------------------------------------------
-
-
 extern const Rotor sondermaschine_I;
 extern const Rotor sondermaschine_II;
 extern const Rotor sondermaschine_III;
@@ -78,13 +76,9 @@ extern const EnigmaModel enigma_s_model;
 
 
 // Enigma D ------------------------------------------------------------------------------------------------------------
-
-
 extern const Rotor commercial_I;
 extern const Rotor commercial_II;
 extern const Rotor commercial_III;
-
-// Combinations: 27
 extern const EnigmaModel commercial_model;
 
 
@@ -103,10 +97,10 @@ extern const EnigmaModel commercial_model;
 
 
 // Enigma K ------------------------------------------------------------------------------------------------------------
-// extern const Rotor swissK_I;
-// extern const Rotor swissK_II;
-// extern const Rotor swissK_III;
-// extern const EnigmaModel swissK_model;
+extern const Rotor swissK_I;
+extern const Rotor swissK_II;
+extern const Rotor swissK_III;
+extern const EnigmaModel swissK_model;
 
 
 // Enigma Z ------------------------------------------------------------------------------------------------------------

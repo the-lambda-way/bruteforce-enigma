@@ -1,24 +1,46 @@
 #pragma once
 
 #include <algorithm>
+#include <bitset>
+#include <execution>
 #include <string_view>
 #include <vector>
+#include "modular_int.h"
 
 
 struct Rotor
 {
      // In the enigma machine, using ordinals instead of characters reduces the amount of arithmetic involved.
      // Triplicating the rotor reduces costly modular divisions.
-     std::string pretty_name;
-     int forward[78];
-     int reverse[78];
-     int turnoverA;
-     int turnoverB;
+     std::string_view    pretty_name;
+     std::array<int, 78> forward;
+     std::array<int, 78> reverse;
+     std::bitset<26>     turnovers;
 
 
-     Rotor (std::string pretty_name,
-            std::string_view str,
-            std::string_view turnovers);
+     constexpr Rotor (std::string_view pretty_name,
+                      std::string_view str,
+                      std::string_view turnovers)
+     : pretty_name {pretty_name}
+     {
+          // ranges should be 26 <= i < 52 for optimization purposes
+
+          std::transform(
+               std::execution::par_unseq,
+               str.begin(), str.end(),
+               forward.begin(),
+               [] (char c) { return c - 'A' + 26; }
+          );
+
+          std::copy(std::execution::par_unseq, &forward[0], &forward[26], &forward[26]);
+          std::copy(std::execution::par_unseq, &forward[0], &forward[26], &forward[52]);
+
+          for (int i = 0; i < 26; ++i)     reverse[forward[i] - 26] = i + 26;
+          std::copy(std::execution::par_unseq, &reverse[0], &reverse[26], &reverse[26]);
+          std::copy(std::execution::par_unseq, &reverse[0], &reverse[26], &reverse[52]);
+
+          for (char c : turnovers)     this->turnovers.set(c - 'A');
+     }
 };
 
 
@@ -63,12 +85,12 @@ struct EnigmaKey
      const Rotor* rotor3;
      const Rotor* reflector;     // UKW
      std::string_view plugboard;
-     int rotor1_pos;
-     int rotor2_pos;
-     int rotor3_pos;
-     int ring1_pos;
-     int ring2_pos;
-     int ring3_pos;
+     modular_int<26> rotor1_pos;
+     modular_int<26> rotor2_pos;
+     modular_int<26> rotor3_pos;
+     modular_int<26> ring1_pos;
+     modular_int<26> ring2_pos;
+     modular_int<26> ring3_pos;
 
 
      constexpr EnigmaKey (
@@ -77,27 +99,27 @@ struct EnigmaKey
           std::string_view ring_positions,
           std::string_view rotor_positions
      )
-     : EnigmaKey(*base.stator, *base.rotor1, *base.rotor2, *base.rotor3, *base.reflector,
-                 plugboard,
-                 rotor_positions[0] - 'A', rotor_positions[1] - 'A', rotor_positions[2] - 'A',
-                 ring_positions[0] - 'A', ring_positions[1] - 'A', ring_positions[2] - 'A')
+     : EnigmaKey {*base.stator, *base.rotor1, *base.rotor2, *base.rotor3, *base.reflector,
+                  plugboard,
+                  rotor_positions[0] - 'A', rotor_positions[1] - 'A', rotor_positions[2] - 'A',
+                  ring_positions[0] - 'A', ring_positions[1] - 'A', ring_positions[2] - 'A'}
      {}
 
 
      constexpr EnigmaKey (
           const EnigmaBase& base,
           std::string_view plugboard,
-          int rotor1_pos = 0,
-          int rotor2_pos = 0,
-          int rotor3_pos = 0,
-          int ring1_pos  = 0,
-          int ring2_pos  = 0,
-          int ring3_pos  = 0
+          modular_int<26> rotor1_pos = 0,
+          modular_int<26> rotor2_pos = 0,
+          modular_int<26> rotor3_pos = 0,
+          modular_int<26> ring1_pos  = 0,
+          modular_int<26> ring2_pos  = 0,
+          modular_int<26> ring3_pos  = 0
      )
-     : EnigmaKey(*base.stator, *base.rotor1, *base.rotor2, *base.rotor3, *base.reflector,
-                 plugboard,
-                 rotor1_pos, rotor2_pos, rotor3_pos,
-                 ring1_pos, ring2_pos, ring3_pos)
+     : EnigmaKey {*base.stator, *base.rotor1, *base.rotor2, *base.rotor3, *base.reflector,
+                  plugboard,
+                  rotor1_pos, rotor2_pos, rotor3_pos,
+                  ring1_pos, ring2_pos, ring3_pos}
      {}
 
 
@@ -111,10 +133,10 @@ struct EnigmaKey
           std::string_view rotor_positions,
           std::string_view ring_positions
      )
-     : EnigmaKey(stator, rotor1, rotor2, rotor3, reflector,
-                 plugboard,
-                 rotor_positions[0] - 'A', rotor_positions[1] - 'A', rotor_positions[2] - 'A',
-                 ring_positions[0] - 'A', ring_positions[1] - 'A', ring_positions[2] - 'A')
+     : EnigmaKey {stator, rotor1, rotor2, rotor3, reflector,
+                  plugboard,
+                  rotor_positions[0] - 'A', rotor_positions[1] - 'A', rotor_positions[2] - 'A',
+                  ring_positions[0] - 'A', ring_positions[1] - 'A', ring_positions[2] - 'A'}
      {}
 
 
@@ -125,12 +147,12 @@ struct EnigmaKey
           const Rotor& rotor3,
           const Rotor& reflector,     // UKW
           std::string_view plugboard,
-          int rotor1_pos = 0,
-          int rotor2_pos = 0,
-          int rotor3_pos = 0,
-          int ring1_pos  = 0,
-          int ring2_pos  = 0,
-          int ring3_pos  = 0
+          modular_int<26> rotor1_pos = 0,
+          modular_int<26> rotor2_pos = 0,
+          modular_int<26> rotor3_pos = 0,
+          modular_int<26> ring1_pos  = 0,
+          modular_int<26> ring2_pos  = 0,
+          modular_int<26> ring3_pos  = 0
      )
      : stator {&stator}, rotor1 {&rotor1}, rotor2 {&rotor2}, rotor3 {&rotor3}, reflector {&reflector},
        plugboard {plugboard},
@@ -139,8 +161,8 @@ struct EnigmaKey
      {}
 
 
-     constexpr EnigmaKey (const EnigmaKey& c) = default;
-     constexpr EnigmaKey (EnigmaKey&& c) = default;
+     constexpr EnigmaKey (const EnigmaKey&) = default;
+     constexpr EnigmaKey (EnigmaKey&&) = default;
      constexpr EnigmaKey& operator= (const EnigmaKey&) = default;
      constexpr bool operator== (const EnigmaKey&) const = default;
 };

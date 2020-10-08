@@ -19,7 +19,7 @@ struct ScoreEntry
 
 
      constexpr ScoreEntry ()
-     : ScoreEntry(-1e12, {ETW_ABCDEF, m3_I, m3_II, m3_III, UKWB, ""})
+     : ScoreEntry{-1e12, {ETW_ABCDEF, m3_I, m3_II, m3_III, UKWB, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"}}
      {}
 
 
@@ -73,7 +73,7 @@ public:
 
      void print () const
      {
-          std::printf("#    Score          Refl   Rotor Order      Ring Pos   Rotor Pos  Text  \n");
+          std::printf("#    Score         Refl     Rotor Order         Ring Pos   Rotor Pos  Text  \n");
 
           int i = 0;
           for (const ScoreEntry& entry : get_entries())     entry.print(++i, ct);

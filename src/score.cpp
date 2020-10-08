@@ -29,9 +29,8 @@ double score_by_Qgram (std::span<const int> ordinals)
 
 
 // Not the actual IOC, but maintains the same IOC sort order.
-// Given the IOC forumula sum(0, 25, f[i]*(f[i] - 1)) / (N*(N-1)) for letter frequencies f and length of text N, returns
-// -abs(sum(0, 25, f[i]*(f[i] - 1)) - 0.066*N*(N-1))
-// which orders the IOC scores by closeness to the English expected IOC 0.066.
+// Returns -abs(sum(0, 25, f[i]*(f[i] - 1)) - 0.066*N*(N-1)) for letter frequencies f and length of text N, which orders
+// the IOC scores by closeness to the English expected IOC 0.066.
 
 double score_by_IOC_order (std::span<const int> ordinals)
 {
@@ -53,7 +52,7 @@ double score_by_IOC_order (std::span<const int> ordinals)
 
 
 // TODO: Test using a sparse matrix
-// TODO: Test other scoring methods
+// TODO: Test other scoring methods (including known plaintext)
 
 
 

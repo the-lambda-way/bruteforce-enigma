@@ -21,19 +21,22 @@ std::vector<EnigmaBase> all_configurations_no_replace (const EnigmaModel& model)
 std::vector<EnigmaBase> all_configurations (const EnigmaModel& model);
 
 
-template <int N, class F>
-void test_configuration (Enigma& enigma,
-                         std::span<int> ct_ordinal, std::span<int> pt_ordinal,
+template <class EnigmaType, int N, class F>
+void test_configuration (EnigmaType& enigma,
+                         std::span<const int> ct_ordinal, std::span<int> pt_ordinal,
                          BestList<N>& scores,
                          F scoring_function = score_by_Qgram)
 {
-     enigma.encrypt(ct_ordinal, pt_ordinal);
+     enigma.encrypt(ct_ordinal, pt_ordinal.begin());
      double score = std::invoke(scoring_function, pt_ordinal);
 
      if (scores.is_good_score(score))
           scores.add(score, enigma.get_key());
 };
 
+
+// TODO: Delegate this to the "4_threads" function and divide the tasks by configurations instead of rotor positions.
+// Will take 1/4 the space costs.
 
 template <int N = 10, class F = decltype(score_by_Qgram)>
 BestList<N> bf_decipher (
@@ -45,9 +48,7 @@ BestList<N> bf_decipher (
 )
 {
      std::vector<int> pt_ordinal(ct.length());
-     std::vector<int> ct_ordinal(ct.length());
-
-     str_to_ordinals(ct, ct_ordinal);
+     const std::vector<int> ct_ordinal = str_to_ordinals(ct);
 
 
      std::puts("Breaking enigma...");
@@ -57,15 +58,15 @@ BestList<N> bf_decipher (
 
      for (const EnigmaBase& base : all_configurations(model))
      {
-          Enigma enigma {base, plugboard, rotor1_start};
+          Enigma_optimize_unknown_positions enigma {base, plugboard, rotor1_start};
 
           // TODO: Determine which settings are equivalent, and skip
 
-          for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor(1))
-          for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_rotor(2))
-          for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_rotor(3))
-          for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring(1))
-          for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring(2))
+          for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor1())
+          for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_rotor2())
+          for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_rotor3())
+          for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring1())
+          for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring2())
           // Third ring has no effect
                test_configuration(enigma, ct_ordinal, pt_ordinal, best, scoring_function);
      }
@@ -84,22 +85,20 @@ BestList<N> bf_decipher (
 )
 {
      std::vector<int> pt_ordinal(ct.length());
-     std::vector<int> ct_ordinal(ct.length());
-
-     str_to_ordinals(ct, ct_ordinal);
+     const std::vector<int> ct_ordinal = str_to_ordinals(ct);
 
 
      std::puts("Breaking enigma...");
 
 
      BestList<N> best {ct};
-     Enigma enigma {base, plugboard, rotor1_start};
+     Enigma_optimize_unknown_positions enigma {base, plugboard, rotor1_start};
 
-     for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor(1))
-     for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_rotor(2))
-     for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_rotor(3))
-     for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring(1))
-     for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring(2))
+     for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor1())
+     for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_rotor2())
+     for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_rotor3())
+     for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring1())
+     for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring2())
      // Third ring has no effect
           test_configuration(enigma, ct_ordinal, pt_ordinal, best, scoring_function);
 
@@ -120,10 +119,14 @@ BestList<N> bf_4_threads (const EnigmaModel& model, std::string_view plug, std::
      int e = rotor_max;
      int max = rotor_max;
 
-     auto future1 = std::async(std::launch::async, [&] () { return bf_decipher<N>(model, plug, ct, a,     b, max, scoring_function); });
-     auto future2 = std::async(std::launch::async, [&] () { return bf_decipher<N>(model, plug, ct, b + 1, c, max, scoring_function); });
-     auto future3 = std::async(std::launch::async, [&] () { return bf_decipher<N>(model, plug, ct, c + 1, d, max, scoring_function); });
-     auto future4 = std::async(std::launch::async, [&] () { return bf_decipher<N>(model, plug, ct, d + 1, e, max, scoring_function); });
+     auto future1 = std::async(std::launch::async,
+                               [&] () { return bf_decipher<N>(model, plug, ct, a,     b, max, scoring_function); });
+     auto future2 = std::async(std::launch::async,
+                               [&] () { return bf_decipher<N>(model, plug, ct, b + 1, c, max, scoring_function); });
+     auto future3 = std::async(std::launch::async,
+                               [&] () { return bf_decipher<N>(model, plug, ct, c + 1, d, max, scoring_function); });
+     auto future4 = std::async(std::launch::async,
+                               [&] () { return bf_decipher<N>(model, plug, ct, d + 1, e, max, scoring_function); });
 
      return combine_best<N>(future1.get(), future2.get(), future3.get(), future4.get());
 }
@@ -142,10 +145,14 @@ BestList<N> bf_4_threads (const EnigmaBase& base, std::string_view plug, std::st
      int e = rotor_max;
      int max = rotor_max;
 
-     auto future1 = std::async(std::launch::async, [&] () { return bf_decipher<N>(base, plug, ct, a,     b, max, scoring_function); });
-     auto future2 = std::async(std::launch::async, [&] () { return bf_decipher<N>(base, plug, ct, b + 1, c, max, scoring_function); });
-     auto future3 = std::async(std::launch::async, [&] () { return bf_decipher<N>(base, plug, ct, c + 1, d, max, scoring_function); });
-     auto future4 = std::async(std::launch::async, [&] () { return bf_decipher<N>(base, plug, ct, d + 1, e, max, scoring_function); });
+     auto future1 = std::async(std::launch::async,
+                               [&] () { return bf_decipher<N>(base, plug, ct, a,     b, max, scoring_function); });
+     auto future2 = std::async(std::launch::async,
+                               [&] () { return bf_decipher<N>(base, plug, ct, b + 1, c, max, scoring_function); });
+     auto future3 = std::async(std::launch::async,
+                               [&] () { return bf_decipher<N>(base, plug, ct, c + 1, d, max, scoring_function); });
+     auto future4 = std::async(std::launch::async,
+                               [&] () { return bf_decipher<N>(base, plug, ct, d + 1, e, max, scoring_function); });
 
      return combine_best<N>(future1.get(), future2.get(), future3.get(), future4.get());
 }
@@ -162,9 +169,7 @@ BestList<N> smart_decipher (
 )
 {
      std::vector<int> pt_ordinal(ct.length());
-     std::vector<int> ct_ordinal(ct.length());
-
-     str_to_ordinals(ct, ct_ordinal);
+     const std::vector<int> ct_ordinal = str_to_ordinals(ct);
 
 
      std::puts("Breaking enigma...");
@@ -175,11 +180,11 @@ BestList<N> smart_decipher (
 
      for (const EnigmaBase& base : all_configurations(model))
      {
-          Enigma enigma {base, plugboard, 0, 0, 0, rotor1_start};
+          Enigma_optimize_unknown_positions enigma {base, plugboard, rotor1_start};
 
-          for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor(1))
-          for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor(2))
-          for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor(3))
+          for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor1())
+          for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor2())
+          for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor3())
                test_configuration(enigma, ct_ordinal, pt_ordinal, best_rotors, scoring_function);
      }
 
@@ -189,10 +194,10 @@ BestList<N> smart_decipher (
 
      for (const ScoreEntry& entry : best_rotors.get_entries())
      {
-          Enigma enigma {entry.key};
+          Enigma_optimize_unknown_positions enigma {entry.key};
 
-          for (int i = 0; i < 26; ++i,     enigma.increment_ring(1), enigma.increment_rotor(1))
-          for (int i = 0; i < 26; ++i,     enigma.increment_ring(2), enigma.increment_rotor(2))
+          for (int i = 0; i < 26; ++i,     enigma.increment_ring1(), enigma.increment_rotor1())
+          for (int i = 0; i < 26; ++i,     enigma.increment_ring2(), enigma.increment_rotor2())
           // Third ring has no effect
                test_configuration(enigma, ct_ordinal, pt_ordinal, best_rings, scoring_function);
      }
@@ -212,20 +217,18 @@ BestList<N> smart_decipher (
 )
 {
      std::vector<int> pt_ordinal(ct.length());
-     std::vector<int> ct_ordinal(ct.length());
-
-     str_to_ordinals(ct, ct_ordinal);
+     const std::vector<int> ct_ordinal = str_to_ordinals(ct);
 
 
      std::puts("Breaking enigma...");
 
 
      BestList<N> best_rotors {ct};
-     Enigma enigma {base, plugboard, 0, 0, 0, rotor1_start};
+     Enigma_optimize_unknown_positions enigma {base, plugboard, rotor1_start};
 
-     for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor(1))
-     for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor(2))
-     for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor(3))
+     for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor1())
+     for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor2())
+     for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor3())
           test_configuration(enigma, ct_ordinal, pt_ordinal, best_rotors, scoring_function);
 
 
@@ -233,10 +236,10 @@ BestList<N> smart_decipher (
 
      for (const ScoreEntry& entry : best_rotors.get_entries())
      {
-          Enigma enigma {entry.key};
+          Enigma_optimize_unknown_positions enigma {entry.key};
 
-          for (int i = 0; i < 26; ++i,     enigma.increment_ring(1), enigma.increment_rotor(1))
-          for (int i = 0; i < 26; ++i,     enigma.increment_ring(2), enigma.increment_rotor(2))
+          for (int i = 0; i < 26; ++i,     enigma.increment_ring1(), enigma.increment_rotor1())
+          for (int i = 0; i < 26; ++i,     enigma.increment_ring2(), enigma.increment_rotor2())
           // Third ring has no effect
                test_configuration(enigma, ct_ordinal, pt_ordinal, best_rings, scoring_function);
      }
@@ -250,10 +253,14 @@ template <int N, class F = decltype(score_by_Qgram)>
 BestList<N> smart_4_threads (const EnigmaModel& model, std::string_view plug, std::string_view ct,
                              F scoring_function = score_by_Qgram)
 {
-     auto future1 = std::async(std::launch::async, [&] () { return smart_decipher<N>(model, plug, ct, 0,  5 , scoring_function); });
-     auto future2 = std::async(std::launch::async, [&] () { return smart_decipher<N>(model, plug, ct, 6,  11, scoring_function); });
-     auto future3 = std::async(std::launch::async, [&] () { return smart_decipher<N>(model, plug, ct, 12, 17, scoring_function); });
-     auto future4 = std::async(std::launch::async, [&] () { return smart_decipher<N>(model, plug, ct, 18, 25, scoring_function); });
+     auto future1 = std::async(std::launch::async,
+                               [&] () { return smart_decipher<N>(model, plug, ct, 0,  5 , scoring_function); });
+     auto future2 = std::async(std::launch::async,
+                               [&] () { return smart_decipher<N>(model, plug, ct, 6,  11, scoring_function); });
+     auto future3 = std::async(std::launch::async,
+                               [&] () { return smart_decipher<N>(model, plug, ct, 12, 17, scoring_function); });
+     auto future4 = std::async(std::launch::async,
+                               [&] () { return smart_decipher<N>(model, plug, ct, 18, 25, scoring_function); });
 
      return combine_best<N>(future1.get(), future2.get(), future3.get(), future4.get());
 }
@@ -263,10 +270,14 @@ template <int N, class F = decltype(score_by_Qgram)>
 BestList<N> smart_4_threads (const EnigmaBase& base, std::string_view plug, std::string_view ct,
                              F scoring_function = score_by_Qgram)
 {
-     auto future1 = std::async(std::launch::async, [&] () { return smart_decipher<N>(base, plug, ct, 0,  5 , scoring_function); });
-     auto future2 = std::async(std::launch::async, [&] () { return smart_decipher<N>(base, plug, ct, 6,  11, scoring_function); });
-     auto future3 = std::async(std::launch::async, [&] () { return smart_decipher<N>(base, plug, ct, 12, 17, scoring_function); });
-     auto future4 = std::async(std::launch::async, [&] () { return smart_decipher<N>(base, plug, ct, 18, 25, scoring_function); });
+     auto future1 = std::async(std::launch::async,
+                               [&] () { return smart_decipher<N>(base, plug, ct, 0,  5 , scoring_function); });
+     auto future2 = std::async(std::launch::async,
+                               [&] () { return smart_decipher<N>(base, plug, ct, 6,  11, scoring_function); });
+     auto future3 = std::async(std::launch::async,
+                               [&] () { return smart_decipher<N>(base, plug, ct, 12, 17, scoring_function); });
+     auto future4 = std::async(std::launch::async,
+                               [&] () { return smart_decipher<N>(base, plug, ct, 18, 25, scoring_function); });
 
      return combine_best<N>(future1.get(), future2.get(), future3.get(), future4.get());
 }
@@ -283,3 +294,5 @@ BestList<N> smart_4_threads (const EnigmaBase& base, std::string_view plug, std:
 
 // TODO: Add a secondary encryption step. Pass in a function that gets called on a encrypted text before it gets scored.
 
+// TODO: No letter can map to itself. So if we find a key that decrypts a letter to the same as the given ciphertext, it
+//      can be rejected. Maybe this can be made an optimization.

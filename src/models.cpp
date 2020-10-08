@@ -5,13 +5,13 @@
 
 
 // Common --------------------------------------------------------------------------------------------------------------
-const Rotor ETW_ABCDEF = {"ETW", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", ""};
-const Rotor ETW_QWERTZ = {"ETW", "QWERTZUIOASDFGHJKPYXCVBNML", ""};
+const Rotor ETW_ABCDEF = {"ABCDEF", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", ""};
+const Rotor ETW_QWERTZ = {"QWERTZ", "QWERTZUIOASDFGHJKPYXCVBNML", ""};
 
 const Rotor UKWA           = {"UKWA", "EJMZALYXVBWFCRQUONTSPIKHGD", ""};
 const Rotor UKWB           = {"UKWB", "YRUHQSLDPXNGOKMIEBFZCWVJAT", ""};
 const Rotor UKWC           = {"UKWC", "FVPJIAOYEDRZXWGCTKUQSBNMHL", ""};
-const Rotor commercial_UKW = {"com",  "IMETCGFRAYSQBZXWLHKDVUPOJN", ""};
+const Rotor commercial_UKW = {"comm", "IMETCGFRAYSQBZXWLHKDVUPOJN", ""};
 
 
 // M3 ------------------------------------------------------------------------------------------------------------------
@@ -77,6 +77,8 @@ const EnigmaModel railway_model = {
 
 
 // CrypTool railway ----------------------------------------------------------------------------------------------------
+// Portal to source code: https://www.cryptool.org/en/ct2-documentation
+
 // CrypTool turns over on the notch position on the wheel, when it should turnover on the indicator position.
 
 const Rotor CrypTool_railway_I   = {"I",   "JGDQOXUSCAMIFRVTPNEWKBLZYH", "V"};
@@ -92,6 +94,8 @@ const EnigmaModel CrypTool_railway_model = {
 
 
 // CrypTool M3 ---------------------------------------------------------------------------------------------------------
+// Portal to source code: https://www.cryptool.org/en/ct2-documentation
+
 // CrypTool includes UKWA in its m3 model.
 
 // Combinations: 2048
@@ -164,6 +168,8 @@ const EnigmaModel commercial_model = {
 
 
 // Enigma T ------------------------------------------------------------------------------------------------------------
+// https://github.com/cryptii/cryptii/blob/master/src/Encoder/Enigma.js
+
 // const Rotor tirpitz_ETW  = {"ETW", "ILXRZTKGJYAMWVDUFCPQEONSHB", ""};
 
 // const Rotor tirpitz_I    = {"I",    "KPTYUELOCVGRFQDANJMBSWHZXI", "WZEKQ"};
@@ -177,6 +183,7 @@ const EnigmaModel commercial_model = {
 
 // const Rotor tirpitz_UKW  = {"UKW", "GEKPBTAUMOCNILJDXZYFHWVQSR", ""};
 
+// Combinations: 343
 // const EnigmaModel tirpitz_model = {
 //     .stator     = &tirpitz_ETW,
 //     .rotors     = {&tirpitz_I, &tirpitz_II, &tirpitz_III, &tirpitz_IV, &tirpitz_V, &tirpitz_VII, &tirpitz_VIII},
@@ -185,22 +192,30 @@ const EnigmaModel commercial_model = {
 
 
 // Enigma K ------------------------------------------------------------------------------------------------------------
-// const Rotor swissK_I   = {"I",   "PEZUOHXSCVFMTBGLRINQJWAYDK", "Y"};
-// const Rotor swissK_II  = {"II",  "ZOUESYDKFWPCIQXHMVBLGNJRAT", "E"};
-// const Rotor swissK_III = {"III", "EHRVXGAOBQUSIMZFLYNWKTPDJC", "N"};
+// https://github.com/cryptii/cryptii/blob/master/src/Encoder/Enigma.js
 
-// const EnigmaModel swissK_model = {
-//     .stator     = &ETW_QWERTZ,
-//     .rotors     = {&swissK_I, &swissK_II, &swissK_III},
-//     .reflectors = {&commercial_UKW}
-// };
+// NOTE: Simulator does not simulate Swiss K. Rotors included here for use with the standard Enigma design.
+
+const Rotor swissK_I   = {"I",   "PEZUOHXSCVFMTBGLRINQJWAYDK", "Y"};
+const Rotor swissK_II  = {"II",  "ZOUESYDKFWPCIQXHMVBLGNJRAT", "E"};
+const Rotor swissK_III = {"III", "EHRVXGAOBQUSIMZFLYNWKTPDJC", "N"};
+
+// Combinations: 27
+const EnigmaModel swissK_model = {
+    .stator     = &ETW_QWERTZ,
+    .rotors     = {&swissK_I, &swissK_II, &swissK_III},
+    .reflectors = {&commercial_UKW}
+};
 
 
 // Enigma Z ------------------------------------------------------------------------------------------------------------
+// https://github.com/cryptii/cryptii/blob/master/src/Encoder/Enigma.js
+
 // const Rotor zahlwerk_I   = {"I",   "LPGSZMHAEOQKVXRFYBUTNICJDW", "SUVWZABCEFGIKLOPQ"};
 // const Rotor zahlwerk_II  = {"II",  "SLVGBTFXJQOHEWIRZYAMKPCNDU", "STVYZACDFGHKMNQ"};
-// const Rotor zahlwerk_III = {"III", "CJGDPSHKTURAWZXFMYNQOBVLIE", "UWXAEFHKMNR"};
+// const Rotor zahlwerk_III = {"III", "CJGDPSHKTURAWZXFMYNQOBVLIE", "UWXUQNAEFHKMNR"};
 
+// Combinations: 27
 // const EnigmaModel zahlwerk_model = {
 //     .stator     = &ETW_QWERTZ,
 //     .rotors     = {&zahlwerk_I, &zahlwerk_II, &zahlwerk_III},
@@ -209,10 +224,13 @@ const EnigmaModel commercial_model = {
 
 
 // Enigma G111 ---------------------------------------------------------------------------------------------------------
+// https://github.com/cryptii/cryptii/blob/master/src/Encoder/Enigma.js
+
 // const Rotor g111_I  = {"I",  "WLRHBQUNDKJCZSEXOTMAGYFPVI", "SUVWZABCEFGIKLOPQ"};
 // const Rotor g111_II = {"II", "TFJQAZWMHLCUIXRDYGOEVBNSKP", "STVYZACDFGHKMNQ"};
 // const Rotor g111_V  = {"V",  "QTPIXWVDFRMUSLJOHCANEZKYBG", "SWZFHMQ"};
 
+// Combinations: 27
 // const EnigmaModel abwehr_model = {
 //     .stator     = &ETW_QWERTZ,
 //     .rotors     = {&g111_I, &g111_II, &g111_V},
@@ -221,12 +239,15 @@ const EnigmaModel commercial_model = {
 
 
 // Enigma G312 ---------------------------------------------------------------------------------------------------------
+// https://github.com/cryptii/cryptii/blob/master/src/Encoder/Enigma.js
+
 // const Rotor g312_I   = {"I",   "DMTWSILRUYQNKFEJCAZBPGXOHV", "SUVWZABCEFGIKLOPQ"};
 // const Rotor g312_II  = {"II",  "HQZGPJTMOBLNCIFDYAWVEUSRKX", "STVYZACDFGHKMNQ"};
 // const Rotor g312_III = {"III", "UQNTLSZFMREHDPXKIBVYGJCWOA", "UWXAEFHKMNR"};
 
 // const Rotor g312_UKW = {"UKW", "RULQMZJSYGOCETKWDAHNBXPVIF", ""};
 
+// Combinations: 27
 // const EnigmaModel abwehr_model = {
 //     .stator     = &ETW_QWERTZ,
 //     .rotors     = {&g312_I, &g312_II, &g312_III},
@@ -235,6 +256,8 @@ const EnigmaModel commercial_model = {
 
 
 // Enigma G260 ---------------------------------------------------------------------------------------------------------
+// https://github.com/cryptii/cryptii/blob/master/src/Encoder/Enigma.js
+
 // const Rotor g260_I   = {"I",   "RCSPBLKQAUMHWYTIFZVGOJNEXD", "SUVWZABCEFGIKLOPQ"};
 // const Rotor g260_II  = {"II",  "WCMIBVPJXAROSGNDLZKEYHUFQT", "STVYZACDFGHKMNQ"};
 // const Rotor g260_III = {"III", "FVDHZELSQMAXOKYIWPGCBUJTNR", "UWXAEFHKMNR"};

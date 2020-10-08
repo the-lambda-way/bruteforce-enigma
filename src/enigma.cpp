@@ -4,222 +4,140 @@
 #include <execution>
 
 
-// Out must have the same length or greater as str
-void str_to_ordinals (std::string_view str, std::span<int> out)
+std::vector<int> str_to_ordinals (std::string_view str)
 {
-     std::transform(
-          std::execution::par_unseq,
-          str.begin(), str.end(), out.begin(),
-          [] (char c) { return c - 'A'; }
-     );
+     std::vector<int> out;
+     out.reserve(str.length());
+
+     for (char c : str)    out.push_back(c - 'A');
+
+     return out;
 }
 
 
-// Operation ------------------------------------------------------------------------------------------------------
+std::string ordinals_to_str (std::span<const int> ordinals)
+{
+     std::string out;
+     out.reserve(ordinals.size());
+
+     for (int o : ordinals)    out.push_back(o + 'A');
+
+     return out;
+}
+
+
+// rotor_offsets -------------------------------------------------------------------------------------------------------
+void rotor_offsets::reset ()
+{
+     one   = rotor1;
+     two   = rotor2;
+     three = rotor3;
+}
+
+
+// TODO: Test with a turnover offset that advances when hit.
+void rotor_offsets::step ()
+{
+     // Tested with a highly optimized switch statement. The if-branch algorithm was 20% more efficient.
+     // The solution used below was 20% more efficient than the if-branch algorithm for any number of notches.
+
+     two   += static_cast<int>(turnover2[two]);
+     three += static_cast<int>(turnover2[two]);
+     two   += static_cast<int>(turnover1[one]);     // Must come last to enact double-stepping in the correct order
+
+     ++one;
+
+     three_minus_two = three - two;
+     two_minus_one   = two - one;
+}
+
+
+void rotor_offsets::rotr_turnover1 ()
+{
+     turnover1 = (turnover1 >> 1) | (turnover1 << 25);
+}
+
+
+
+void rotor_offsets::rotr_turnover2 ()
+{
+     turnover2 = (turnover2 >> 1) | (turnover2 << 25);
+}
+
+
+// Enigma_optimize_unknown_positions -----------------------------------------------------------------------------------
+EnigmaKey Enigma_optimize_unknown_positions::get_key () const
+{
+     EnigmaKey copy = key;
+     copy.rotor1_pos = offsets.rotor1 + copy.ring1_pos;
+     copy.rotor2_pos = offsets.rotor2 + copy.ring2_pos;
+     copy.rotor3_pos = offsets.rotor3 + copy.ring3_pos;
+
+     return copy;
+}
+
+
+void Enigma_optimize_unknown_positions::increment_ring1 ()
+{
+     // incrementing the ring decrements the rotor offset
+     ++key.ring1_pos;
+     --offsets.rotor1;
+     offsets.rotr_turnover1();
+}
+
+
+void Enigma_optimize_unknown_positions::increment_ring2 ()
+{
+     ++key.ring2_pos;
+     --offsets.rotor2;
+     offsets.rotr_turnover2();
+}
+
+
+void Enigma_optimize_unknown_positions::increment_ring3 ()
+{
+     ++key.ring3_pos;
+     --offsets.rotor3;
+}
+
+
+void Enigma_optimize_unknown_positions::increment_rotor1 ()     { ++offsets.rotor1; }
+void Enigma_optimize_unknown_positions::increment_rotor2 ()     { ++offsets.rotor2; }
+void Enigma_optimize_unknown_positions::increment_rotor3 ()     { ++offsets.rotor3; }
+
+
+int Enigma_optimize_unknown_positions::encrypt_ordinal (int j)
+{
+     offsets.step();
+
+     // plugboard and stator don't move
+     j = plugboard_stator_forward[j] + offsets.one;
+
+     // each rotor returns the range 26 <= i < 52, this avoids needing to modulo j
+     j = rotor1_forward[j] + offsets.two_minus_one;
+     j = rotor2_forward[j] + offsets.three_minus_two;
+     j = rotor3_forward[j] - offsets.three;
+
+     // reflector returns the range 0 <= i < 26
+     j = reflector[j] + offsets.three;
+
+     // each rotor returns the range 26 <= i < 52, this avoids needing to modulo j
+     j = rotor3_reverse[j] - offsets.three_minus_two;
+     j = rotor2_reverse[j] - offsets.two_minus_one;
+     j = rotor1_reverse[j] - offsets.one;
+
+     // stator and plugboard don't move
+     return stator_plugboard_reverse[j];
+}
+
+
+// Enigma --------------------------------------------------------------------------------------------------------------
 std::string Enigma::encrypt (std::string_view input)
 {
-     offset1 = rotor1_offset;
-     offset2 = rotor2_offset;
-     offset3 = rotor3_offset;
+     const std::vector<int> in = str_to_ordinals(input);
+     std::vector<int> out(input.length());
 
-     std::string s;
-     s.reserve(input.length());
+     enigma.encrypt(in, out.begin());
 
-     for (auto c : input)     s.push_back(encrypt_letter(c));
-
-     return s;
+     return ordinals_to_str(out);
 }
-
-
-void Enigma::encrypt (std::span<const int> ordinals, std::span<int> out)
-{
-     offset1 = rotor1_offset;
-     offset2 = rotor2_offset;
-     offset3 = rotor3_offset;
-
-     std::ranges::transform(ordinals, out.begin(), [this] (int o) { return encrypt_ordinal(o); });
-}
-
-
-
-void Enigma::reset_ring_pos (int ring, int pos)
-{
-     assert(1 <= ring && ring <= 3);
-     assert(0 <= pos && pos <= 25);
-
-     switch (ring)
-     {
-          case 1 :
-               key.ring1_pos = pos;
-
-               turnover1A_offset = calculate_offset(key.rotor1->turnoverA, pos);
-               turnover1B_offset = calculate_offset(key.rotor1->turnoverB, pos);
-
-               rotor1_offset = calculate_offset(key.rotor1_pos, pos);
-               break;
-          case 2 :
-               key.ring2_pos = pos;
-
-               turnover2A_offset = calculate_offset(key.rotor2->turnoverA, pos);
-               turnover2B_offset = calculate_offset(key.rotor2->turnoverB, pos);
-
-               rotor2_offset = calculate_offset(key.rotor2_pos, pos);
-               break;
-          case 3 :
-               key.ring3_pos = pos;
-               rotor3_offset = calculate_offset(key.rotor3_pos, pos);
-     }
-}
-
-
-void Enigma::reset_rotor_pos (int rotor, int pos)
-{
-     assert(1 <= rotor && rotor <= 3);
-     assert(0 <= pos && pos <= 25);
-
-     switch (rotor)
-     {
-          case 1 :
-               key.rotor1_pos = pos;
-               rotor1_offset  = calculate_offset(pos, key.ring1_pos);
-               break;
-          case 2 :
-               key.rotor2_pos = pos;
-               rotor2_offset  = calculate_offset(pos, key.ring2_pos);
-               break;
-          case 3 :
-               key.rotor3_pos = pos;
-               rotor3_offset  = calculate_offset(pos, key.ring3_pos);
-     }
-}
-
-
-// While bruteforcing ring positions, save calculations by rotating the rotor instead of recalculating it
-void Enigma::increment_ring (int ring)
-{
-     assert(1 <= ring && ring <= 3);
-
-     // incrementing the ring decrements the rotor offset
-     switch (ring)
-     {
-          case 1 :
-               key.ring1_pos     = increment_of(key.ring1_pos);
-               rotor1_offset     = decrement_of(rotor1_offset);
-               turnover1A_offset = decrement_of(turnover1A_offset);
-               turnover1B_offset = decrement_of(turnover1B_offset);
-               break;
-          case 2 :
-               key.ring2_pos     = increment_of(key.ring2_pos);
-               rotor2_offset     = decrement_of(rotor2_offset);
-               turnover2A_offset = decrement_of(turnover2A_offset);
-               turnover2B_offset = decrement_of(turnover2B_offset);
-               break;
-          case 3 :
-               key.ring3_pos = increment_of(key.ring3_pos);
-               rotor3_offset = decrement_of(rotor3_offset);
-     }
-}
-
-
-// While bruteforcing rotor positions, save calculations by rotating the rotor instead of recalculating it
-void Enigma::increment_rotor (int rotor)
-{
-     assert(1 <= rotor && rotor <= 3);
-
-     switch (rotor)
-     {
-          case 1 :
-               key.rotor1_pos = increment_of(key.rotor1_pos);
-               rotor1_offset  = increment_of(rotor1_offset);
-               break;
-          case 2 :
-               key.rotor2_pos = increment_of(key.rotor2_pos);
-               rotor2_offset  = increment_of(rotor2_offset);
-               break;
-          case 3 :
-               key.rotor3_pos = increment_of(key.rotor3_pos);
-               rotor3_offset  = increment_of(rotor3_offset);
-     }
-}
-
-
-EnigmaKey Enigma::get_key ()     { return key; }
-
-
-
-// Optimization ---------------------------------------------------------------------------------------------------
-void Enigma::init_rotor (const int* in, int* out)
-{
-     std::copy(in, in + 78, out);
-}
-
-
-constexpr int Enigma::calculate_offset (int rotor_pos, int ring_pos) const
-{
-     int offset = rotor_pos - ring_pos;
-     return offset < 0 ? offset + 26 : offset;
-}
-
-
-// Operation ------------------------------------------------------------------------------------------------------
-constexpr int Enigma::increment_of (int pos) const
-{
-     return pos == 25 ? 0 : pos + 1;
-}
-
-
-constexpr int Enigma::decrement_of (int pos) const
-{
-     return pos == 0 ? 25 : pos - 1;
-}
-
-
-void Enigma::step_positions ()
-{
-     if (offset2 == turnover2A_offset || offset2 == turnover2B_offset)
-     {
-          offset3 = increment_of(offset3);
-          offset2 = increment_of(offset2);
-     }
-
-     if (offset1 == turnover1A_offset || offset1 == turnover1B_offset)
-          offset2 = increment_of(offset2);
-
-     offset1 = increment_of(offset1);
-}
-
-
-int Enigma::run_rotor (const int* rotor, int offset, int pos) const
-{
-     return rotor[pos + offset] - offset + 26;
-}
-
-
-char Enigma::encrypt_letter (char keypressed)
-{
-     return encrypt_ordinal(keypressed - 'A') + 'A';
-}
-
-
-int Enigma::encrypt_ordinal (int j)
-{
-     step_positions();
-
-     j = plugboardA[j];
-
-     j = stator_forward[j];
-     j = run_rotor(rotor1_forward, offset1, j);
-     j = run_rotor(rotor2_forward, offset2, j);
-     j = run_rotor(rotor3_forward, offset3, j);
-     j = reflector[j];
-     j = run_rotor(rotor3_reverse, offset3, j);
-     j = run_rotor(rotor2_reverse, offset2, j);
-     j = run_rotor(rotor1_reverse, offset1, j);
-     j = stator_reverse[j];
-
-     return plugboardB[j];
-}
-
-
-
-
