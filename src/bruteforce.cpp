@@ -1,17 +1,35 @@
 #include "bruteforce.h"
+#include <algorithm>     // std::swap
+#include <cctype>        // std::isalpha, std::toupper
+#include <ranges>
+
+
+
+constexpr auto is_alpha = [] (unsigned char c) { return std::isalpha(c); };
+constexpr auto to_upper = [] (unsigned char c) { return std::toupper(c); };
 
 
 std::string convert_to_ct (std::string_view in)
 {
-     std::string s;
+     std::string out;
+     out.reserve(in.length());
 
-     for (char c : in)
-     {
-          if      ('a' <= c && c <= 'z')     s += (c - 32);
-          else if ('A' <= c && c <= 'Z')     s += c;
-     }
+     std::ranges::copy(in | std::views::filter(is_alpha) | std::views::transform(to_upper),
+                       std::back_inserter(out));
 
-     return s;
+     return out;
+}
+
+
+std::string convert_to_plug (std::string_view pairs)
+{
+     std::string out = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+     std::string s = convert_to_ct(pairs);
+
+     for (int i = 0; i + 1 < s.length(); i += 2)
+          std::swap(out[s[i] - 'A'], out[s[i + 1] - 'A']);
+
+     return out;
 }
 
 

@@ -15,6 +15,7 @@
 
 
 std::string convert_to_ct (std::string_view in);
+std::string convert_to_plug (std::string_view pairs);
 std::vector<std::array<int, 3>> three_permutations_of_n (int n);
 std::vector<std::array<int, 3>> triples_from_n (int n);
 std::vector<EnigmaBase> all_configurations_no_replace (const EnigmaModel& model);
@@ -58,7 +59,7 @@ BestList<N> bf_decipher (
 
      for (const EnigmaBase& base : all_configurations(model))
      {
-          Enigma_optimize_unknown_positions enigma {base, plugboard, rotor1_start};
+          Enigma_optimize_unknown_positions enigma {base, plugboard, modular_int<26>{rotor1_start}};
 
           // TODO: Determine which settings are equivalent, and skip
 
@@ -92,7 +93,7 @@ BestList<N> bf_decipher (
 
 
      BestList<N> best {ct};
-     Enigma_optimize_unknown_positions enigma {base, plugboard, rotor1_start};
+     Enigma_optimize_unknown_positions enigma {base, plugboard, modular_int<26>{rotor1_start}};
 
      for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor1())
      for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_rotor2())
@@ -180,7 +181,7 @@ BestList<N> smart_decipher (
 
      for (const EnigmaBase& base : all_configurations(model))
      {
-          Enigma_optimize_unknown_positions enigma {base, plugboard, rotor1_start};
+          Enigma_optimize_unknown_positions enigma {base, plugboard, modular_int<26>{rotor1_start}};
 
           for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor1())
           for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor2())
@@ -224,7 +225,7 @@ BestList<N> smart_decipher (
 
 
      BestList<N> best_rotors {ct};
-     Enigma_optimize_unknown_positions enigma {base, plugboard, rotor1_start};
+     Enigma_optimize_unknown_positions enigma {base, plugboard, modular_int<26>{rotor1_start}};
 
      for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor1())
      for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor2())

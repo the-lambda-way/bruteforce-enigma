@@ -22,9 +22,9 @@ const Rotor m3_II   = {"II",   "AJDKSIRUXBLHWTMCQGZNPYFVOE", "E"};
 const Rotor m3_III  = {"III",  "BDFHJLCPRTXVZNYEIWGAKMUSQO", "V"};
 const Rotor m3_IV   = {"IV",   "ESOVPZJAYQUIRHXLNFTGKDCMWB", "J"};
 const Rotor m3_V    = {"V",    "VZBRGITYUPSDNHLXAWMJQOFECK", "Z"};
-const Rotor m4_VI   = {"VI",   "JPGVOUMFYQBENHZRDKASXLICTW", "ZM"};
-const Rotor m4_VII  = {"VII",  "NZJHGRCXMYSWBOUFAIVLPEKQDT", "ZM"};
-const Rotor m4_VIII = {"VIII", "FKQHTLXOCBJSPDZRAMEWNIUYGV", "ZM"};
+const Rotor m3_VI   = {"VI",   "JPGVOUMFYQBENHZRDKASXLICTW", "ZM"};
+const Rotor m3_VII  = {"VII",  "NZJHGRCXMYSWBOUFAIVLPEKQDT", "ZM"};
+const Rotor m3_VIII = {"VIII", "FKQHTLXOCBJSPDZRAMEWNIUYGV", "ZM"};
 
 // Combinations: 250
 const EnigmaModel m3_model = {
@@ -34,9 +34,9 @@ const EnigmaModel m3_model = {
 };
 
 // Combinations: 1024
-const EnigmaModel m3_extended_model = {
+const EnigmaModel m3_Kriegsmarine_model = {
      .stator     = &ETW_ABCDEF,
-     .rotors     = {&m3_I, &m3_II, &m3_III, &m3_IV, &m3_V, &m4_VI, &m4_VII, &m4_VIII},
+     .rotors     = {&m3_I, &m3_II, &m3_III, &m3_IV, &m3_V, &m3_VI, &m3_VII, &m3_VIII},
      .reflectors = {&UKWB, &UKWC}
 };
 
@@ -46,15 +46,16 @@ const EnigmaModel m3_extended_model = {
 
 // Note: Simulator currently only supports three rotors.
 
-const Rotor m4_UKWB_thin = {"Bthin", "ENKQAUYWJICOPBLMDXZVFTHRGS", ""};
-const Rotor m4_UKWC_thin = {"Cthin", "RDOBJNTKVEHMLFCWZAXGYIPSUQ", ""};
 const Rotor m4_beta      = {"beta",  "LEYJVCNIXWPBQMDRTAKZGFUHOS", ""};
 const Rotor m4_gamma     = {"gamma", "FSOKANUERHMBTIYCWLQPZXVGJD", ""};
+const Rotor m4_UKWB_thin = {"Bthin", "ENKQAUYWJICOPBLMDXZVFTHRGS", ""};
+const Rotor m4_UKWC_thin = {"Cthin", "RDOBJNTKVEHMLFCWZAXGYIPSUQ", ""};
 
-// Combinations: 2000
-const EnigmaModel m4_model = {
+// Combinations: 2048
+const Enigma4Model m4_model = {
      .stator     = &ETW_ABCDEF,
-     .rotors     = {&m4_beta, &m4_gamma, &m3_I, &m3_II, &m3_III, &m3_IV, &m3_V, &m4_VI, &m4_VII, &m4_VIII},
+     .rotors     = {&m3_I, &m3_II, &m3_III, &m3_IV, &m3_V, &m3_VI, &m3_VII, &m3_VIII},
+     .rotors4    = {&m4_beta, &m4_gamma},
      .reflectors = {&m4_UKWB_thin, &m4_UKWC_thin}
 };
 
@@ -101,7 +102,7 @@ const EnigmaModel CrypTool_railway_model = {
 // Combinations: 2048
 const EnigmaModel CrypTool_m3_model = {
      .stator     = &ETW_ABCDEF,
-     .rotors     = {&m3_I, &m3_II, &m3_III, &m3_IV, &m3_V, &m4_VI, &m4_VII, &m4_VIII},
+     .rotors     = {&m3_I, &m3_II, &m3_III, &m3_IV, &m3_V, &m3_VI, &m3_VII, &m3_VIII},
      .reflectors = {&UKWA, &UKWB, &UKWC}
 };
 

@@ -47,9 +47,9 @@ From: http://practicalcryptography.com/cryptanalysis/breaking-machine-ciphers/cr
 | ------------------------------ | ----------------------| ----------------------|
 | Cipher length                  | 56                    | 56                    |
 | Enigma model                   | m3 (250 combinations) | m3 (250 combinations) |
-| Solve time                     | 1.75 sec              | 13 min, 37 sec        |
-| Number of decryptions / second | -                     | 3.63 x 10^6           |
-| Characters / second            | -                     | 203.52 x 10^6         |
+| Solve time                     | 1.6 sec               | 15 min, 16 sec        |
+| Number of decryptions / second | -                     | 3.24 x 10^6           |
+| Characters / second            | -                     | 181.54 x 10^6         |
 
 
 
@@ -72,9 +72,9 @@ From: http://www.practicalcryptography.com/cryptanalysis/breaking-machine-cipher
 | ------------------------------ | --------------------- |
 | Cipher length                  | 170                   |
 | Enigma model                   | m3 (250 combinations) |
-| Solve time                     | 34 min, 51 sec        |
-| Number of decryptions / second | 1.42 x 10^6           |
-| Characters / second            | 241.53 x 10^6         |
+| Solve time                     | 44 min, 12 sec        |
+| Number of decryptions / second | 1.12 x 10^6           |
+| Characters / second            | 190.38 x 10^6         |
 
 
 

@@ -19,11 +19,11 @@ extern const Rotor m3_II;
 extern const Rotor m3_III;
 extern const Rotor m3_IV;
 extern const Rotor m3_V;
-extern const Rotor m4_VI;
-extern const Rotor m4_VII;
-extern const Rotor m4_VIII;
+extern const Rotor m3_VI;
+extern const Rotor m3_VII;
+extern const Rotor m3_VIII;
 extern const EnigmaModel m3_model;
-extern const EnigmaModel m3_extended_model;
+extern const EnigmaModel m3_Kriegsmarine_model;
 
 
 // M4 ------------------------------------------------------------------------------------------------------------------
@@ -31,7 +31,7 @@ extern const Rotor m4_UKWB_thin;
 extern const Rotor m4_UKWC_thin;
 extern const Rotor m4_beta;
 extern const Rotor m4_gamma;
-extern const EnigmaModel m4_model;
+extern const Enigma4Model m4_model;
 
 
 // Railway -------------------------------------------------------------------------------------------------------------

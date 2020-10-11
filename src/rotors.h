@@ -53,6 +53,15 @@ struct EnigmaModel
 };
 
 
+struct Enigma4Model
+{
+     const Rotor*              stator;         // ETW
+     std::vector<const Rotor*> rotors;
+     std::vector<const Rotor*> rotors4;
+     std::vector<const Rotor*> reflectors;     // UKW
+};
+
+
 // Useful when cracking rotor and ring positions or plugboards.
 struct EnigmaBase
 {
@@ -101,20 +110,20 @@ struct EnigmaKey
      )
      : EnigmaKey {*base.stator, *base.rotor1, *base.rotor2, *base.rotor3, *base.reflector,
                   plugboard,
-                  rotor_positions[0] - 'A', rotor_positions[1] - 'A', rotor_positions[2] - 'A',
-                  ring_positions[0] - 'A', ring_positions[1] - 'A', ring_positions[2] - 'A'}
+                  modular_int<26>{rotor_positions[0] - 'A'}, modular_int<26>{rotor_positions[1] - 'A'}, modular_int<26>{rotor_positions[2] - 'A'},
+                  modular_int<26>{ring_positions[0] - 'A'}, modular_int<26>{ring_positions[1] - 'A'}, modular_int<26>{ring_positions[2] - 'A'}}
      {}
 
 
      constexpr EnigmaKey (
           const EnigmaBase& base,
           std::string_view plugboard,
-          modular_int<26> rotor1_pos = 0,
-          modular_int<26> rotor2_pos = 0,
-          modular_int<26> rotor3_pos = 0,
-          modular_int<26> ring1_pos  = 0,
-          modular_int<26> ring2_pos  = 0,
-          modular_int<26> ring3_pos  = 0
+          modular_int<26> rotor1_pos = modular_int<26>{0},
+          modular_int<26> rotor2_pos = modular_int<26>{0},
+          modular_int<26> rotor3_pos = modular_int<26>{0},
+          modular_int<26> ring1_pos  = modular_int<26>{0},
+          modular_int<26> ring2_pos  = modular_int<26>{0},
+          modular_int<26> ring3_pos  = modular_int<26>{0}
      )
      : EnigmaKey {*base.stator, *base.rotor1, *base.rotor2, *base.rotor3, *base.reflector,
                   plugboard,
@@ -135,8 +144,8 @@ struct EnigmaKey
      )
      : EnigmaKey {stator, rotor1, rotor2, rotor3, reflector,
                   plugboard,
-                  rotor_positions[0] - 'A', rotor_positions[1] - 'A', rotor_positions[2] - 'A',
-                  ring_positions[0] - 'A', ring_positions[1] - 'A', ring_positions[2] - 'A'}
+                  modular_int<26>{rotor_positions[0] - 'A'}, modular_int<26>{rotor_positions[1] - 'A'}, modular_int<26>{rotor_positions[2] - 'A'},
+                  modular_int<26>{ring_positions[0] - 'A'}, modular_int<26>{ring_positions[1] - 'A'}, modular_int<26>{ring_positions[2] - 'A'}}
      {}
 
 
@@ -147,12 +156,12 @@ struct EnigmaKey
           const Rotor& rotor3,
           const Rotor& reflector,     // UKW
           std::string_view plugboard,
-          modular_int<26> rotor1_pos = 0,
-          modular_int<26> rotor2_pos = 0,
-          modular_int<26> rotor3_pos = 0,
-          modular_int<26> ring1_pos  = 0,
-          modular_int<26> ring2_pos  = 0,
-          modular_int<26> ring3_pos  = 0
+          modular_int<26> rotor1_pos = modular_int<26>{0},
+          modular_int<26> rotor2_pos = modular_int<26>{0},
+          modular_int<26> rotor3_pos = modular_int<26>{0},
+          modular_int<26> ring1_pos  = modular_int<26>{0},
+          modular_int<26> ring2_pos  = modular_int<26>{0},
+          modular_int<26> ring3_pos  = modular_int<26>{0}
      )
      : stator {&stator}, rotor1 {&rotor1}, rotor2 {&rotor2}, rotor3 {&rotor3}, reflector {&reflector},
        plugboard {plugboard},
@@ -165,4 +174,110 @@ struct EnigmaKey
      constexpr EnigmaKey (EnigmaKey&&) = default;
      constexpr EnigmaKey& operator= (const EnigmaKey&) = default;
      constexpr bool operator== (const EnigmaKey&) const = default;
+};
+
+
+struct Enigma4Key
+{
+     const Rotor* stator;        // ETW
+     const Rotor* rotor1;
+     const Rotor* rotor2;
+     const Rotor* rotor3;
+     const Rotor* rotor4;
+     const Rotor* reflector;     // UKW
+     std::string_view plugboard;
+     modular_int<26> rotor1_pos;
+     modular_int<26> rotor2_pos;
+     modular_int<26> rotor3_pos;
+     modular_int<26> rotor4_pos;
+     modular_int<26> ring1_pos;
+     modular_int<26> ring2_pos;
+     modular_int<26> ring3_pos;
+     modular_int<26> ring4_pos;
+
+
+     constexpr Enigma4Key (
+          const EnigmaBase& base,
+          const Rotor& rotor4,
+          std::string_view plugboard,
+          std::string_view ring_positions,
+          std::string_view rotor_positions
+     )
+     : Enigma4Key {*base.stator, *base.rotor1, *base.rotor2, *base.rotor3, rotor4, *base.reflector,
+                  plugboard,
+                  modular_int<26>{rotor_positions[0] - 'A'}, modular_int<26>{rotor_positions[1] - 'A'},
+                  modular_int<26>{rotor_positions[2] - 'A'}, modular_int<26>{rotor_positions[3] - 'A'},
+                  modular_int<26>{ring_positions[0] - 'A'}, modular_int<26>{ring_positions[1] - 'A'},
+                  modular_int<26>{ring_positions[2] - 'A'}, modular_int<26>{ring_positions[3] - 'A'}}
+     {}
+
+
+     constexpr Enigma4Key (
+          const EnigmaBase& base,
+          const Rotor& rotor4,
+          std::string_view plugboard,
+          modular_int<26> rotor1_pos = modular_int<26>{0},
+          modular_int<26> rotor2_pos = modular_int<26>{0},
+          modular_int<26> rotor3_pos = modular_int<26>{0},
+          modular_int<26> rotor4_pos = modular_int<26>{0},
+          modular_int<26> ring1_pos  = modular_int<26>{0},
+          modular_int<26> ring2_pos  = modular_int<26>{0},
+          modular_int<26> ring3_pos  = modular_int<26>{0},
+          modular_int<26> ring4_pos  = modular_int<26>{0}
+     )
+     : Enigma4Key {*base.stator, *base.rotor1, *base.rotor2, *base.rotor3, rotor4, *base.reflector,
+                  plugboard,
+                  rotor1_pos, rotor2_pos, rotor3_pos, rotor4_pos,
+                  ring1_pos, ring2_pos, ring3_pos, ring4_pos}
+     {}
+
+
+     constexpr Enigma4Key (
+          const Rotor& stator,        // ETW
+          const Rotor& rotor1,
+          const Rotor& rotor2,
+          const Rotor& rotor3,
+          const Rotor& rotor4,
+          const Rotor& reflector,     // UKW
+          std::string_view plugboard,
+          std::string_view rotor_positions,
+          std::string_view ring_positions
+     )
+     : Enigma4Key {stator, rotor1, rotor2, rotor3, rotor4, reflector,
+                  plugboard,
+                  modular_int<26>{rotor_positions[0] - 'A'}, modular_int<26>{rotor_positions[1] - 'A'},
+                  modular_int<26>{rotor_positions[2] - 'A'}, modular_int<26>{rotor_positions[3] - 'A'},
+                  modular_int<26>{ring_positions[0] - 'A'}, modular_int<26>{ring_positions[1] - 'A'},
+                  modular_int<26>{ring_positions[2] - 'A'}, modular_int<26>{ring_positions[3] - 'A'}}
+     {}
+
+
+     constexpr Enigma4Key (
+          const Rotor& stator,        // ETW
+          const Rotor& rotor1,
+          const Rotor& rotor2,
+          const Rotor& rotor3,
+          const Rotor& rotor4,
+          const Rotor& reflector,     // UKW
+          std::string_view plugboard,
+          modular_int<26> rotor1_pos = modular_int<26>{0},
+          modular_int<26> rotor2_pos = modular_int<26>{0},
+          modular_int<26> rotor3_pos = modular_int<26>{0},
+          modular_int<26> rotor4_pos = modular_int<26>{0},
+          modular_int<26> ring1_pos  = modular_int<26>{0},
+          modular_int<26> ring2_pos  = modular_int<26>{0},
+          modular_int<26> ring3_pos  = modular_int<26>{0},
+          modular_int<26> ring4_pos  = modular_int<26>{0}
+     )
+     : stator {&stator}, rotor1 {&rotor1}, rotor2 {&rotor2}, rotor3 {&rotor3}, rotor4 {&rotor4}, reflector {&reflector},
+       plugboard {plugboard},
+       rotor1_pos {rotor1_pos}, rotor2_pos {rotor2_pos}, rotor3_pos {rotor3_pos}, rotor4_pos {rotor4_pos},
+       ring1_pos {ring1_pos}, ring2_pos {ring2_pos}, ring3_pos {ring3_pos}, ring4_pos {ring4_pos}
+     {}
+
+
+     constexpr Enigma4Key (const Enigma4Key&) = default;
+     constexpr Enigma4Key (Enigma4Key&&) = default;
+     constexpr Enigma4Key& operator= (const Enigma4Key&) = default;
+     constexpr bool operator== (const Enigma4Key&) const = default;
 };

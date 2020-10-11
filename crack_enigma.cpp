@@ -43,12 +43,17 @@ int main (int argc, char** argv)
      string_view ct = "NPNKANVHWKPXORCDDTRJRXSJFLCIUAIIBUNQIUQFTHLOZOIMENDNGPCB";
      string_view plug = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+     // string_view ct = "YXBMXADQBDBAAYIMKDODAYIXNBDQZFJKOLFVEEQBCLUUXDFVQYGKEYBVRHONJKPJMKUNLYLZUKBKJOA"
+     //                  "JTWVWMOMDPGVXEPUKXBVSGHROFOSBCNKEHEHAKWKOGWTBZFXSYCGSUUPPIZTRTFVCXZVCXTFLMTPTAQ"
+     //                  "VMREGWSBFZBM";
+     // string_view plug = "ABCDEFGNUKJMLHPOQRSYIVWXTZ";
+
 
      Stopwatch sw;
      sw.click();
 
      // BestList best = bf_4_threads<25>(rotors, plug, ct, 13);     // quick test
-     // BestList best = bf_4_threads<25>(railway_model, plug, ct, 25, score_by_IOC_order);
+     // BestList best = bf_4_threads<25>(m3_model, plug, ct, 25, score_by_IOC_order);
 
      BestList best = smart_4_threads<25>(m3_model, plug, ct);
 

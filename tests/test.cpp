@@ -7,6 +7,9 @@
 using namespace std;
 
 
+// TODO: Replace with Catch, to help with interface design.
+
+
 int main (int argc, char** argv)
 {
      // Practical Cryptography test 1
@@ -18,21 +21,22 @@ int main (int argc, char** argv)
           string_view expected_pt = "INTELLIGENCEPOINTSTOATTACKONTHEEASTWALLOFTHECASTLEATDAWN";
 
           string_view ct = "NPNKANVHWKPXORCDDTRJRXSJFLCIUAIIBUNQIUQFTHLOZOIMENDNGPCB";
-          string_view plug = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+          string plug    = convert_to_plug("");
 
           Enigma enigma {ETW_ABCDEF, m3_IV, m3_V, m3_II, UKWB, plug, "GWD", "PAA"};
 
           string pt = enigma.encrypt(ct);
           string rt = enigma.encrypt(pt);
 
+
           cout << "Practical Cryptography 1\n"
                << "------------------------\n";
 
-          cout << "Plaintext:       " << pt << "\n";
-          cout << "     " << (pt == expected_pt ? "good\n" : "bad\n");
+          cout << "Plaintext:       " << pt << "\n"
+               << "     " << (pt == expected_pt ? "good\n" : "bad\n");
 
-          cout << "Reciphered text: " << rt << "\n";
-          cout << "     " << (rt == ct ? "good\n\n" : "bad\n\n");
+          cout << "Reciphered text: " << rt << "\n"
+               << "     " << (rt == ct ? "good\n\n" : "bad\n\n");
 
      }
 
@@ -50,21 +54,22 @@ int main (int argc, char** argv)
           string_view ct = "YXBMXADQBDBAAYIMKDODAYIXNBDQZFJKOLFVEEQBCLUUXDFVQYGKEYBVRHONJKPJMKUNLYLZUKBKJOA"
                            "JTWVWMOMDPGVXEPUKXBVSGHROFOSBCNKEHEHAKWKOGWTBZFXSYCGSUUPPIZTRTFVCXZVCXTFLMTPTAQ"
                            "VMREGWSBFZBM";
-          string_view plug = "ABCDEFGNUKJMLHPOQRSYIVWXTZ";
+          string plug = convert_to_plug("PO ML IU KJ NH YT");
 
           Enigma enigma {ETW_ABCDEF, m3_I, m3_V, m3_II, UKWB, plug, "SAO", "BFA"};
 
           string pt = enigma.encrypt(ct);
           string rt = enigma.encrypt(pt);
 
+
           cout << "Practical Cryptography 2\n"
                << "------------------------\n";
 
-          cout << "Plaintext:       " << pt << "\n";
-          cout << "     " << (pt == expected_pt ? "good\n" : "bad\n");
+          cout << "Plaintext:       " << pt << "\n"
+               << "     " << (pt == expected_pt ? "good\n" : "bad\n");
 
-          cout << "Reciphered text: " << rt << "\n";
-          cout << "     " << (rt == ct ? "good\n\n" : "bad\n\n");
+          cout << "Reciphered text: " << rt << "\n"
+               << "     " << (rt == ct ? "good\n\n" : "bad\n\n");
      }
 
 
@@ -79,8 +84,8 @@ int main (int argc, char** argv)
 
           string_view text = "Rc qipv jhx vld plson fhceuh itp jui gh qhzu dg sq xie dhw. "
                              "U gbfl lf fluz pcag wrgkv zw, dinyg zw, qge gnvm L fhx.";
-          string ct = convert_to_ct(text);
-          string_view plug = "AYCDWZIHGJKLQNOPMVSTXREUBF";
+          string ct   = convert_to_ct(text);
+          string plug = convert_to_plug("BY EW FZ GI MQ RV UX");
 
 
           Enigma enigma {ETW_QWERTZ,
@@ -97,11 +102,11 @@ int main (int argc, char** argv)
           cout << "Random CrypTool\n"
                << "---------------\n";
 
-          cout << "Plaintext:       " << pt << "\n";
-          cout << "     " << (pt == expected_pt ? "good\n" : "bad\n");
+          cout << "Plaintext:       " << pt << "\n"
+               << "     " << (pt == expected_pt ? "good\n" : "bad\n");
 
-          cout << "Reciphered text: " << rt << "\n";
-          cout << "     " << (rt == expected_ct ? "good\n\n" : "bad\n\n");
+          cout << "Reciphered text: " << rt << "\n"
+               << "     " << (rt == expected_ct ? "good\n\n" : "bad\n\n");
      }
 
 
@@ -114,12 +119,12 @@ int main (int argc, char** argv)
                                     "IMWORKINGONTESTINGTHEBRUTEFORCEPORTIONAGAINSTAKNOWNCIPHERTHEOPTIMIZATIONSIUSEFOR"
                                     "BRUTEFORCINGROTATETHEWHEELSDIFFERENTLYSOTHETESTINGISDIFFERENT";
 
-          string_view ct   = "EQJRHLEDDYDEIZLBDIYMCDJUXBXKBATSHXDOLOQDZQFZWRHYEUFNCXDEIXKPDNQHBESVHWIZTQEPWCKHJL"
-                             "GDKUWWBJIRGIINLPSDMOZIBJLCUCEJVQLPKUAQGMMKOWKPWIAJDJMXFFBNDBEXGLTVLQPZFRKTQKRGCQ"
-                             "RGXGFWLBHGUYKHDYESJUKZUUCRZMAKHTCJVMIUZJLBAXMCZLFOFXEGIIHMRLH";
-          string_view plug = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+          string_view ct = "EQJRHLEDDYDEIZLBDIYMCDJUXBXKBATSHXDOLOQDZQFZWRHYEUFNCXDEIXKPDNQHBESVHWIZTQEPWCKHJL"
+                           "GDKUWWBJIRGIINLPSDMOZIBJLCUCEJVQLPKUAQGMMKOWKPWIAJDJMXFFBNDBEXGLTVLQPZFRKTQKRGCQ"
+                           "RGXGFWLBHGUYKHDYESJUKZUUCRZMAKHTCJVMIUZJLBAXMCZLFOFXEGIIHMRLH";
+          string plug = convert_to_plug("");
 
-          Enigma enigma {ETW_ABCDEF, m3_V, m3_I, m4_VII, UKWA, plug, 0, 0, 0, 0, 0, 0};
+          Enigma enigma {ETW_ABCDEF, m3_V, m3_I, m3_VII, UKWA, plug, 0, 0, 0, 0, 0, 0};
 
           string pt = enigma.encrypt(ct);
           string rt = enigma.encrypt(pt);
@@ -128,11 +133,11 @@ int main (int argc, char** argv)
           cout << "CrypTool 2-notch test\n"
                << "---------------------\n";
 
-          cout << "Plaintext:       " << pt << "\n";
-          cout << "     " << (pt == expected_pt ? "good\n" : "bad\n");
+          cout << "Plaintext:       " << pt << "\n"
+               << "     " << (pt == expected_pt ? "good\n" : "bad\n");
 
-          cout << "Reciphered text: " << rt << "\n";
-          cout << "     " << (rt == ct ? "good\n\n" : "bad\n\n");
+          cout << "Reciphered text: " << rt << "\n"
+               << "     " << (rt == ct ? "good\n\n" : "bad\n\n");
      }
 
 
@@ -142,9 +147,10 @@ int main (int argc, char** argv)
           // Model: m3
           // Rotors: IV V II   Pos: G W D   Ring: P A A   Reflector: UKWB
           string_view ct = "NPNKANVHWKPXORCDDTRJRXSJFLCIUAIIBUNQIUQFTHLOZOIMENDNGPCB";
-          string_view plug = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+          string plug    = convert_to_plug("");
 
           EnigmaKey expected {ETW_ABCDEF, m3_IV, m3_V, m3_II, UKWB, plug, "GWD", "PAA"};
+
 
           cout << "smart_decipher test\n"
                << "-------------------\n";
@@ -156,5 +162,76 @@ int main (int argc, char** argv)
           });
 
           cout << "\nSolution was found: " << (solution_was_found ? "yes\n\n" : "no\n\n");
+     }
+
+
+     // Enigma M4 test
+     {
+          // Expected:
+          // Model: m4
+          // Rotors: I III II beta   Pos: A L Q A   Ring: A E C I   Reflector: UKWB thin
+          string_view expected_pt = "INTELLIGENCEPOINTSTOATTACKONTHEEASTWALLOFTHECASTLEATDAWN";
+
+          string ct   = convert_to_ct("ntaa phjk csol ntpa irsx pyro ohal vsum qjqc rmjz qowc gkzf zfne nvih");
+          string plug = convert_to_plug("bq cr di ej kw mt os px uz gh");
+
+          Enigma4 enigma {ETW_ABCDEF, m3_I, m3_III, m3_II, m4_beta, m4_UKWB_thin, plug, "BLQA", "BECI"};
+
+          string pt = enigma.encrypt(ct);
+          string rt = enigma.encrypt(pt);
+
+
+          cout << "Enigma M4 test\n"
+               << "--------------\n";
+
+          cout << "Plaintext:       " << pt << "\n"
+               << "     " << (pt == expected_pt ? "good\n" : "bad\n");
+
+          cout << "Reciphered text: " << rt << "\n"
+               << "     " << (rt == ct ? "good\n\n" : "bad\n\n");
+     }
+
+     // Enigma M4->M3 test
+     {
+          // M4 using beta and Bthin should be the same as M3 using UKWB. Similarly with gamma, Cthin, UKWC.
+          // Rotor/ring positions must both be A for this equivalence to hold.
+
+          cout << "Enigma M4->M3 test\n"
+               << "------------------\n";
+
+          string_view expected_pt = "INTELLIGENCEPOINTSTOATTACKONTHEEASTWALLOFTHECASTLEATDAWN";
+          string plug = convert_to_plug("bq cr di ej kw mt os px uz gh");
+
+
+          // beta
+          string ctB = convert_to_ct("odlio qsapd tbttn ueokz jbqzw hlynd mmbvn dlanx tvrny lvqmj kovre v");
+
+          Enigma4 enigma4B {ETW_ABCDEF, m3_I, m3_III, m3_I, m4_beta, m4_UKWB_thin, plug, "BLQA", "BECA"};
+          Enigma  enigmaB  {ETW_ABCDEF, m3_I, m3_III, m3_I, UKWB, plug, "BLQ", "BEC"};
+
+          string pt4B = enigma4B.encrypt(ctB);
+          string rt4B = enigma4B.encrypt(pt4B);
+          string ptB  = enigmaB.encrypt(ctB);
+
+
+          cout << "beta/UKWB plaintexts:  " << pt4B << "     " << ptB << "\n"
+               << "     " << (pt4B == expected_pt && pt4B == ptB ? "good\n" : "bad\n");
+
+
+          // gamma
+          string ctC = convert_to_ct("xwwap gzbvs iqlym zmemh tyhok ixjvz pyklq auysb awxmf bijpl nnuvk m");
+
+          Enigma4 enigma4C {ETW_ABCDEF, m3_I, m3_III, m3_I, m4_gamma, m4_UKWC_thin, plug, "BLQA", "BECA"};
+          Enigma  enigmaC  {ETW_ABCDEF, m3_I, m3_III, m3_I, UKWC, plug, "BLQ", "BEC"};
+
+          string pt4C = enigma4C.encrypt(ctC);
+          string ptC  = enigmaC.encrypt(ctC);
+
+
+          cout << "gamma/UKWC plaintexts: " << pt4C << "     " << ptC << "\n"
+               << "     " << (pt4C == expected_pt && pt4C == ptC ? "good\n" : "bad\n");
+
+          cout << "Reciphered text:       " << rt4B << "\n"
+               << "     " << (rt4B == ctB ? "good\n\n" : "bad\n\n");
      }
 }

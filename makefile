@@ -23,7 +23,7 @@ $(MAIN): $(MAIN).cpp $(OBJS)
 
 .PHONY: debug
 debug:
-	@$(CXX) $(CXXFLAGS) -ggdb -Og -Iinclude/ $(MAIN).cpp $(SRCS) -o $(MAIN)
+	@$(CXX) $(CXXFLAGS) -ggdb -Iinclude/ $(MAIN).cpp $(SRCS) -o $(MAIN)
 
 
 .PHONY: $(MAIN)_callgrind
@@ -44,7 +44,7 @@ test: tests/test.cpp $(OBJS)
 
 .PHONY: debug-test
 debug-test:
-	@$(CXX) $(CXXFLAGS) -ggdb -Og -Iinclude/ tests/test.cpp $(OBJS) -o test
+	@$(CXX) $(CXXFLAGS) -ggdb -Iinclude/ tests/test.cpp $(SRCS) -o test
 
 
 .PHONY: clean
