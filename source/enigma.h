@@ -70,8 +70,8 @@ public:
      std::bitset<26> turnover2;
 
      // Pre-calculations
-     int two_minus_one   = 0;
-     int three_minus_two = 0;
+     int two_minus_one;
+     int three_minus_two;
 
      void reset ();
      void step ();

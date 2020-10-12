@@ -1,3 +1,3 @@
 #pragma once
 
-#include "../src/bruteforce.h"
+#include "../source/bruteforce.h"
