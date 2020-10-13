@@ -94,10 +94,16 @@ public:
      constexpr auto operator<=> (const self_type&) const = delete;
 
 
+     // WARNING: If x >= N this breaks the invariant.
      constexpr self_type& add_unsafely (int x)
      {
-          value += x;
-          return *this;
+          return this + x;
+     }
+
+     // WARNING: If x >= N this breaks the invariant.
+     constexpr self_type& subtract_unsafely (int x)
+     {
+          return this - x;
      }
 
 }; // modular_int
