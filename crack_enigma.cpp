@@ -5,62 +5,41 @@
 #include "bruteforce-enigma.h"
 #include "stopwatch.h"
 
-using namespace std;
 
+/*
+Helpful tips:
 
-// Formula for number of encryptions run on smart_decipher:
-//   num_of_encryptions = num_of_configurations * 26^3 + BestList_N * num_threads * 26^2
+Formula for number of encryptions run on smart_decipher:
+     num_of_encryptions = num_of_configurations * (26^3 + HighScores_N * 26^2)
 
+Formula for number of encryptions run on bruteforece_decipher:
+     num_of_encryptions = num_of_configurations * 26^5
 
-// bf_4_threads time approximations (40 characters):
-// CrypTool_m3: 58 min 32 seconds
-// CrypTool_railway: 1 min 4 seconds
+Core i7-6500U, 2.50 Ghz
+Speed using Qgram scoring: 207.16 x 10^6 characters/sec
+Speed using IOC scoring: 252.30 x 10^6 characters/sec
+*/
 
-// smart_4_threads time approximations (85 characters):
-// m3_extended: 9.50 seconds
-// railway: 0.30 seconds
 
 int main (int argc, char** argv)
 {
-     // string_view text = "Rc qipv jhx vld plson fhceuh itp jui gh qhzu dg sq xie dhw. "
-     //                    "U gbfl lf fluz pcag wrgkv zw, dinyg zw, qge gnvm L fhx.";
-     // string ct = convert_to_ct(text);
-     // string_view plug = "AYCDWZIHGJKLQNOPMVSTXREUBF";
+     // Ciphertext ct = "NPNKANVHWKPXORCDDTRJRXSJFLCIUAIIBUNQIUQFTHLOZOIMENDNGPCB";
+     // Plugboard plug = "";
 
-     // string_view text = "Rc qipv jhx vld plson fhceuh itp jui gh qhzu dg sq xie dhw. ";
-     // string ct = convert_to_ct(text);
-     // string_view plug = "AYCDWZIHGJKLQNOPMVSTXREUBF";
-
-     // string_view text = "U gbfl lf fluz pcag wrgkv zw, dinyg zw, qge gnvm L fhx.";
-     // string ct = convert_to_ct(text);
-     // string_view plug = "AYCDWZIHGJKLQNOPMVSTXREUBF";
-
-     // string_view text = "WPEEN ZDYPG OTHVE KCLXA GNKGN AVGVF AWTMA XTWFW";
-     // string ct = convert_to_ct(text);
-     // string_view plug = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-     // EnigmaBase rotors {ETW_ABCDEF, m3_III, m3_II, m3_I, UKWB};
-
-     string_view ct = "NPNKANVHWKPXORCDDTRJRXSJFLCIUAIIBUNQIUQFTHLOZOIMENDNGPCB";
-     string_view plug = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-     // string_view ct = "YXBMXADQBDBAAYIMKDODAYIXNBDQZFJKOLFVEEQBCLUUXDFVQYGKEYBVRHONJKPJMKUNLYLZUKBKJOA"
-     //                  "JTWVWMOMDPGVXEPUKXBVSGHROFOSBCNKEHEHAKWKOGWTBZFXSYCGSUUPPIZTRTFVCXZVCXTFLMTPTAQ"
-     //                  "VMREGWSBFZBM";
-     // string_view plug = "ABCDEFGNUKJMLHPOQRSYIVWXTZ";
-
+     Ciphertext ct = "YXBMXADQBDBAAYIMKDODAYIXNBDQZFJKOLFVEEQBCLUUXDFVQYGKEYBVRHONJKPJMKUNLYLZUKBKJOA"
+                     "JTWVWMOMDPGVXEPUKXBVSGHROFOSBCNKEHEHAKWKOGWTBZFXSYCGSUUPPIZTRTFVCXZVCXTFLMTPTAQ"
+                     "VMREGWSBFZBM";
+     Plugboard plug = "PO ML IU KJ NH YT";
 
      Stopwatch sw;
      sw.click();
 
-     // BestList best = bf_4_threads<25>(rotors, plug, ct, 13);     // quick test
-     // BestList best = bf_4_threads<25>(m3_model, plug, ct, 25, score_by_IOC_order);
-
-     BestList best = smart_4_threads<25>(m3_model, plug, ct);
+     // HighScores best = bruteforce_decipher(m3_model, plug, ct);
+     HighScores best = smart_decipher(m3_model, plug, ct);
 
      sw.click();
 
      best.print();
-
      std::cout << "\n";
      sw.read();
 }
