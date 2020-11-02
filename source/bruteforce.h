@@ -1,286 +1,245 @@
 #pragma once
 
 #include <array>
-#include <functional>      // std::invoke
+#include <functional>     // std::invoke
 #include <future>
 #include <iostream>
-#include <string>
+#include <ranges>
 #include <string_view>
 #include <vector>
-#include "bestlist.h"
+#include "leaderboard.h"
 #include "enigma.h"
-#include "models.h"        // for automatic import into user code
-#include "rotors.h"
+#include "datatypes.h"
 #include "score.h"
 
 
-std::string convert_to_ct (std::string_view in);
-std::string convert_to_plug (std::string_view pairs);
-std::vector<std::array<int, 3>> three_permutations_of_n (int n);
+// ---------------------------------------------------------------------------------------------------------------------
+// Common
+// ---------------------------------------------------------------------------------------------------------------------
 std::vector<std::array<int, 3>> triples_from_n (int n);
-std::vector<EnigmaBase> all_configurations_no_replace (const EnigmaModel& model);
 std::vector<EnigmaBase> all_configurations (const EnigmaModel& model);
+std::vector<Enigma4Base> all_configurations (const Enigma4Model& model);
 
 
-template <class EnigmaType, int N, class F>
-void test_configuration (EnigmaType& enigma,
-                         std::span<const int> ct_ordinal, std::span<int> pt_ordinal,
-                         BestList<N>& scores,
-                         F scoring_function = score_by_Qgram)
+template <class EnigmaType, std::ranges::input_range R1,
+          std::ranges::forward_range R2, class LeaderboardType,
+          class F>
+void test_enigma_configuration (
+     EnigmaType& enigma, const R1& ct_ordinals, R2& pt_ordinals, LeaderboardType& scores, F scoring_function
+)
 {
-     enigma.encrypt(ct_ordinal, pt_ordinal.begin());
-     double score = std::invoke(scoring_function, pt_ordinal);
+     enigma.encrypt(ct_ordinals, std::ranges::begin(pt_ordinals));
+
+     double score = std::invoke(scoring_function, pt_ordinals);
 
      if (scores.is_good_score(score))
           scores.add(score, enigma.get_key());
 };
 
 
-// TODO: Delegate this to the "4_threads" function and divide the tasks by configurations instead of rotor positions.
-// Will take 1/4 the space costs.
-
-template <int N = 10, class F = decltype(score_by_Qgram)>
-BestList<N> bf_decipher (
-     const EnigmaModel& model,
-     std::string_view plugboard,
-     std::string_view ct,
-     int rotor1_start = 0, int rotor1_end = 25, int rotor_max = 25,
-     F scoring_function = score_by_Qgram
+// ---------------------------------------------------------------------------------------------------------------------
+// Bruteforce
+// ---------------------------------------------------------------------------------------------------------------------
+template <std::ranges::forward_range R, int N = 10, class F = decltype(score_by_Qgram<std::vector<int>>)>
+void bruteforce_positions (
+     const basic_enigma_base<EnigmaKey>& base, const Plugboard& plugboard, const R& ct_ordinals,
+     Leaderboard<N, EnigmaKey>& scores,
+     F scoring_function = score_by_Qgram<std::vector<int>>
 )
 {
-     std::vector<int> pt_ordinal(ct.length());
-     const std::vector<int> ct_ordinal = str_to_ordinals(ct);
+     std::vector<int> pt_ordinals(std::ranges::size(ct_ordinals), 0);
+     Enigma_optimize_unknown_positions<EnigmaKey> enigma {base, plugboard};
 
-
-     std::puts("Breaking enigma...");
-
-
-     BestList<N> best {ct};
-
-     for (const EnigmaBase& base : all_configurations(model))
-     {
-          Enigma_optimize_unknown_positions enigma {base, plugboard, modular_int<26>{rotor1_start}};
-
-          // TODO: Determine which settings are equivalent, and skip
-
-          for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor1())
-          for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_rotor2())
-          for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_rotor3())
-          for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring1())
-          for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring2())
-          // Third ring has no effect
-               test_configuration(enigma, ct_ordinal, pt_ordinal, best, scoring_function);
-     }
-
-     return best;
-}
-
-
-template <int N = 10, class F = decltype(score_by_Qgram)>
-BestList<N> bf_decipher (
-     const EnigmaBase& base,
-     std::string_view plugboard,
-     std::string_view ct,
-     int rotor1_start = 0, int rotor1_end = 25, int rotor_max = 25,
-     F scoring_function = score_by_Qgram
-)
-{
-     std::vector<int> pt_ordinal(ct.length());
-     const std::vector<int> ct_ordinal = str_to_ordinals(ct);
-
-
-     std::puts("Breaking enigma...");
-
-
-     BestList<N> best {ct};
-     Enigma_optimize_unknown_positions enigma {base, plugboard, modular_int<26>{rotor1_start}};
-
-     for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor1())
-     for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_rotor2())
-     for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_rotor3())
-     for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring1())
-     for (int i = 0;            i < rotor_max + 1;  ++i,     enigma.increment_ring2())
+     for (int i = 0; i < 26; ++i,     enigma.increment_rotor1())
+     for (int i = 0; i < 26; ++i,     enigma.increment_rotor2())
+     for (int i = 0; i < 26; ++i,     enigma.increment_rotor3())
+     for (int i = 0; i < 26; ++i,     enigma.increment_ring1())
+     for (int i = 0; i < 26; ++i,     enigma.increment_ring2())
      // Third ring has no effect
-          test_configuration(enigma, ct_ordinal, pt_ordinal, best, scoring_function);
-
-     return best;
+          test_enigma_configuration(enigma, ct_ordinals, pt_ordinals, scores, scoring_function);
 }
 
 
-template <int N, class F = decltype(score_by_Qgram)>
-BestList<N> bf_4_threads (const EnigmaModel& model, std::string_view plug, std::string_view ct,
-                          int rotor_max = 25, F scoring_function = score_by_Qgram)
-{
-     int quarter = rotor_max / 4 ;
-
-     int a = 0 * quarter;
-     int b = 1 * quarter;
-     int c = 2 * quarter;
-     int d = 3 * quarter;
-     int e = rotor_max;
-     int max = rotor_max;
-
-     auto future1 = std::async(std::launch::async,
-                               [&] () { return bf_decipher<N>(model, plug, ct, a,     b, max, scoring_function); });
-     auto future2 = std::async(std::launch::async,
-                               [&] () { return bf_decipher<N>(model, plug, ct, b + 1, c, max, scoring_function); });
-     auto future3 = std::async(std::launch::async,
-                               [&] () { return bf_decipher<N>(model, plug, ct, c + 1, d, max, scoring_function); });
-     auto future4 = std::async(std::launch::async,
-                               [&] () { return bf_decipher<N>(model, plug, ct, d + 1, e, max, scoring_function); });
-
-     return combine_best<N>(future1.get(), future2.get(), future3.get(), future4.get());
-}
-
-
-template <int N, class F = decltype(score_by_Qgram)>
-BestList<N> bf_4_threads (const EnigmaBase& base, std::string_view plug, std::string_view ct,
-                          int rotor_max = 25, F scoring_function = score_by_Qgram)
-{
-     int quarter = rotor_max / 4 ;
-
-     int a = 0 * quarter;
-     int b = 1 * quarter;
-     int c = 2 * quarter;
-     int d = 3 * quarter;
-     int e = rotor_max;
-     int max = rotor_max;
-
-     auto future1 = std::async(std::launch::async,
-                               [&] () { return bf_decipher<N>(base, plug, ct, a,     b, max, scoring_function); });
-     auto future2 = std::async(std::launch::async,
-                               [&] () { return bf_decipher<N>(base, plug, ct, b + 1, c, max, scoring_function); });
-     auto future3 = std::async(std::launch::async,
-                               [&] () { return bf_decipher<N>(base, plug, ct, c + 1, d, max, scoring_function); });
-     auto future4 = std::async(std::launch::async,
-                               [&] () { return bf_decipher<N>(base, plug, ct, d + 1, e, max, scoring_function); });
-
-     return combine_best<N>(future1.get(), future2.get(), future3.get(), future4.get());
-}
-
-
-// Get best rotor positions, then use those to determine best ring positions
-template <int N, class F = decltype(score_by_Qgram)>
-BestList<N> smart_decipher (
-     const EnigmaModel& model,
-     std::string_view plugboard,
-     std::string_view ct,
-     int rotor1_start = 0, int rotor1_end = 25,
-     F scoring_function = score_by_Qgram
+// Useful for multithreading a single configuration.
+template <std::ranges::forward_range R, int N = 10, class F = decltype(score_by_Qgram<std::vector<int>>)>
+Leaderboard<N, EnigmaKey> bruteforce_positions (
+     const basic_enigma_base<EnigmaKey>& base, const Plugboard& plugboard, const R& ct_ordinals,
+     F scoring_function = score_by_Qgram<std::vector<int>>, int rotor1_start = 0, int rotor1_end = 26
 )
 {
-     std::vector<int> pt_ordinal(ct.length());
-     const std::vector<int> ct_ordinal = str_to_ordinals(ct);
+     Leaderboard<N, EnigmaKey> scores;
+     std::vector<int> pt_ordinals(std::ranges::size(ct_ordinals), 0);
+     Enigma_optimize_unknown_positions<EnigmaKey> enigma {base, plugboard, rotor1_start};
+
+     for (int i = rotor1_start; i < rotor1_end; ++i,     enigma.increment_rotor1())
+     for (int i = 0;            i < 26;         ++i,     enigma.increment_rotor2())
+     for (int i = 0;            i < 26;         ++i,     enigma.increment_rotor3())
+     for (int i = 0;            i < 26;         ++i,     enigma.increment_ring1())
+     for (int i = 0;            i < 26;         ++i,     enigma.increment_ring2())
+     // Third ring has no effect
+          test_enigma_configuration(enigma, ct_ordinals, pt_ordinals, scores, scoring_function);
+
+     return scores;
+}
 
 
-     std::puts("Breaking enigma...");
+template <std::ranges::forward_range R, int N = 10, class F = decltype(score_by_Qgram<std::vector<int>>)>
+void bruteforce_positions (
+     const basic_enigma_base<Enigma4Key>& base, const Plugboard& plugboard, const R& ct_ordinals,
+     Leaderboard<N, Enigma4Key>& scores,
+     F scoring_function = score_by_Qgram<std::vector<int>>
+)
+{
+     std::vector<int> pt_ordinals(std::ranges::size(ct_ordinals), 0);
+     Enigma_optimize_unknown_positions<Enigma4Key> enigma {base, plugboard};
+
+     for (int i = 0; i < 26; ++i,     enigma.increment_rotor1())
+     for (int i = 0; i < 26; ++i,     enigma.increment_rotor2())
+     for (int i = 0; i < 26; ++i,     enigma.increment_rotor3())
+     for (int i = 0; i < 26; ++i,     enigma.increment_rotor4())
+     for (int i = 0; i < 26; ++i,     enigma.increment_ring1())
+     for (int i = 0; i < 26; ++i,     enigma.increment_ring2())
+     // Third and fourth rings have no effect
+          test_enigma_configuration(enigma, ct_ordinals, pt_ordinals, scores, scoring_function);
+}
 
 
-     // Find the N best rotors
-     BestList<N> best_rotors {ct};
+// Useful for multithreading a single configuration.
+template <std::ranges::forward_range R, int N = 10, class F = decltype(score_by_Qgram<std::vector<int>>)>
+Leaderboard<N, Enigma4Key> bruteforce_positions (
+     const basic_enigma_base<Enigma4Key>& base, const Plugboard& plugboard, const R& ct_ordinals,
+     F scoring_function = score_by_Qgram<std::vector<int>>, int rotor1_start = 0, int rotor1_end = 26
+)
+{
+     Leaderboard<N, Enigma4Key> scores;
+     std::vector<int> pt_ordinals(std::ranges::size(ct_ordinals), 0);
+     Enigma_optimize_unknown_positions<Enigma4Key> enigma {base, plugboard, rotor1_start};
 
-     for (const EnigmaBase& base : all_configurations(model))
+     for (int i = rotor1_start; i < rotor1_end; ++i,     enigma.increment_rotor1())
+     for (int i = 0;            i < 26;         ++i,     enigma.increment_rotor2())
+     for (int i = 0;            i < 26;         ++i,     enigma.increment_rotor3())
+     for (int i = 0;            i < 26;         ++i,     enigma.increment_rotor4())
+     for (int i = 0;            i < 26;         ++i,     enigma.increment_ring1())
+     for (int i = 0;            i < 26;         ++i,     enigma.increment_ring2())
+     // Third and fourth rings have no effect
+          test_enigma_configuration(enigma, ct_ordinals, pt_ordinals, scores, scoring_function);
+
+     return scores;
+}
+
+
+// Useful for multithreading mutliple bases.
+template <class KeyType, std::ranges::forward_range R1, std::ranges::forward_range R2,
+          int N = 10, class F = decltype(score_by_Qgram<std::vector<int>>)>
+     requires std::same_as<std::ranges::range_value_t<R1>, basic_enigma_base<KeyType>>
+Leaderboard<N, KeyType> bruteforce_positions (
+     const R1& bases, const Plugboard& plugboard, const R2& ct_ordinals,
+     F scoring_function = score_by_Qgram<std::vector<int>>
+)
+{
+     Leaderboard<N, KeyType> scores;
+
+     for (const basic_enigma_base<KeyType>& base : bases)
+          bruteforce_positions(base, plugboard, ct_ordinals, scores, scoring_function);
+
+     return scores;
+}
+
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Smart
+// ---------------------------------------------------------------------------------------------------------------------
+template <std::ranges::forward_range R, int N, class F = decltype(score_by_Qgram<std::vector<int>>)>
+void smart_decipher_positions (
+     const basic_enigma_base<EnigmaKey>& base, const Plugboard& plugboard, const R& ct_ordinals,
+     Leaderboard<N, EnigmaKey>& scores,
+     F scoring_function = score_by_Qgram<std::vector<int>>
+)
+{
+     std::vector<int> pt_ordinals(std::ranges::size(ct_ordinals), 0);
+     Enigma_optimize_unknown_positions<EnigmaKey> enigma {base, plugboard};
+
+     Leaderboard<N, EnigmaKey> rotor_scores;
+
+     for (int i = 0; i < 26; ++i,     enigma.increment_rotor1())
+     for (int i = 0; i < 26; ++i,     enigma.increment_rotor2())
+     for (int i = 0; i < 26; ++i,     enigma.increment_rotor3())
+          test_enigma_configuration(enigma, ct_ordinals, pt_ordinals, rotor_scores, scoring_function);
+
+
+     for (const auto& entry : rotor_scores.get_entries())
      {
-          Enigma_optimize_unknown_positions enigma {base, plugboard, modular_int<26>{rotor1_start}};
-
-          for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor1())
-          for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor2())
-          for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor3())
-               test_configuration(enigma, ct_ordinal, pt_ordinal, best_rotors, scoring_function);
-     }
-
-
-     // Now find the best rings from the top results
-     BestList<N> best_rings {ct};
-
-     for (const ScoreEntry& entry : best_rotors.get_entries())
-     {
-          Enigma_optimize_unknown_positions enigma {entry.key};
+          Enigma_optimize_unknown_positions<EnigmaKey> enigma {entry.id};
 
           for (int i = 0; i < 26; ++i,     enigma.increment_ring1(), enigma.increment_rotor1())
           for (int i = 0; i < 26; ++i,     enigma.increment_ring2(), enigma.increment_rotor2())
           // Third ring has no effect
-               test_configuration(enigma, ct_ordinal, pt_ordinal, best_rings, scoring_function);
+               test_enigma_configuration(enigma, ct_ordinals, pt_ordinals, scores, scoring_function);
      }
-
-
-     return best_rings;
 }
 
 
-template <int N, class F = decltype(score_by_Qgram)>
-BestList<N> smart_decipher (
-     const EnigmaBase& base,
-     std::string_view plugboard,
-     std::string_view ct,
-     int rotor1_start = 0, int rotor1_end = 25,
-     F scoring_function = score_by_Qgram
+template <std::ranges::forward_range R, int N, class F = decltype(score_by_Qgram<std::vector<int>>)>
+void smart_decipher_positions (
+     const basic_enigma_base<Enigma4Key>& base, const Plugboard& plugboard, const R& ct_ordinals,
+     Leaderboard<N, Enigma4Key>& scores,
+     F scoring_function = score_by_Qgram<std::vector<int>>
 )
 {
-     std::vector<int> pt_ordinal(ct.length());
-     const std::vector<int> ct_ordinal = str_to_ordinals(ct);
+     std::vector<int> pt_ordinals(std::ranges::size(ct_ordinals), 0);
+     Enigma_optimize_unknown_positions<Enigma4Key> enigma {base, plugboard};
+
+     Leaderboard<N, Enigma4Key> rotor_scores;
+
+     for (int i = 0; i < 26; ++i,     enigma.increment_rotor1())
+     for (int i = 0; i < 26; ++i,     enigma.increment_rotor2())
+     for (int i = 0; i < 26; ++i,     enigma.increment_rotor3())
+     for (int i = 0; i < 26; ++i,     enigma.increment_rotor4())
+          test_enigma_configuration(enigma, ct_ordinals, pt_ordinals, rotor_scores, scoring_function);
 
 
-     std::puts("Breaking enigma...");
-
-
-     BestList<N> best_rotors {ct};
-     Enigma_optimize_unknown_positions enigma {base, plugboard, modular_int<26>{rotor1_start}};
-
-     for (int i = rotor1_start; i < rotor1_end + 1; ++i,     enigma.increment_rotor1())
-     for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor2())
-     for (int i = 0;            i < 26;             ++i,     enigma.increment_rotor3())
-          test_configuration(enigma, ct_ordinal, pt_ordinal, best_rotors, scoring_function);
-
-
-     BestList<N> best_rings {ct};
-
-     for (const ScoreEntry& entry : best_rotors.get_entries())
+     for (const auto& entry : rotor_scores.get_entries())
      {
-          Enigma_optimize_unknown_positions enigma {entry.key};
+          Enigma_optimize_unknown_positions<Enigma4Key> enigma {entry.id};
 
           for (int i = 0; i < 26; ++i,     enigma.increment_ring1(), enigma.increment_rotor1())
           for (int i = 0; i < 26; ++i,     enigma.increment_ring2(), enigma.increment_rotor2())
-          // Third ring has no effect
-               test_configuration(enigma, ct_ordinal, pt_ordinal, best_rings, scoring_function);
+          // Third and fourth rings have no effect
+               test_enigma_configuration(enigma, ct_ordinals, pt_ordinals, scores, scoring_function);
      }
-
-
-     return best_rings;
 }
 
 
-template <int N, class F = decltype(score_by_Qgram)>
-BestList<N> smart_4_threads (const EnigmaModel& model, std::string_view plug, std::string_view ct,
-                             F scoring_function = score_by_Qgram)
+// Useful for a single configuration.
+template <class KeyType, std::ranges::input_range R, int N, class F = decltype(score_by_Qgram<std::vector<int>>)>
+     requires std::same_as<std::ranges::range_value_t<R>, int>
+Leaderboard<N, KeyType> smart_decipher_positions (
+     const basic_enigma_base<KeyType>& base, const Plugboard& plugboard, const R& ct_ordinals,
+     F scoring_function = score_by_Qgram<std::vector<int>>
+)
 {
-     auto future1 = std::async(std::launch::async,
-                               [&] () { return smart_decipher<N>(model, plug, ct, 0,  5 , scoring_function); });
-     auto future2 = std::async(std::launch::async,
-                               [&] () { return smart_decipher<N>(model, plug, ct, 6,  11, scoring_function); });
-     auto future3 = std::async(std::launch::async,
-                               [&] () { return smart_decipher<N>(model, plug, ct, 12, 17, scoring_function); });
-     auto future4 = std::async(std::launch::async,
-                               [&] () { return smart_decipher<N>(model, plug, ct, 18, 25, scoring_function); });
+     Leaderboard<N, KeyType> scores;
+     smart_decipher_positions(base, plugboard, ct_ordinals, scores);
 
-     return combine_best<N>(future1.get(), future2.get(), future3.get(), future4.get());
+     return scores;
 }
 
 
-template <int N, class F = decltype(score_by_Qgram)>
-BestList<N> smart_4_threads (const EnigmaBase& base, std::string_view plug, std::string_view ct,
-                             F scoring_function = score_by_Qgram)
+// Useful for multithreading mutliple bases.
+template <class KeyType, std::ranges::input_range R1, std::ranges::input_range R2,
+          int N = 10, class F = decltype(score_by_Qgram<std::vector<int>>)>
+     requires std::same_as<std::ranges::range_value_t<R1>, basic_enigma_base<KeyType>>
+Leaderboard<N, KeyType> smart_decipher_positions (
+     const R1& bases, const Plugboard& plugboard, const R2& ct_ordinals,
+     F scoring_function = score_by_Qgram<std::vector<int>>
+)
 {
-     auto future1 = std::async(std::launch::async,
-                               [&] () { return smart_decipher<N>(base, plug, ct, 0,  5 , scoring_function); });
-     auto future2 = std::async(std::launch::async,
-                               [&] () { return smart_decipher<N>(base, plug, ct, 6,  11, scoring_function); });
-     auto future3 = std::async(std::launch::async,
-                               [&] () { return smart_decipher<N>(base, plug, ct, 12, 17, scoring_function); });
-     auto future4 = std::async(std::launch::async,
-                               [&] () { return smart_decipher<N>(base, plug, ct, 18, 25, scoring_function); });
+     Leaderboard<N, KeyType> scores;
 
-     return combine_best<N>(future1.get(), future2.get(), future3.get(), future4.get());
+     for (const basic_enigma_base<KeyType>& base : bases)
+          smart_decipher_positions(base, plugboard, ct_ordinals, scores, scoring_function);
+
+     return scores;
 }
 
 

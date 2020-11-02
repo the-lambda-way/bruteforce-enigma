@@ -32,23 +32,20 @@ public:
 
      constexpr self_type& operator+= (self_type x)
      {
-          value = value + x.value;
-          if (value >= N)     value -= N;
-          return *this;
+          return add_unsafely(x.value);
      }
 
 
      constexpr self_type& operator-= (self_type x)
      {
-          value = N + value - x.value;
-          if (value >= N)     value -= N;
-          return *this;
+          return subtract_unsafely(x.value);
      }
 
 
      constexpr self_type& operator*= (self_type x)
      {
-          value = (value * x.value) % N;
+          value *= x.value;
+          value %= N;
           return *this;
      }
 
@@ -75,9 +72,7 @@ public:
 
      constexpr self_type& operator-- ()
      {
-          // Can't assume a signed type, so cannot decrement first.
-          if (value == 0)     value = N;
-          --value;
+          if (--value == -1)     value = N - 1;
           return *this;
      }
 
@@ -94,16 +89,21 @@ public:
      constexpr auto operator<=> (const self_type&) const = delete;
 
 
-     // WARNING: If x >= N this breaks the invariant.
+     // Avoids conversion (which uses modular division). WARNING: If this.value + x >= 2N this breaks the invariant.
      constexpr self_type& add_unsafely (int x)
      {
-          return this + x;
+          value += x;
+          if (value >= N)     value -= N;
+          return *this;
      }
 
-     // WARNING: If x >= N this breaks the invariant.
+
+     // Avoids conversion (which uses modular division). WARNING: If this.value - x < -N this breaks the invariant.
      constexpr self_type& subtract_unsafely (int x)
      {
-          return this - x;
+          value -= x;
+          if (value < 0)     value += N;
+          return *this;
      }
 
 }; // modular_int

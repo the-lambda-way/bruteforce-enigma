@@ -1,4 +1,4 @@
-CXX      = g++-10
+CXX      = g++
 CXXFLAGS = -std=c++20 -pthread
 CPPFLAGS =
 INCLUDES = -Iinclude/ -Iexternal/
@@ -11,7 +11,7 @@ TIME_FORMAT="     %E elapsed"
 # Since de_qgr.h and qgr.h cannot be compiled together, it is convenient to auto generate the dependency list
 DEPS     = $(subst \,,$(shell $(BASE_COMPILE) -MM include/bruteforce-enigma.h))
 INCL     = $(notdir $(wordlist 3, $(words $(DEPS)), $(DEPS)))
-HDR_ONLY = modular_int.h rotors.h
+HDR_ONLY = modular_int.h leaderboard.h score.h
 HDRS     = $(filter-out $(HDR_ONLY),$(INCL))
 SRCS     = $(addprefix source/,$(HDRS:.h=.cpp))
 OBJS     = $(addprefix build/,$(HDRS:.h=.o))
@@ -30,17 +30,14 @@ $(MAIN): $(MAIN).cpp $(OBJS)
 
 .PHONY: debug
 debug:
-	@$(BASE_COMPILE) -ggdb $(MAIN).cpp $(SRCS) -o $(MAIN)
+	@$(BASE_COMPILE) -ggdb -Og $(MAIN).cpp $(SRCS) -o $(MAIN)
 
 
 .PHONY: $(MAIN)_callgrind
 $(MAIN)_callgrind:
-	@$(BASE_COMPILE) -ggdb -Og $(MAIN).cpp $(SRCS) -o $(MAIN)
-
-
-.PHONY: $(MAIN)_cachegrind
-$(MAIN)_cachegrind:
-	@$(BASE_COMPILE) -ggdb -O3 $(MAIN).cpp $(SRCS) -o $(MAIN)
+	@echo "Building $@ ..."
+	@$(COMPILE) -ggdb $(MAIN).cpp $(SRCS) -o $(MAIN)
+	valgrind --tool=callgrind --simulate-cache=yes ./$(MAIN)
 
 
 build/%.o: source/%.cpp source/%.h
@@ -56,7 +53,6 @@ TEST_SRCS = $(filter-out tests/main.test.cpp,$(shell find tests/ -name "*.test.c
 TEST_EXES = $(addprefix build/,$(TEST_SRCS:.cpp=.out))
 
 
-.PHONY: tests
 tests: build/tests/main.test.o $(TEST_EXES)
 
 
@@ -80,7 +76,7 @@ watch-test:
 build/tests/%.test.out: tests/%.test.cpp $(OBJS)
 	@printf "Building $(@F) ..."
 	@mkdir -p $(@D)
-	@time -f $(TIME_FORMAT) -- $(BASE_COMPILE) -ggdb build/tests/main.test.o $(OBJS) $< -o $@
+	@time -f $(TIME_FORMAT) -- $(COMPILE) -ggdb build/tests/main.test.o $(OBJS) $< -o $@
 
 
 build/tests/main.test.o: tests/main.test.cpp
@@ -100,4 +96,3 @@ clean:
 
 .PHONY: clean-tests
 	rm -rf build/tests
-

@@ -33,9 +33,9 @@ public:
 
 
 private:
-     std::chrono::time_point<std::chrono::steady_clock> begin;
-     std::chrono::time_point<std::chrono::steady_clock> end;
-     std::chrono::duration<double> face;
+     std::chrono::time_point<std::chrono::steady_clock> begin = {};
+     std::chrono::time_point<std::chrono::steady_clock> end = {};
+     std::chrono::duration<double> face = {};
      bool is_running = false;
 
 }; // class Stopwatch

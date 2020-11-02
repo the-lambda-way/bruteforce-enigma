@@ -1,31 +1,5 @@
 #include "enigma.h"
 
-#include <cassert>       // set_ring, set_rotor
-#include <execution>
-
-
-std::vector<int> str_to_ordinals (std::string_view str)
-{
-     std::vector<int> out;
-     out.reserve(str.length());
-
-     for (char c : str)    out.push_back(c - 'A');
-
-     return out;
-}
-
-
-std::string ordinals_to_str (std::span<const int> ordinals)
-{
-     std::string out;
-     out.reserve(ordinals.size());
-
-     for (int o : ordinals)    out.push_back(o + 'A');
-
-     return out;
-}
-
-
 
 // rotor_offsets -------------------------------------------------------------------------------------------------------
 void rotor_offsets::reset ()
@@ -36,15 +10,14 @@ void rotor_offsets::reset ()
 }
 
 
-// TODO: Test with a turnover offset that advances when hit.
+// TODO: Test with a turnover offset that advances when hit. (E.g. cache the next turnover, possibly unroll loops.)
 void rotor_offsets::step ()
 {
-     // Tested with a highly optimized switch statement. The if-branch algorithm was 20% more efficient.
+     // Tested with a highly optimized switch statement. The if-branch algorithm was 20% more efficient than the switch.
      // The solution used below was 20% more efficient than the if-branch algorithm for any number of notches.
 
-     two.add_unsafely(static_cast<int>(turnover2[two]));
      three.add_unsafely(static_cast<int>(turnover2[two]));
-     two.add_unsafely(static_cast<int>(turnover1[one]));     // Must come last to enact double-stepping in the correct order
+     two.add_unsafely(static_cast<int>(turnover2[two]) + static_cast<int>(turnover1[one]));
 
      ++one;
 
@@ -66,8 +39,10 @@ void rotor_offsets::rotr_turnover2 ()
 
 void rotor_offsets::precalculate_deltas ()
 {
-     three_minus_two = three - two;
-     two_minus_one   = two - one;
+     // If we don't cast first, then the modular subtraction will be called. We've avoided the need for this modularity
+     // check by making these deltas type int and the rotor array values large enough to handle the range.
+     three_minus_two = static_cast<int>(three) - static_cast<int>(two);
+     two_minus_one   = static_cast<int>(two) - static_cast<int>(one);
 }
 
 
@@ -83,9 +58,8 @@ void rotor4_offsets::reset ()
 
 void rotor4_offsets::step ()
 {
-     two.add_unsafely(static_cast<int>(turnover2[two]));
      three.add_unsafely(static_cast<int>(turnover2[two]));
-     two.add_unsafely(static_cast<int>(turnover1[one]));     // Must come last to enact double-stepping in the correct order
+     two.add_unsafely(static_cast<int>(turnover2[two]) + static_cast<int>(turnover1[one]));
 
      ++one;
 
@@ -107,15 +81,86 @@ void rotor4_offsets::rotr_turnover2 ()
 
 void rotor4_offsets::precalculate_deltas ()
 {
-     four_minus_three = four - three;
-     three_minus_two  = three - two;
-     two_minus_one    = two - one;
+     four_minus_three = static_cast<int>(four) - static_cast<int>(three);
+     three_minus_two  = static_cast<int>(three) - static_cast<int>(two);
+     two_minus_one    = static_cast<int>(two) - static_cast<int>(one);
 }
 
 
 
-// Enigma_optimize_unknown_positions -----------------------------------------------------------------------------------
-EnigmaKey Enigma_optimize_unknown_positions::get_key () const
+// Enigma_optimize_unknown_positions<EnigmaKey> ------------------------------------------------------------------------
+Enigma_optimize_unknown_positions<EnigmaKey>::Enigma_optimize_unknown_positions (
+     const basic_enigma_base<EnigmaKey>& base,
+     const Plugboard& plugboard,
+     int rotor1_start,
+     int rotor2_start,
+     int rotor3_start,
+     int ring1_start,
+     int ring2_start,
+     int ring3_start
+)
+: Enigma_optimize_unknown_positions {
+     EnigmaKey {*base.stator, *base.rotor1, *base.rotor2, *base.rotor3, *base.reflector, plugboard,
+                    rotor1_start, rotor2_start, rotor3_start, ring1_start, ring2_start, ring3_start}}
+{}
+
+
+Enigma_optimize_unknown_positions<EnigmaKey>::Enigma_optimize_unknown_positions (EnigmaKey key)
+: key {std::move(key)}, offsets {this->key}
+{
+     // the plugboard_stator_forward should have the range 0 <= i < 26
+     std::transform(
+          std::execution::par_unseq,
+          this->key.plug_ordinals->begin(), this->key.plug_ordinals->end(),
+          plugboard_stator_forward.begin(),
+          [this] (int o) { return this->key.stator->forward[o] - 26; }
+     );
+
+     // rotors keep the range 26 <= i < 52
+     std::copy(std::execution::par_unseq,
+               this->key.rotor1->forward.begin(), this->key.rotor1->forward.begin() + rotor1_forward.size(),
+               rotor1_forward.begin());
+     std::copy(std::execution::par_unseq,
+               this->key.rotor2->forward.begin(), this->key.rotor2->forward.end(),
+               rotor2_forward.begin());
+     std::copy(std::execution::par_unseq,
+               this->key.rotor3->forward.begin(), this->key.rotor3->forward.end(),
+               rotor3_forward.begin());
+
+     // the reflector should have the range 0 <= i < 26
+     std::transform(
+          std::execution::par_unseq,
+          this->key.reflector->forward.begin(), this->key.reflector->forward.begin() + reflector.size(),
+          reflector.begin(),
+          [] (int o) { return o - 26; }
+     );
+
+     // rotors keep the range 26 <= i < 52
+     std::copy(std::execution::par_unseq,
+               this->key.rotor3->reverse.begin(), this->key.rotor3->reverse.begin() + rotor3_reverse.size(),
+               rotor3_reverse.begin());
+     std::copy(std::execution::par_unseq,
+               this->key.rotor2->reverse.begin(), this->key.rotor2->reverse.end(),
+               rotor2_reverse.begin());
+     std::copy(std::execution::par_unseq,
+               this->key.rotor1->reverse.begin(), this->key.rotor1->reverse.end(),
+               rotor1_reverse.begin());
+
+     // the plugboard_stator_forward should have the range 0 <= i < 26
+     std::transform(
+          std::execution::par_unseq,
+          this->key.stator->reverse.begin(), this->key.stator->reverse.begin() + 26,
+          stator_plugboard_reverse.begin(),
+          [this] (int o) { return (*this->key.plug_ordinals)[o - 26]; }
+     );
+
+     std::copy(std::execution::par_unseq,
+               stator_plugboard_reverse.begin(), stator_plugboard_reverse.begin() + 26,
+               stator_plugboard_reverse.begin() + 26);
+}
+
+
+EnigmaKey Enigma_optimize_unknown_positions<EnigmaKey>::get_key () const
 {
      EnigmaKey copy = key;
      copy.rotor1_pos = offsets.rotor1 + copy.ring1_pos;
@@ -126,7 +171,7 @@ EnigmaKey Enigma_optimize_unknown_positions::get_key () const
 }
 
 
-void Enigma_optimize_unknown_positions::increment_ring1 ()
+void Enigma_optimize_unknown_positions<EnigmaKey>::increment_ring1 ()
 {
      // incrementing the ring decrements the rotor offset
      ++key.ring1_pos;
@@ -135,7 +180,7 @@ void Enigma_optimize_unknown_positions::increment_ring1 ()
 }
 
 
-void Enigma_optimize_unknown_positions::increment_ring2 ()
+void Enigma_optimize_unknown_positions<EnigmaKey>::increment_ring2 ()
 {
      ++key.ring2_pos;
      --offsets.rotor2;
@@ -143,19 +188,19 @@ void Enigma_optimize_unknown_positions::increment_ring2 ()
 }
 
 
-void Enigma_optimize_unknown_positions::increment_ring3 ()
+void Enigma_optimize_unknown_positions<EnigmaKey>::increment_ring3 ()
 {
      ++key.ring3_pos;
      --offsets.rotor3;
 }
 
 
-void Enigma_optimize_unknown_positions::increment_rotor1 ()     { ++offsets.rotor1; }
-void Enigma_optimize_unknown_positions::increment_rotor2 ()     { ++offsets.rotor2; }
-void Enigma_optimize_unknown_positions::increment_rotor3 ()     { ++offsets.rotor3; }
+void Enigma_optimize_unknown_positions<EnigmaKey>::increment_rotor1 ()     { ++offsets.rotor1; }
+void Enigma_optimize_unknown_positions<EnigmaKey>::increment_rotor2 ()     { ++offsets.rotor2; }
+void Enigma_optimize_unknown_positions<EnigmaKey>::increment_rotor3 ()     { ++offsets.rotor3; }
 
 
-int Enigma_optimize_unknown_positions::encrypt_ordinal (int j)
+int Enigma_optimize_unknown_positions<EnigmaKey>::encrypt_ordinal (int j)
 {
      offsets.step();
 
@@ -180,8 +225,88 @@ int Enigma_optimize_unknown_positions::encrypt_ordinal (int j)
 }
 
 
-// Enigma4_optimize_unknown_positions -----------------------------------------------------------------------------------
-Enigma4Key Enigma4_optimize_unknown_positions::get_key () const
+// Enigma_optimize_unknown_positions<Enigma4Key> -----------------------------------------------------------------------
+Enigma_optimize_unknown_positions<Enigma4Key>::Enigma_optimize_unknown_positions (
+     const basic_enigma_base<Enigma4Key>& base,
+     const Plugboard& plugboard,
+     int rotor1_start,
+     int rotor2_start,
+     int rotor3_start,
+     int rotor4_start,
+     int ring1_start,
+     int ring2_start,
+     int ring3_start,
+     int ring4_start
+)
+: Enigma_optimize_unknown_positions {
+     Enigma4Key {*base.stator, *base.rotor1, *base.rotor2, *base.rotor3, *base.rotor4, *base.reflector, plugboard,
+                    rotor1_start, rotor2_start, rotor3_start, rotor4_start,
+                    ring1_start, ring2_start, ring3_start, ring4_start}}
+{}
+
+
+Enigma_optimize_unknown_positions<Enigma4Key>::Enigma_optimize_unknown_positions (Enigma4Key key)
+: key {std::move(key)}, offsets {this->key}
+{
+     // the plugboard_stator_forward should have the range 0 <= i < 26
+     std::transform(
+          std::execution::par_unseq,
+          this->key.plug_ordinals->begin(), this->key.plug_ordinals->end(),
+          plugboard_stator_forward.begin(),
+          [this] (int o) { return this->key.stator->forward[o] - 26; }
+     );
+
+     // rotors keep the range 26 <= i < 52
+     std::copy(std::execution::par_unseq,
+               this->key.rotor1->forward.begin(), this->key.rotor1->forward.begin() + rotor1_forward.size(),
+               rotor1_forward.begin());
+     std::copy(std::execution::par_unseq,
+               this->key.rotor2->forward.begin(), this->key.rotor2->forward.end(),
+               rotor2_forward.begin());
+     std::copy(std::execution::par_unseq,
+               this->key.rotor3->forward.begin(), this->key.rotor3->forward.end(),
+               rotor3_forward.begin());
+     std::copy(std::execution::par_unseq,
+               this->key.rotor4->forward.begin(), this->key.rotor4->forward.end(),
+               rotor4_forward.begin());
+
+     // the reflector should have the range 0 <= i < 26
+     std::transform(
+          std::execution::par_unseq,
+          this->key.reflector->forward.begin(), this->key.reflector->forward.begin() + reflector.size(),
+          reflector.begin(),
+          [] (int o) { return o - 26; }
+     );
+
+     // rotors keep the range 26 <= i < 52
+     std::copy(std::execution::par_unseq,
+               this->key.rotor4->reverse.begin(), this->key.rotor4->reverse.begin() + rotor4_reverse.size(),
+               rotor4_reverse.begin());
+     std::copy(std::execution::par_unseq,
+               this->key.rotor3->reverse.begin(), this->key.rotor3->reverse.end(),
+               rotor3_reverse.begin());
+     std::copy(std::execution::par_unseq,
+               this->key.rotor2->reverse.begin(), this->key.rotor2->reverse.end(),
+               rotor2_reverse.begin());
+     std::copy(std::execution::par_unseq,
+               this->key.rotor1->reverse.begin(), this->key.rotor1->reverse.end(),
+               rotor1_reverse.begin());
+
+     // the plugboard_stator_forward should have the range 0 <= i < 26
+     std::transform(
+          std::execution::par_unseq,
+          this->key.stator->reverse.begin(), this->key.stator->reverse.begin() + 26,
+          stator_plugboard_reverse.begin(),
+          [this] (int o) { return (*this->key.plug_ordinals)[o - 26]; }
+     );
+
+     std::copy(std::execution::par_unseq,
+               stator_plugboard_reverse.begin(), stator_plugboard_reverse.begin() + 26,
+               stator_plugboard_reverse.begin() + 26);
+}
+
+
+Enigma4Key Enigma_optimize_unknown_positions<Enigma4Key>::get_key () const
 {
      Enigma4Key copy = key;
      copy.rotor1_pos = offsets.rotor1 + copy.ring1_pos;
@@ -193,7 +318,7 @@ Enigma4Key Enigma4_optimize_unknown_positions::get_key () const
 }
 
 
-void Enigma4_optimize_unknown_positions::increment_ring1 ()
+void Enigma_optimize_unknown_positions<Enigma4Key>::increment_ring1 ()
 {
      // incrementing the ring decrements the rotor offset
      ++key.ring1_pos;
@@ -202,7 +327,7 @@ void Enigma4_optimize_unknown_positions::increment_ring1 ()
 }
 
 
-void Enigma4_optimize_unknown_positions::increment_ring2 ()
+void Enigma_optimize_unknown_positions<Enigma4Key>::increment_ring2 ()
 {
      ++key.ring2_pos;
      --offsets.rotor2;
@@ -210,27 +335,27 @@ void Enigma4_optimize_unknown_positions::increment_ring2 ()
 }
 
 
-void Enigma4_optimize_unknown_positions::increment_ring3 ()
+void Enigma_optimize_unknown_positions<Enigma4Key>::increment_ring3 ()
 {
      ++key.ring3_pos;
      --offsets.rotor3;
 }
 
 
-void Enigma4_optimize_unknown_positions::increment_ring4 ()
+void Enigma_optimize_unknown_positions<Enigma4Key>::increment_ring4 ()
 {
      ++key.ring4_pos;
      --offsets.rotor4;
 }
 
 
-void Enigma4_optimize_unknown_positions::increment_rotor1 ()     { ++offsets.rotor1; }
-void Enigma4_optimize_unknown_positions::increment_rotor2 ()     { ++offsets.rotor2; }
-void Enigma4_optimize_unknown_positions::increment_rotor3 ()     { ++offsets.rotor3; }
-void Enigma4_optimize_unknown_positions::increment_rotor4 ()     { ++offsets.rotor4; }
+void Enigma_optimize_unknown_positions<Enigma4Key>::increment_rotor1 ()     { ++offsets.rotor1; }
+void Enigma_optimize_unknown_positions<Enigma4Key>::increment_rotor2 ()     { ++offsets.rotor2; }
+void Enigma_optimize_unknown_positions<Enigma4Key>::increment_rotor3 ()     { ++offsets.rotor3; }
+void Enigma_optimize_unknown_positions<Enigma4Key>::increment_rotor4 ()     { ++offsets.rotor4; }
 
 
-int Enigma4_optimize_unknown_positions::encrypt_ordinal (int j)
+int Enigma_optimize_unknown_positions<Enigma4Key>::encrypt_ordinal (int j)
 {
      offsets.step();
 
@@ -254,27 +379,4 @@ int Enigma4_optimize_unknown_positions::encrypt_ordinal (int j)
 
      // stator and plugboard don't move
      return stator_plugboard_reverse[j];
-}
-
-
-// Enigma --------------------------------------------------------------------------------------------------------------
-std::string Enigma::encrypt (std::string_view input)
-{
-     const std::vector<int> in = str_to_ordinals(input);
-     std::vector<int> out(input.length());
-
-     enigma.encrypt(in, out.begin());
-
-     return ordinals_to_str(out);
-}
-
-
-std::string Enigma4::encrypt (std::string_view input)
-{
-     const std::vector<int> in = str_to_ordinals(input);
-     std::vector<int> out(input.length());
-
-     enigma.encrypt(in, out.begin());
-
-     return ordinals_to_str(out);
 }
