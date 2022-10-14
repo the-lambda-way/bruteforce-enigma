@@ -349,7 +349,7 @@ HighScores<N, KeyType> smart_decipher (
 )
 {
      std::puts("Breaking enigma...");
-     return {ct, smart_decipher_positions<std::vector<int>, N, F>(
+     return {ct, smart_decipher_positions<KeyType, std::vector<int>, N, F>(
           base, plugboard, ct.ordinals, scoring_function
      )};
 }
