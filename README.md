@@ -54,7 +54,7 @@ The bruteforce decipher goes through every combination of rotor, rotor position,
 Ciphertext ct = "NPNKANVHWKPXORCDDTRJRXSJFLCIUAIIBUNQIUQFTHLOZOIMENDNGPCB";
 Plugboard plug = "";
 
-EnigmaBase base {ETW_ABCDEF, m3_IV, m3_V, m3_II, UKWB};
+EnigmaBase base {ETW_ABCDEF, m3_IV, m3_V, m3_II, m3_UKWB};
 
 HighScores scores = bruteforce_decipher(base, plug, ct);
 scores.print();
