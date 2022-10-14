@@ -39,7 +39,7 @@ The smart decipher should be sufficient for almost all ciphers. It uses a simila
 Ciphertext ct = "NPNKANVHWKPXORCDDTRJRXSJFLCIUAIIBUNQIUQFTHLOZOIMENDNGPCB";
 Plugboard plug = "";
 
-EnigmaBase base {ETW_ABCDEF, m3_IV, m3_V, m3_II, UKWB};
+EnigmaBase base {ETW_ABCDEF, m3_IV, m3_V, m3_II, m3_UKWB};
 
 HighScores scores = smart_decipher(base, plug, ct);
 scores.print();
