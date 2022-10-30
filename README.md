@@ -246,6 +246,7 @@ From: http://www.practicalcryptography.com/cryptanalysis/breaking-machine-cipher
 In no order:
 * Fix the rotor order and position ordinals to match other tools.
 * Documentation.
+* Investigate the correct double-stepping behavior when the middle and leftmost rotor positions begin at their notches. If that is a bug in this program, fix it. If not, document the behavior because a lot of enigma tools behave differently.
 * More detailed comments and/or public internal documentation.
 * Look into using named parameters (they're pretty limited in C++ so we'll see if it will even be an improvement).
 * Add a namespace and other library code hygiene practices.
