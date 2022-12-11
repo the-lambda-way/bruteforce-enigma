@@ -6,7 +6,8 @@ INCLUDES = -Iinclude/ -Iexternal/
 BASE_COMPILE = $(CXX) $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES)
 COMPILE      = $(BASE_COMPILE) -O3 -flto
 
-TIME_FORMAT="     %E elapsed"
+TIME        = /usr/bin/time
+TIME_FORMAT = "     %e seconds elapsed"
 
 # Since de_qgr.h and qgr.h cannot be compiled together, it is convenient to auto generate the dependency list
 DEPS     = $(subst \,,$(shell $(BASE_COMPILE) -MM include/bruteforce-enigma.h))
@@ -25,7 +26,7 @@ MAIN = crack_enigma
 
 $(MAIN): $(MAIN).cpp $(OBJS)
 	@printf "Building $@ ..."
-	@time -f $(TIME_FORMAT) -- $(COMPILE) $(MAIN).cpp $(OBJS) -o $@
+	@$(TIME) --format=$(TIME_FORMAT) -- $(COMPILE) $(MAIN).cpp $(OBJS) -o $@
 
 
 .PHONY: debug
@@ -43,7 +44,7 @@ $(MAIN)_callgrind:
 build/%.o: source/%.cpp source/%.h
 	@mkdir -p build
 	@printf "Building $@ ..."
-	@time -f $(TIME_FORMAT) -- $(COMPILE) $< -c -o $@
+	@$(TIME) --format=$(TIME_FORMAT) -- $(COMPILE) $< -c -o $@
 
 
 # ======================================================================================================================
@@ -60,29 +61,29 @@ tests: build/tests/main.test.o $(TEST_EXES)
 .PHONY: watch-test
 watch-test: exe=build/$(basename $(src)).out
 watch-test:
-	@if [ -f "$(src)" ]; then                       \
-		while true; do                             \
+	@if [ -f "$(src)" ]; then                     \
+		while true; do                            \
 			clear;                                \
 			$(MAKE) $(exe) --no-print-directory;  \
 			                                      \
 			echo "watching $(notdir $(src)) ..."; \
 			inotifywait -qq -e modify $(src);     \
-		done;                                      \
-	else                                            \
-		echo "file doesn't exist: $(src)";         \
+		done;                                     \
+	else                                          \
+		echo "file doesn't exist: $(src)";        \
 	fi
 
 
 build/tests/%.test.out: tests/%.test.cpp $(OBJS)
 	@printf "Building $(@F) ..."
 	@mkdir -p $(@D)
-	@time -f $(TIME_FORMAT) -- $(COMPILE) -ggdb build/tests/main.test.o $(OBJS) $< -o $@
+	@$(TIME) --format=$(TIME_FORMAT) -- $(COMPILE) -ggdb build/tests/main.test.o $(OBJS) $< -o $@
 
 
 build/tests/main.test.o: tests/main.test.cpp
 	@printf "Building $(@F) ..."
 	@mkdir -p $(@D)
-	@time -f $(TIME_FORMAT) -- $(COMPILE) $< -c -o $@
+	@$(TIME) --format=$(TIME_FORMAT) -- $(COMPILE) $< -c -o $@
 
 
 # ======================================================================================================================
