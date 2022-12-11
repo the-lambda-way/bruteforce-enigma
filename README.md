@@ -28,7 +28,7 @@ To import into an existing project, you need the the contents of the `source/` a
 
 # About
 
-This tool assumes a working knowledge of enigma terminology (there is no wizard). Some   good resources I have used for learning about enigma are [Wikipedia](https://en.wikipedia.org/wiki/Enigma_machine), [Practical Cryptography](http://practicalcryptography.com/ciphers/enigma-cipher/), and [Crypto Museum](https://www.cryptomuseum.com/crypto/enigma/).
+This tool assumes a working knowledge of enigma terminology (there is no wizard). Some good resources I have used for learning about enigma are [Wikipedia](https://en.wikipedia.org/wiki/Enigma_machine), [Practical Cryptography](http://practicalcryptography.com/ciphers/enigma-cipher/), and [Crypto Museum](https://www.cryptomuseum.com/crypto/enigma/).
 
 It also expects basic C++ programming knowledge so that you can modify the source code for your particular needs. There is no command line interface. I haven't written documentation yet, so you're expected to read the code if you're going beyond the most basic usage.
 
