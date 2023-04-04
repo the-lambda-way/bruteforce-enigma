@@ -53,7 +53,7 @@ It also expects basic C++ programming knowledge so that you can modify the sourc
 ## Available Models
 
 Enigma model definitions can be found in `models.cpp`. The list includes:
-* M3
+* M3 (rotors I, II, III, IV, and V)
 * Kriegsmarine (M3 with rotors VI, VII, and VIII added)
 * M4
 * Enigma I
@@ -147,6 +147,8 @@ scores.print();
 **Cracking unknown rotors**
 
 Pass in one of the models in `models.h`.
+
+(Note: m3_model uses rotors I - V. For all rotors I - VIII, use kriegsmarine_model.)
 
 ```Cpp
 Ciphertext ct = "NPNKANVHWKPXORCDDTRJRXSJFLCIUAIIBUNQIUQFTHLOZOIMENDNGPCB";
